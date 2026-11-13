@@ -5,23 +5,23 @@ Acceptance criteria live in [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md).
 
 ## Stack
 
-| Layer | Choice |
-|---|---|
-| Frontend | React + Redux Toolkit + TypeScript (mobile first) |
-| Backend | NestJS + TypeScript, hexagonal + Railway Oriented Programming |
-| Database | DynamoDB (decided): any database is allowed; no JOINs needed; atomic conditional stock updates |
-| Tests | Jest, above 80 % coverage on both sides |
-| Cloud | S3 + CloudFront, Lambda + API Gateway, defined with AWS CDK; all regional resources in `us-east-2` |
+| Layer    | Choice                                                                                             |
+| -------- | -------------------------------------------------------------------------------------------------- |
+| Frontend | React + Redux Toolkit + TypeScript (mobile first)                                                  |
+| Backend  | NestJS + TypeScript, hexagonal + Railway Oriented Programming                                      |
+| Database | DynamoDB (decided): any database is allowed; no JOINs needed; atomic conditional stock updates     |
+| Tests    | Jest, above 80 % coverage on both sides                                                            |
+| Cloud    | S3 + CloudFront, Lambda + API Gateway, defined with AWS CDK; all regional resources in `us-east-2` |
 
 ## Key decisions
 
-| Decision | Why |
-|---|---|
-| Reserve stock when the PENDING transaction is created; release it on failure | Prevents overselling |
-| Idempotent webhook plus status check as fallback | Survives a crash between charge and update |
-| Amounts always computed in the backend | The client can be tampered with |
-| Card data never stored; only the provider token is used | Smaller risk surface |
-| Serverless deployment | Fewer moving parts than containers and a database server |
+| Decision                                                                     | Why                                                      |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Reserve stock when the PENDING transaction is created; release it on failure | Prevents overselling                                     |
+| Idempotent webhook plus status check as fallback                             | Survives a crash between charge and update               |
+| Amounts always computed in the backend                                       | The client can be tampered with                          |
+| Card data never stored; only the provider token is used                      | Smaller risk surface                                     |
+| Serverless deployment                                                        | Fewer moving parts than containers and a database server |
 
 ## Phases
 
