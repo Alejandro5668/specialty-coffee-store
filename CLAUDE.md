@@ -49,3 +49,8 @@ Every change must serve an acceptance criterion; do not add features that are no
 - PR title follows the same format as commits. PR description in Spanish with: **Resumen**, **Cambios**, **Cómo probar**, **Criterios de aceptación cubiertos**.
 - Never add AI attribution of any kind: no `Co-Authored-By`, no "Generated with" lines, no tool names or marks in commits, PRs, code or docs.
 - Never push, merge or open a PR without the owner's approval.
+
+## Project skills
+- `.claude/skills/pr-writer`: PR title (English) and description (Spanish).
+- `.claude/skills/hexagonal-usecase`: use case with ROP, port, adapter stub and test.
+- `.claude/skills/adversarial-tests`: attack-style tests for endpoints and use cases.
