@@ -38,7 +38,12 @@ Every change must serve an acceptance criterion; do not add features that are no
 - The company name of the payment provider must never appear in the repository.
 
 ## Documentation
-- Short and readable: prefer tables and checklists over paragraphs.
+Applies to every document: README, `docs/`, code comments, Swagger descriptions and PR descriptions.
+- **Precise, readable, short.** Say it once, with the fewest words that stay exact.
+- Prefer tables, checklists and examples over paragraphs. Paragraphs: 3 sentences maximum.
+- One topic per document; link instead of repeating. No history, motivation essays or filler.
+- Concrete over vague: name the file, command, endpoint or number.
+- Brevity never removes required content: the README must keep the data model, API docs link, coverage results, run/deploy steps and decisions.
 - Update the README and docs in the same PR that changes behavior.
 - Keep API docs (Swagger or Postman) in sync with the endpoints.
 
