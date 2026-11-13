@@ -23,6 +23,18 @@ Every change must serve an acceptance criterion; do not add features that are no
 - Presentational components receive props; containers connect to the store.
 - Never store or log the card number or CVV.
 
+## UI/UX
+
+Work backwards from the user: decide what they need to see, do and feel, then build what delivers it.
+
+- Per screen or component, state first: who the user is, what they want, what can go wrong.
+- Design every state: loading, empty, error, success, disabled.
+- Errors say what happened and how to fix it, in plain words. Never show technical messages.
+- Every action gives feedback; no double submit; progress survives a refresh.
+- Mobile first (375 px): no overflow, touch targets of 44 px or more, readable contrast.
+- Accessible: labels, visible focus, keyboard navigation, ARIA where needed.
+- Check each change at 375 px before calling it done.
+
 ## Security
 - Sandbox only. Keys come from environment variables; never commit secrets.
 - Keep `.env.example` updated. Use security headers and restricted CORS.
