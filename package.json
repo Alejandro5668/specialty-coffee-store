@@ -1,8 +1,13 @@
 {
   "name": "specialty-coffee-store",
   "private": true,
-  "engines": { "node": ">=22" },
-  "workspaces": ["backend", "frontend"],
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -10,5 +15,14 @@
     "test": "npm run test --workspaces --if-present",
     "test:cov": "npm run test:cov --workspaces --if-present",
     "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2"
   }
 }
