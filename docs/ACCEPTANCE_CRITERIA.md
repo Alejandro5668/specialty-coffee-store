@@ -3,14 +3,17 @@
 Grouped by test rubric item. Each box must be verifiable by a test, a command or a public URL.
 
 ## README (5 pts)
+
 - [ ] Data model, API docs link (Swagger or Postman), coverage results, run and deploy steps.
 - [ ] Decisions and trade-offs section.
 
 ## UI/UX (5 pts)
+
 - [ ] Usable from 375 px wide with no overflow.
 - [ ] Images load fast (optimized, lazy loaded).
 
 ## Checkout flow (20 pts)
+
 - [ ] Product page shows description, price and stock.
 - [ ] "Pay with credit card" opens a modal with card and delivery data.
 - [ ] Card validated (Luhn, expiry, CVV); Visa and Mastercard logos detected.
@@ -20,6 +23,7 @@ Grouped by test rubric item. Each box must be verifiable by a test, a command or
 - [ ] Refreshing at any step recovers the progress.
 
 ## API (20 pts)
+
 - [ ] `GET /products`, `POST /checkout`, `GET /transactions/:id`, `POST /webhooks/payments`.
 - [ ] Validation with correct HTTP codes (400, 404, 409, 422).
 - [ ] Amounts computed in the backend; client amounts ignored.
@@ -28,17 +32,20 @@ Grouped by test rubric item. Each box must be verifiable by a test, a command or
 - [ ] Webhook verifies its signature and is idempotent.
 
 ## Unit tests (30 pts)
+
 - [ ] Backend coverage above 80 % (Jest).
 - [ ] Frontend coverage above 80 % (Jest).
 - [ ] Threshold enforced in CI; results copied to the README.
 
 ## Deployment (20 pts)
+
 - [ ] Frontend on CloudFront over HTTPS.
 - [ ] API deployed and connected to the frontend.
 - [ ] Infrastructure reproducible with one CDK command.
 - [ ] A full purchase works on the public URL.
 
 ## Bonus
+
 - [ ] **Security (5)**: security headers, restricted CORS, HTTPS, no secrets in the repo.
 - [ ] **Responsive (5)**: checked in two browsers.
 - [ ] **CSS (10)**: flexbox and grid layout.
@@ -47,7 +54,9 @@ Grouped by test rubric item. Each box must be verifiable by a test, a command or
 - [ ] **ROP (10)**: use cases chain steps returning success or error.
 
 ## Adversarial testing
+
 Try to break the app on purpose. Each case is an automated test where possible.
+
 - [ ] Hostile inputs on validators (fuzzing or property-based).
 - [ ] Forged prices, negative or huge quantities are rejected.
 - [ ] Parallel purchases on stock 1: stock never goes negative.
@@ -61,4 +70,5 @@ Try to break the app on purpose. Each case is an automated test where possible.
 - [ ] Mozilla Observatory and OWASP ZAP baseline show no high findings.
 
 ## Repository rules
+
 - [ ] Public repo, no company name in it, commits spread over time, one PR per feature.
