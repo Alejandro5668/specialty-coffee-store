@@ -9,10 +9,7 @@ import {
   FunctionCode,
   FunctionEventType,
   FunctionRuntime,
-  HeadersFrameOption,
-  HeadersReferrerPolicy,
   OriginRequestPolicy,
-  ResponseHeadersPolicy,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin, S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
@@ -23,6 +20,7 @@ import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3'
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
 import { PROJECT, TABLE_PREFIX, Tables } from './data-stack';
+import { securityHeaders } from './security-headers';
 
 export const SECRET_PARAMETERS = {
   PAYMENT_PRIVATE_KEY: '/coffee-store/payment-private-key',
@@ -129,37 +127,7 @@ export class AppStack extends Stack {
     });
 
     const paymentOrigin = new URL(props.paymentApiUrl).origin;
-    const headers = new ResponseHeadersPolicy(this, 'SecurityHeaders', {
-      securityHeadersBehavior: {
-        contentSecurityPolicy: {
-          override: true,
-          contentSecurityPolicy: [
-            "default-src 'self'",
-            "script-src 'self'",
-            "style-src 'self'",
-            "img-src 'self' data:",
-            "font-src 'self'",
-            `connect-src 'self' ${paymentOrigin}`,
-            "frame-ancestors 'none'",
-            "base-uri 'self'",
-            "form-action 'self'",
-            "object-src 'none'",
-          ].join('; '),
-        },
-        strictTransportSecurity: {
-          override: true,
-          accessControlMaxAge: Duration.seconds(63072000),
-          includeSubdomains: true,
-          preload: true,
-        },
-        contentTypeOptions: { override: true },
-        frameOptions: { override: true, frameOption: HeadersFrameOption.DENY },
-        referrerPolicy: {
-          override: true,
-          referrerPolicy: HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
-        },
-      },
-    });
+    const headers = securityHeaders(this, paymentOrigin);
 
     const edge = (name: string, code: string) =>
       new EdgeFunction(this, name, {
