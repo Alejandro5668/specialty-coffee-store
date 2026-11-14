@@ -37,6 +37,28 @@ Swagger UI at `/docs` on the running API; spec in [docs/openapi.json](docs/opena
 
 Limits: 16 KB bodies, 60 requests per minute per client (10 for checkout), CORS only for `CORS_ORIGIN`. Payment flow: [docs/PAYMENTS.md](docs/PAYMENTS.md).
 
+## Deploy
+
+AWS CDK in `infra/`, region `us-east-2`. One CloudFront URL serves the SPA and `/api/*`, so the browser only calls its own origin and CORS stays closed.
+
+| Piece             | Resource                                                                          |
+| ----------------- | --------------------------------------------------------------------------------- |
+| `CoffeeStoreData` | 4 DynamoDB tables, on demand; point-in-time recovery on orders                    |
+| `CoffeeStoreApp`  | Lambda (Node 22, arm64) + HTTP API (50 req/s) + private S3 + CloudFront           |
+| Secrets           | SSM SecureString `/coffee-store/payment-*`, read by the Lambda; never in the code |
+| Edge              | Two CloudFront Functions: strip `/api`, send app routes to `index.html`           |
+
+| Step | Command                                                                         |
+| ---- | ------------------------------------------------------------------------------- |
+| 1    | `aws login --profile coffee-store`, then `export AWS_PROFILE=coffee-store`      |
+| 2    | `npx cdk bootstrap aws://<account>/us-east-2 -w infra` (once per account)       |
+| 3    | Export `.env`, then `npm run secrets -w infra` (stores the 3 secrets in SSM)    |
+| 4    | `npm run deploy -w infra` (package, build, deploy, seed); prints `SiteUrl`      |
+| 5    | `npm run smoke -w infra -- <SiteUrl>`                                           |
+| 6    | `npx cdk destroy --all -w infra` removes everything, tables and bucket included |
+
+Limits: the default CloudFront certificate fixes the minimum TLS version; a custom domain is needed to raise it. `aws-cdk-lib` bundles a `minimatch` flagged by `npm audit`; it only runs on the developer machine at synth time.
+
 ## Frontend
 
 Routes: `/` coffees, `/checkout/details` card and delivery (dialog), `/checkout/summary` summary (sheet), `/order/:id` result. Build-time variables (see `.env.example`): `VITE_API_URL`, `VITE_PAYMENT_API_URL`, `VITE_PAYMENT_PUBLIC_KEY`.
