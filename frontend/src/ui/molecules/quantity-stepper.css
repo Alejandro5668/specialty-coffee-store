@@ -1,0 +1,28 @@
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-pill);
+}
+
+.stepper__button {
+  inline-size: var(--touch);
+  block-size: var(--touch);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.stepper__button:disabled {
+  color: var(--color-muted);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stepper__value {
+  min-inline-size: 2ch;
+  text-align: center;
+  font-weight: 700;
+}

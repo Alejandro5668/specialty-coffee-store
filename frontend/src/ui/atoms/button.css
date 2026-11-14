@@ -1,0 +1,35 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--touch);
+  padding-inline: var(--space-5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-control);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  transition: background-color 120ms ease;
+}
+
+.button--primary {
+  background: var(--color-cherry);
+  color: var(--color-on-cherry);
+}
+
+.button--primary:hover:not(:disabled) {
+  background: var(--color-cherry-deep);
+}
+
+.button--quiet {
+  background: transparent;
+  border-color: var(--color-line);
+  color: var(--color-ink);
+}
+
+.button:disabled {
+  background: var(--color-leaf);
+  border-color: var(--color-leaf);
+  color: var(--color-muted);
+  cursor: not-allowed;
+}

@@ -1,0 +1,5 @@
+.skeleton {
+  background: var(--color-leaf);
+  border-radius: var(--radius-control);
+  min-block-size: var(--space-4);
+}
