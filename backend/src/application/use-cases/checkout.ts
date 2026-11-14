@@ -4,8 +4,10 @@ import { err, ok, Result } from '../../domain/shared/result';
 import { createDelivery, Delivery } from '../../domain/transaction/delivery';
 import { calculateAmounts } from '../../domain/transaction/fees';
 import { createTransaction, Transaction } from '../../domain/transaction/transaction';
+import { SettleTransaction } from '../settle-transaction';
 import { CatalogRepository } from '../ports/catalog.repository';
 import { CustomerRepository } from '../ports/customer.repository';
+import { PaymentGateway } from '../ports/payment.gateway';
 import { Clock, IdGenerator } from '../ports/system.ports';
 import { TransactionRepository } from '../ports/transaction.repository';
 
@@ -15,11 +17,15 @@ export type CheckoutInput = {
   quantity: number;
   customer: { name: string; email: string };
   delivery: Delivery;
+  cardToken: string;
+  acceptanceToken: string;
+  personalAuthToken: string;
 };
 export type CheckoutError = 'INVALID_INPUT' | 'VARIANT_NOT_FOUND' | 'OUT_OF_STOCK';
 
 type Placed = { transaction: Transaction; created: boolean };
-type Parsed = {
+type Tokens = { cardToken: string; acceptanceToken: string; personalAuthToken: string };
+type Parsed = Tokens & {
   key: string;
   variantId: string;
   quantity: number;
@@ -28,15 +34,21 @@ type Parsed = {
 };
 
 const KEY = /^[A-Za-z0-9_-]{8,100}$/;
+const TOKEN = /^[\w.-]{1,2048}$/;
 
 export class Checkout {
+  private readonly settler: SettleTransaction;
+
   constructor(
     private readonly catalog: CatalogRepository,
     private readonly transactions: TransactionRepository,
     private readonly customers: CustomerRepository,
+    private readonly gateway: PaymentGateway,
     private readonly ids: IdGenerator,
     private readonly clock: Clock,
-  ) {}
+  ) {
+    this.settler = new SettleTransaction(transactions, catalog);
+  }
 
   async execute(input: CheckoutInput): Promise<Result<Transaction, CheckoutError>> {
     const parsed = this.parse(input);
@@ -50,7 +62,9 @@ export class Checkout {
     if (!variant) return err('VARIANT_NOT_FOUND');
 
     const placed = await this.withReservedStock(variant, p.quantity, () => this.place(p, variant));
-    return placed.ok ? ok(placed.value.transaction) : placed;
+    if (!placed.ok) return placed;
+    const { transaction, created } = placed.value;
+    return created ? this.charge(transaction, p) : ok(transaction);
   }
 
   private parse(input: CheckoutInput): Result<Parsed, 'INVALID_INPUT'> {
@@ -60,7 +74,12 @@ export class Checkout {
     if (typeof input.idempotencyKey !== 'string' || !KEY.test(input.idempotencyKey)) {
       return err('INVALID_INPUT');
     }
+    const tokens = [input.cardToken, input.acceptanceToken, input.personalAuthToken];
+    if (!tokens.every((t) => typeof t === 'string' && TOKEN.test(t))) return err('INVALID_INPUT');
     return ok({
+      cardToken: input.cardToken,
+      acceptanceToken: input.acceptanceToken,
+      personalAuthToken: input.personalAuthToken,
       key: input.idempotencyKey,
       variantId: String(input.variantId),
       quantity: input.quantity,
@@ -86,6 +105,32 @@ export class Checkout {
     if (!transaction.ok) return err('INVALID_INPUT');
 
     return ok(await this.transactions.createIfAbsent(p.key, transaction.value));
+  }
+
+  /** The outcome of the charge never fails the request: the transaction already exists and tells the story. */
+  private async charge(transaction: Transaction, p: Parsed): Promise<Result<Transaction, never>> {
+    const charged = await this.gateway.charge({
+      reference: transaction.id,
+      amountInCents: transaction.amounts.total.amountInCents,
+      customerEmail: p.customer.email,
+      cardToken: p.cardToken,
+      acceptanceToken: p.acceptanceToken,
+      personalAuthToken: p.personalAuthToken,
+    });
+    if (!charged.ok) {
+      // REJECTED: the provider refused it. UNAVAILABLE: unknown outcome, stay PENDING and reconcile later.
+      return ok(
+        charged.error === 'GATEWAY_REJECTED'
+          ? await this.settler.execute(transaction, 'ERROR', null)
+          : transaction,
+      );
+    }
+    const { status, providerRef } = charged.value;
+    return ok(
+      status === 'PENDING'
+        ? transaction
+        : await this.settler.execute(transaction, status, providerRef),
+    );
   }
 
   private async findOrCreateCustomer(data: Customer): Promise<Customer> {

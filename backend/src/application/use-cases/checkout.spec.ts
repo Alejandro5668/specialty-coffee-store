@@ -1,35 +1,8 @@
-import { InMemoryCatalog } from '../../../test/fakes/in-memory-catalog';
-import { InMemoryCustomers } from '../../../test/fakes/in-memory-customers';
-import { InMemoryTransactions } from '../../../test/fakes/in-memory-transactions';
-import {
-  catalogWithStock,
-  fixedClock,
-  sequentialIds,
-  VARIANT_ID,
-} from '../../../test/fakes/fixtures';
+import { VARIANT_ID } from '../../../test/fakes/fixtures';
+import { input, setup } from '../../../test/checkout-fixtures';
+import { FakeGateway } from '../../../test/fakes/fake-gateway';
+import { fixedClock, sequentialIds } from '../../../test/fakes/fixtures';
 import { Checkout, CheckoutInput } from './checkout';
-
-const input = (over: Partial<CheckoutInput> = {}): CheckoutInput => ({
-  idempotencyKey: 'key-0001-aaaa',
-  variantId: VARIANT_ID,
-  quantity: 2,
-  customer: { name: 'Ana Pérez', email: 'ana@example.com' },
-  delivery: {
-    recipientName: 'Ana Pérez',
-    address: 'Calle 10 # 5-20',
-    city: 'Medellín',
-    phone: '3001234567',
-  },
-  ...over,
-});
-
-const setup = (stock = 5) => {
-  const catalog: InMemoryCatalog = catalogWithStock(VARIANT_ID, stock);
-  const transactions = new InMemoryTransactions();
-  const customers = new InMemoryCustomers();
-  const checkout = new Checkout(catalog, transactions, customers, sequentialIds(), fixedClock);
-  return { catalog, transactions, customers, checkout };
-};
 
 describe('Checkout', () => {
   it('creates a PENDING transaction with amounts computed by the backend', async () => {
@@ -120,6 +93,10 @@ describe('Checkout', () => {
     ['bad phone', { delivery: { ...input().delivery, phone: 'abc' } }],
     ['short idempotency key', { idempotencyKey: 'x' }],
     ['idempotency key with spaces', { idempotencyKey: 'key with spaces 123' }],
+    ['missing card token', { cardToken: '' }],
+    ['non-string card token', { cardToken: 123 as unknown as string }],
+    ['missing acceptance token', { acceptanceToken: '  ' }],
+    ['missing personal data token', { personalAuthToken: '' }],
   ])('rejects %s without side effects', async (_label, over) => {
     const { checkout, catalog, transactions } = setup();
     const result = await checkout.execute(input(over as Partial<CheckoutInput>));
@@ -128,12 +105,26 @@ describe('Checkout', () => {
     expect(transactions.all()).toHaveLength(0);
   });
 
+  it('does not charge when the input is invalid or the stock is short', async () => {
+    const { checkout, gateway } = setup(1);
+    await checkout.execute(input({ quantity: 2 }));
+    await checkout.execute(input({ cardToken: '' }));
+    expect(gateway.charges).toHaveLength(0);
+  });
+
   it('gives the stock back if something fails after reserving it', async () => {
     const { catalog, transactions, customers } = setup();
     customers.save = async () => {
       throw new Error('db down');
     };
-    const checkout = new Checkout(catalog, transactions, customers, sequentialIds(), fixedClock);
+    const checkout = new Checkout(
+      catalog,
+      transactions,
+      customers,
+      new FakeGateway(),
+      sequentialIds(),
+      fixedClock,
+    );
     await expect(checkout.execute(input())).rejects.toThrow('db down');
     expect(catalog.stockOf(VARIANT_ID)).toBe(5);
   });
