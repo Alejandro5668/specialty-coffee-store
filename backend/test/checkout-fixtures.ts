@@ -38,5 +38,5 @@ export const setup = (stock = 5) => {
     sequentialIds(),
     fixedClock,
   );
-  return { catalog, transactions, customers, gateway, checkout };
+  return { catalog, transactions, orders, customers, gateway, checkout };
 };

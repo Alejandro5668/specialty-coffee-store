@@ -1,6 +1,6 @@
 import { err, ok, Result } from '../../domain/shared/result';
 import { Transaction } from '../../domain/transaction/transaction';
-import { CatalogRepository } from '../ports/catalog.repository';
+import { OrderStore } from '../ports/order.store';
 import { EventError, EventVerifier } from '../ports/event.verifier';
 import { TransactionRepository } from '../ports/transaction.repository';
 import { SettleTransaction } from '../settle-transaction';
@@ -13,9 +13,9 @@ export class ProcessPaymentEvent {
   constructor(
     private readonly verifier: EventVerifier,
     private readonly transactions: TransactionRepository,
-    catalog: CatalogRepository,
+    orders: OrderStore,
   ) {
-    this.settler = new SettleTransaction(transactions, catalog);
+    this.settler = new SettleTransaction(orders, transactions);
   }
 
   async execute(payload: unknown): Promise<Result<Transaction, ProcessEventError>> {

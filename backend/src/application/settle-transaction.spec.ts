@@ -1,4 +1,5 @@
 import { catalogWithStock, VARIANT_ID } from '../../test/fakes/fixtures';
+import { InMemoryOrders } from '../../test/fakes/in-memory-orders';
 import { InMemoryTransactions } from '../../test/fakes/in-memory-transactions';
 import { createTransaction, Transaction } from '../domain/transaction/transaction';
 import { money } from '../domain/shared/money';
@@ -29,7 +30,8 @@ const setup = async () => {
   await catalog.reserveStock(VARIANT_ID, 2);
   const transactions = new InMemoryTransactions();
   await transactions.createIfAbsent('key-0001-aaaa', pending());
-  return { catalog, transactions, settle: new SettleTransaction(transactions, catalog) };
+  const orders = new InMemoryOrders(catalog, transactions);
+  return { catalog, transactions, orders, settle: new SettleTransaction(orders, transactions) };
 };
 
 describe('SettleTransaction', () => {
@@ -65,6 +67,22 @@ describe('SettleTransaction', () => {
       settle.execute(pending(), 'DECLINED', 'prov-1'),
       settle.execute(pending(), 'DECLINED', 'prov-1'),
     ]);
+    expect(catalog.stockOf(VARIANT_ID)).toBe(5);
+  });
+
+  it('settles and frees the stock as one step, so a failure leaves the transaction retryable', async () => {
+    const { settle, orders, catalog, transactions } = await setup();
+    const realSettle = orders.settle.bind(orders);
+    orders.settle = async () => {
+      throw new Error('db down');
+    };
+    await expect(settle.execute(pending(), 'DECLINED', null)).rejects.toThrow('db down');
+    expect((await transactions.findById('t1'))?.status).toBe('PENDING');
+    expect(catalog.stockOf(VARIANT_ID)).toBe(3);
+
+    orders.settle = realSettle;
+    await settle.execute(pending(), 'DECLINED', null);
+    expect((await transactions.findById('t1'))?.status).toBe('DECLINED');
     expect(catalog.stockOf(VARIANT_ID)).toBe(5);
   });
 });

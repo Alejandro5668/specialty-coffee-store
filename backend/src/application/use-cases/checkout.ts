@@ -49,7 +49,7 @@ export class Checkout {
     private readonly ids: IdGenerator,
     private readonly clock: Clock,
   ) {
-    this.settler = new SettleTransaction(transactions, catalog);
+    this.settler = new SettleTransaction(orders, transactions);
   }
 
   async execute(input: CheckoutInput): Promise<Result<Transaction, CheckoutError>> {

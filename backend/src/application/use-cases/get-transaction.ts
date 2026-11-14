@@ -1,6 +1,6 @@
 import { err, ok, Result } from '../../domain/shared/result';
 import { Transaction } from '../../domain/transaction/transaction';
-import { CatalogRepository } from '../ports/catalog.repository';
+import { OrderStore } from '../ports/order.store';
 import { PaymentGateway } from '../ports/payment.gateway';
 import { Clock } from '../ports/system.ports';
 import { TransactionRepository } from '../ports/transaction.repository';
@@ -17,10 +17,10 @@ export class GetTransaction {
   constructor(
     private readonly transactions: TransactionRepository,
     private readonly gateway: PaymentGateway,
-    catalog: CatalogRepository,
+    orders: OrderStore,
     private readonly clock: Clock,
   ) {
-    this.settler = new SettleTransaction(transactions, catalog);
+    this.settler = new SettleTransaction(orders, transactions);
   }
 
   async execute(id: string): Promise<Result<Transaction, GetTransactionError>> {

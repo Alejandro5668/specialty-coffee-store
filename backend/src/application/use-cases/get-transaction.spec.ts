@@ -9,7 +9,7 @@ const arrange = async (now = '2026-01-01T00:01:00.000Z') => {
   const ctx = setup();
   const placed = await ctx.checkout.execute(input());
   if (!placed.ok) throw new Error('setup');
-  const getTransaction = new GetTransaction(ctx.transactions, ctx.gateway, ctx.catalog, at(now));
+  const getTransaction = new GetTransaction(ctx.transactions, ctx.gateway, ctx.orders, at(now));
   return { ...ctx, getTransaction, id: placed.value.id };
 };
 

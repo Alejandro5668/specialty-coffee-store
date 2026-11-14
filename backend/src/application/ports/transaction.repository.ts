@@ -8,6 +8,4 @@ export interface TransactionRepository {
   ): Promise<{ transaction: Transaction; created: boolean }>;
   findById(id: string): Promise<Transaction | null>;
   findByIdempotencyKey(key: string): Promise<Transaction | null>;
-  /** Conditional write: only succeeds while the stored transaction is still PENDING. */
-  saveSettled(transaction: Transaction): Promise<boolean>;
 }

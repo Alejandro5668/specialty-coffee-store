@@ -42,6 +42,10 @@ export class InMemoryCatalog implements CatalogRepository {
   }
 
   async releaseStock(variantId: string, quantity: number): Promise<void> {
+    this.releaseNow(variantId, quantity);
+  }
+
+  releaseNow(variantId: string, quantity: number): void {
     const current = this.variants.get(variantId);
     const released = current ? release(current, quantity) : null;
     if (released?.ok) this.variants.set(variantId, released.value);

@@ -23,4 +23,12 @@ export class InMemoryOrders implements OrderStore {
     this.transactions.putNow(key, transaction);
     return ok({ transaction, created: true });
   }
+
+  async settle(transaction: Transaction): Promise<boolean> {
+    if (!this.transactions.settleNow(transaction)) return false;
+    if (transaction.status !== 'APPROVED') {
+      this.catalog.releaseNow(transaction.variantId, transaction.quantity);
+    }
+    return true;
+  }
 }

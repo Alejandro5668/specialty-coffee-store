@@ -7,7 +7,7 @@ const arrange = async () => {
   const ctx = setup();
   const placed = await ctx.checkout.execute(input());
   if (!placed.ok) throw new Error('setup');
-  const processor = new ProcessPaymentEvent(new FakeVerifier(), ctx.transactions, ctx.catalog);
+  const processor = new ProcessPaymentEvent(new FakeVerifier(), ctx.transactions, ctx.orders);
   const event = (over: Record<string, unknown> = {}) => ({
     signature: 'valid',
     reference: placed.value.id,

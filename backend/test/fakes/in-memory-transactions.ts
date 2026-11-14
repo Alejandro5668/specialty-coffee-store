@@ -31,7 +31,7 @@ export class InMemoryTransactions implements TransactionRepository {
     return id ? (this.byId.get(id) ?? null) : null;
   }
 
-  async saveSettled(transaction: Transaction): Promise<boolean> {
+  settleNow(transaction: Transaction): boolean {
     const current = this.byId.get(transaction.id);
     if (!current || current.status !== 'PENDING') return false;
     this.byId.set(transaction.id, transaction);

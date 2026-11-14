@@ -12,4 +12,11 @@ export interface OrderStore {
     idempotencyKey: string,
     transaction: Transaction,
   ): Promise<Result<{ transaction: Transaction; created: boolean }, StockError>>;
+
+  /**
+   * Atomic and conditional on the stored transaction still being PENDING. Stores the final
+   * transaction and, unless it was approved, gives its reserved stock back in the same step.
+   * Returns false, changing nothing, when the transaction was no longer PENDING.
+   */
+  settle(transaction: Transaction): Promise<boolean>;
 }
