@@ -455,7 +455,7 @@
           },
           "message": {
             "type": "string",
-            "example": "There is not enough stock for that quantity. Choose fewer units."
+            "example": "No hay stock suficiente para esa cantidad. Elige menos unidades."
           },
           "fields": {
             "description": "Fields with missing or wrongly typed data (400 only).",

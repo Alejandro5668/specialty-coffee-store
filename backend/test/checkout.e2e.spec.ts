@@ -138,7 +138,7 @@ describe('POST /checkout', () => {
     expect(res.body).toEqual({
       statusCode: 409,
       code: 'OUT_OF_STOCK',
-      message: 'There is not enough stock for that quantity. Choose fewer units.',
+      message: 'No hay stock suficiente para esa cantidad. Elige menos unidades.',
     });
     expect(built.gateway.charges).toHaveLength(0);
   });

@@ -9,22 +9,23 @@ export const API_ERRORS = {
   INVALID_INPUT: {
     status: 422,
     message:
-      'Some order details are not valid. Check the quantity, email, phone and address, then try again.',
+      'Algunos datos del pedido no son válidos. Revisa la cantidad, el correo, el teléfono y la dirección, e inténtalo de nuevo.',
   },
-  AMOUNT_MISMATCH: { status: 422, message: 'The payment amount does not match the order.' },
-  VARIANT_NOT_FOUND: { status: 404, message: 'That coffee size is not available.' },
-  TRANSACTION_NOT_FOUND: { status: 404, message: 'We could not find that order.' },
-  DELIVERY_NOT_FOUND: { status: 404, message: 'There is no delivery for that order.' },
-  UNKNOWN_TRANSACTION: { status: 404, message: 'We could not find that order.' },
+  AMOUNT_MISMATCH: { status: 422, message: 'El importe del pago no coincide con el pedido.' },
+  VARIANT_NOT_FOUND: { status: 404, message: 'Ese tamaño de café no está disponible.' },
+  TRANSACTION_NOT_FOUND: { status: 404, message: 'No encontramos ese pedido.' },
+  DELIVERY_NOT_FOUND: { status: 404, message: 'No hay una entrega para ese pedido.' },
+  UNKNOWN_TRANSACTION: { status: 404, message: 'No encontramos ese pedido.' },
   OUT_OF_STOCK: {
     status: 409,
-    message: 'There is not enough stock for that quantity. Choose fewer units.',
+    message: 'No hay stock suficiente para esa cantidad. Elige menos unidades.',
   },
-  INVALID_SIGNATURE: { status: 401, message: 'The event signature is not valid.' },
-  MALFORMED_EVENT: { status: 400, message: 'The event is not valid.' },
+  INVALID_SIGNATURE: { status: 401, message: 'La firma del evento no es válida.' },
+  MALFORMED_EVENT: { status: 400, message: 'El evento no es válido.' },
   GATEWAY_UNAVAILABLE: {
     status: 503,
-    message: 'We cannot reach the payment service right now. Try again in a minute.',
+    message:
+      'No podemos conectar con el servicio de pagos en este momento. Inténtalo de nuevo en un minuto.',
   },
 } as const;
 
@@ -47,7 +48,7 @@ export const validationFailed = (fields: string[]): HttpException =>
     {
       statusCode: 400,
       code: 'VALIDATION_FAILED',
-      message: 'The request is missing data or has the wrong type of data.',
+      message: 'Faltan datos en la petición o tienen un tipo incorrecto.',
       fields,
     },
     400,

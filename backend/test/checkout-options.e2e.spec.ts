@@ -51,7 +51,8 @@ describe('GET /checkout/options', () => {
     expect(res.body).toEqual({
       statusCode: 503,
       code: 'GATEWAY_UNAVAILABLE',
-      message: 'We cannot reach the payment service right now. Try again in a minute.',
+      message:
+        'No podemos conectar con el servicio de pagos en este momento. Inténtalo de nuevo en un minuto.',
     });
   });
 
@@ -69,7 +70,7 @@ describe('GET /checkout/options', () => {
     expect(res.body).toEqual({
       statusCode: 429,
       code: 'TOO_MANY_REQUESTS',
-      message: 'Too many requests. Wait a minute and try again.',
+      message: 'Demasiadas peticiones. Espera un minuto e inténtalo de nuevo.',
     });
   });
 
