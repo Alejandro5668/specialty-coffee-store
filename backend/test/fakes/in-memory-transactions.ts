@@ -6,11 +6,20 @@ export class InMemoryTransactions implements TransactionRepository {
   private readonly byKey = new Map<string, string>();
 
   async createIfAbsent(key: string, transaction: Transaction) {
-    const existingId = this.byKey.get(key);
-    if (existingId) return { transaction: this.byId.get(existingId)!, created: false };
+    const existing = this.peekByKey(key);
+    if (existing) return { transaction: existing, created: false };
+    this.putNow(key, transaction);
+    return { transaction, created: true };
+  }
+
+  peekByKey(key: string): Transaction | null {
+    const id = this.byKey.get(key);
+    return id ? (this.byId.get(id) ?? null) : null;
+  }
+
+  putNow(key: string, transaction: Transaction): void {
     this.byKey.set(key, transaction.id);
     this.byId.set(transaction.id, transaction);
-    return { transaction, created: true };
   }
 
   async findById(id: string): Promise<Transaction | null> {

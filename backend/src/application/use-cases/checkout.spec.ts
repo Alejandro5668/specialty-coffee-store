@@ -2,6 +2,7 @@ import { VARIANT_ID } from '../../../test/fakes/fixtures';
 import { input, setup } from '../../../test/checkout-fixtures';
 import { FakeGateway } from '../../../test/fakes/fake-gateway';
 import { fixedClock, sequentialIds } from '../../../test/fakes/fixtures';
+import { InMemoryOrders } from '../../../test/fakes/in-memory-orders';
 import { Checkout, CheckoutInput } from './checkout';
 
 describe('Checkout', () => {
@@ -81,6 +82,16 @@ describe('Checkout', () => {
     expect(catalog.stockOf(VARIANT_ID)).toBe(3);
   });
 
+  it('answers a parallel double submit with the stored order even when the stock covers only one', async () => {
+    const { checkout, catalog, transactions, gateway } = setup(2);
+    const [a, b] = await Promise.all([checkout.execute(input()), checkout.execute(input())]);
+    if (!a.ok || !b.ok) throw new Error('expected both calls to answer with the order');
+    expect(a.value.id).toBe(b.value.id);
+    expect(transactions.all()).toHaveLength(1);
+    expect(gateway.charges).toHaveLength(1);
+    expect(catalog.stockOf(VARIANT_ID)).toBe(0);
+  });
+
   it.each([
     ['zero quantity', { quantity: 0 }],
     ['negative quantity', { quantity: -3 }],
@@ -120,6 +131,7 @@ describe('Checkout', () => {
     const checkout = new Checkout(
       catalog,
       transactions,
+      new InMemoryOrders(catalog, transactions),
       customers,
       new FakeGateway(),
       sequentialIds(),

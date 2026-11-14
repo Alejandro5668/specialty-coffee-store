@@ -1,5 +1,6 @@
 import { FakeGateway } from './fakes/fake-gateway';
 import { InMemoryCatalog } from './fakes/in-memory-catalog';
+import { InMemoryOrders } from './fakes/in-memory-orders';
 import { InMemoryCustomers } from './fakes/in-memory-customers';
 import { InMemoryTransactions } from './fakes/in-memory-transactions';
 import { catalogWithStock, fixedClock, sequentialIds, VARIANT_ID } from './fakes/fixtures';
@@ -26,10 +27,12 @@ export const setup = (stock = 5) => {
   const catalog: InMemoryCatalog = catalogWithStock(VARIANT_ID, stock);
   const transactions = new InMemoryTransactions();
   const customers = new InMemoryCustomers();
+  const orders = new InMemoryOrders(catalog, transactions);
   const gateway = new FakeGateway();
   const checkout = new Checkout(
     catalog,
     transactions,
+    orders,
     customers,
     gateway,
     sequentialIds(),

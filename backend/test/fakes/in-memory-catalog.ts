@@ -29,6 +29,10 @@ export class InMemoryCatalog implements CatalogRepository {
   }
 
   async reserveStock(variantId: string, quantity: number): Promise<Result<Variant, StockError>> {
+    return this.reserveNow(variantId, quantity);
+  }
+
+  reserveNow(variantId: string, quantity: number): Result<Variant, StockError> {
     const current = this.variants.get(variantId);
     if (!current) return err('VARIANT_NOT_FOUND');
     const reserved = reserve(current, quantity);

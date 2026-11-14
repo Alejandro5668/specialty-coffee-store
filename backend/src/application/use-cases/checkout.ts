@@ -8,6 +8,7 @@ import { SettleTransaction } from '../settle-transaction';
 import { CatalogRepository } from '../ports/catalog.repository';
 import { CustomerRepository } from '../ports/customer.repository';
 import { PaymentGateway } from '../ports/payment.gateway';
+import { OrderStore } from '../ports/order.store';
 import { Clock, IdGenerator } from '../ports/system.ports';
 import { TransactionRepository } from '../ports/transaction.repository';
 
@@ -42,6 +43,7 @@ export class Checkout {
   constructor(
     private readonly catalog: CatalogRepository,
     private readonly transactions: TransactionRepository,
+    private readonly orders: OrderStore,
     private readonly customers: CustomerRepository,
     private readonly gateway: PaymentGateway,
     private readonly ids: IdGenerator,
@@ -61,7 +63,7 @@ export class Checkout {
     const variant = await this.catalog.findVariant(p.variantId);
     if (!variant) return err('VARIANT_NOT_FOUND');
 
-    const placed = await this.withReservedStock(variant, p.quantity, () => this.place(p, variant));
+    const placed = await this.place(p, variant);
     if (!placed.ok) return placed;
     const { transaction, created } = placed.value;
     return created ? this.charge(transaction, p) : ok(transaction);
@@ -104,7 +106,9 @@ export class Checkout {
     });
     if (!transaction.ok) return err('INVALID_INPUT');
 
-    return ok(await this.transactions.createIfAbsent(p.key, transaction.value));
+    const stored = await this.orders.place(p.key, transaction.value);
+    if (stored.ok) return stored;
+    return err(stored.error === 'VARIANT_NOT_FOUND' ? 'VARIANT_NOT_FOUND' : 'OUT_OF_STOCK');
   }
 
   /** The outcome of the charge never fails the request: the transaction already exists and tells the story. */
@@ -139,29 +143,5 @@ export class Checkout {
     const created = { ...data, id: this.ids.next() };
     await this.customers.save(created);
     return created;
-  }
-
-  /** Reserves first and gives the units back when the order was not stored by this call. */
-  private async withReservedStock(
-    variant: Variant,
-    quantity: number,
-    next: () => Promise<Result<Placed, CheckoutError>>,
-  ): Promise<Result<Placed, CheckoutError>> {
-    if (!calculateAmounts(variant.price, quantity).ok) return err('INVALID_INPUT');
-    const reserved = await this.catalog.reserveStock(variant.id, quantity);
-    if (!reserved.ok) {
-      return err(reserved.error === 'VARIANT_NOT_FOUND' ? 'VARIANT_NOT_FOUND' : 'OUT_OF_STOCK');
-    }
-    let outcome: Result<Placed, CheckoutError>;
-    try {
-      outcome = await next();
-    } catch (error) {
-      await this.catalog.releaseStock(variant.id, quantity);
-      throw error;
-    }
-    if (!outcome.ok || !outcome.value.created) {
-      await this.catalog.releaseStock(variant.id, quantity);
-    }
-    return outcome;
   }
 }
