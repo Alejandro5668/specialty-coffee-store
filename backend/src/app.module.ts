@@ -1,4 +1,6 @@
 import { Module, Provider } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { CatalogRepository } from './application/ports/catalog.repository';
 import { CustomerRepository } from './application/ports/customer.repository';
 import { EventVerifier } from './application/ports/event.verifier';
@@ -109,6 +111,7 @@ const useCases: Provider[] = [
     TransactionsController,
     WebhooksController,
   ],
-  providers: [...adapters, ...useCases],
+  imports: [ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }])],
+  providers: [...adapters, ...useCases, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

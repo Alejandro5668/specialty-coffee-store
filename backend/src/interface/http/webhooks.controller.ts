@@ -1,7 +1,10 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { ProcessPaymentEvent } from '../../application/use-cases/process-payment-event';
 import { unwrap } from './errors';
 
+/** Never throttled: the provider must always get through, and the signature is the gate. */
+@SkipThrottle()
 @Controller('webhooks')
 export class WebhooksController {
   constructor(private readonly processEvent: ProcessPaymentEvent) {}

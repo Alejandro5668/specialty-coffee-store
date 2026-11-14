@@ -1,7 +1,9 @@
-import { INestApplication } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { TOKENS } from '../src/composition/tokens';
+import { configureApp } from '../src/interface/http/configure-app';
+import { loadHttpConfig } from '../src/interface/http/http-config';
 import { FakeGateway } from './fakes/fake-gateway';
 import { FakeVerifier } from './fakes/fake-verifier';
 import { catalogWithStock, fixedClock, sequentialIds, VARIANT_ID } from './fakes/fixtures';
@@ -36,7 +38,8 @@ export const buildTestApp = async (stock = 5) => {
     .useValue(fixedClock)
     .compile();
 
-  const app: INestApplication = moduleRef.createNestApplication();
+  const app = moduleRef.createNestApplication<NestExpressApplication>();
+  configureApp(app, loadHttpConfig({ CORS_ORIGIN: 'http://localhost:5173' }));
   await app.init();
   return { app, catalog, transactions, orders, customers, gateway };
 };
