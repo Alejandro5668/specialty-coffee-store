@@ -1,5 +1,5 @@
 import { formatCop } from './money';
-import { stockLabel } from './stock';
+import { remaining, stockLabel } from './stock';
 
 describe('formatCop', () => {
   it.each([
@@ -16,6 +16,14 @@ describe('formatCop', () => {
   it.each([NaN, Infinity, -5, 1.5])('never prints a made-up amount for %p', (cents) => {
     expect(formatCop(cents)).toBe('-');
   });
+});
+
+describe('remaining', () => {
+  it.each([
+    [1, 'queda 1'],
+    [2, 'quedan 2'],
+    [10, 'quedan 10'],
+  ])('writes %i as "%s"', (stock, text) => expect(remaining(stock)).toBe(text));
 });
 
 describe('stockLabel', () => {

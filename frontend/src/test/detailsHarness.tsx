@@ -27,6 +27,7 @@ export const setup = async (
     tokenizer?: CardTokenizer['tokenize'];
     getCheckoutOptions?: () => Promise<CheckoutOptions>;
     prepare?: (s: ReturnType<typeof createStore>) => void;
+    now?: () => number;
   } = {},
 ) => {
   const tokenize = jest.fn(
@@ -47,7 +48,7 @@ export const setup = async (
   const user = userEvent.setup();
   render(
     <Provider store={store}>
-      <ServicesProvider value={{ tokenizer: { tokenize }, now: () => NOW }}>
+      <ServicesProvider value={{ tokenizer: { tokenize }, now: opts.now ?? (() => NOW) }}>
         <MemoryRouter initialEntries={['/checkout/details']}>
           <Routes>
             <Route path="/" element={<p>Catalog page</p>} />

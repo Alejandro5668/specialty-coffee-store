@@ -1,3 +1,4 @@
+import { FALLBACK } from './messages';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { ApiError } from '../api/client';
 import { ProductView } from '../api/types';
@@ -8,8 +9,6 @@ export type CatalogState = {
   products: ProductView[];
   error: string | null;
 };
-
-const FALLBACK = 'Algo salió mal. Inténtalo de nuevo en un minuto.';
 
 export const loadCatalog = createAsyncThunk<
   ProductView[],

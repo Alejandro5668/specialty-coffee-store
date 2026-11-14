@@ -43,7 +43,7 @@ describe('initialSelection', () => {
 
   it.each([
     ['another coffee', { variantId: 'b-250', quantity: 2 }],
-    ['a size that is agotado now', { variantId: 'a-500', quantity: 2 }],
+    ['a size that is sold out now', { variantId: 'a-500', quantity: 2 }],
     ['nothing', { variantId: null, quantity: 1 }],
   ])('ignores a saved selection of %s', (_label, saved) => {
     expect(initialSelection(product([5, 0]), saved)).toEqual({ variantId: 'a-250', quantity: 1 });

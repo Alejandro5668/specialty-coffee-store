@@ -140,6 +140,10 @@ describe('validateHolder', () => {
       'Ingresa el nombre como aparece en la tarjeta (mínimo 5 caracteres).',
     );
   });
+  it('says how long a name may be, and which characters it may use', () => {
+    expect(validateHolder('x'.repeat(101))).toBe('Usa 100 caracteres o menos.');
+    expect(validateHolder('Ana1234 Pérez')).toBe("Usa solo letras, espacios y . - ' en el nombre.");
+  });
   it.each([
     'Ana <b>Pérez</b>',
     'Ana1234 Pérez',

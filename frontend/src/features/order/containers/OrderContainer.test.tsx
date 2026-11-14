@@ -28,6 +28,12 @@ describe('OrderContainer: while the payment is confirmed', () => {
     expect(new Set(calls)).toEqual(new Set(['order-1']));
   });
 
+  it('titles the tab "Tu pedido"', async () => {
+    setupOrder({ api: { getTransaction: async () => orderView('APPROVED') } });
+    await heading('Pago aprobado');
+    expect(document.title).toBe('Tu pedido - Tienda de café de especialidad');
+  });
+
   it('stops asking once the result is final', async () => {
     const getTransaction = jest.fn(async () => orderView('APPROVED'));
     setupOrder({ api: { getTransaction } });

@@ -15,7 +15,7 @@ Agrupados por el criterio de evaluación de la prueba. Cada casilla debe poder v
 ## Flujo de compra (20 pts)
 
 - [x] La página de productos muestra descripción, precio y stock.
-- [x] "Pay with credit card" abre un modal con los datos de la tarjeta y de la entrega.
+- [x] "Pagar con tarjeta de crédito" (en el PDF de la prueba, "Pay with credit card") abre un modal con los datos de la tarjeta y de la entrega.
 - [x] La tarjeta se valida (Luhn, vencimiento y CVV) y se detectan los logotipos de Visa y Mastercard.
 - [x] El resumen muestra producto, tarifa base y costo de envío en un panel superpuesto (backdrop).
 - [x] El pago crea una transacción `PENDING`, llama al proveedor y luego actualiza la transacción, asigna la entrega y actualiza el stock.
