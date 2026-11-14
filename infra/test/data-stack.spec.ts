@@ -34,4 +34,12 @@ describe('DataStack', () => {
       expect(table.DeletionPolicy).toBe('Delete');
     }
   });
+
+  it('tags every table with the project, so the whole project can be found in one view', () => {
+    for (const table of Object.values(data.findResources('AWS::DynamoDB::Table'))) {
+      expect(table.Properties.Tags).toEqual(
+        expect.arrayContaining([{ Key: 'Project', Value: 'coffee-store' }]),
+      );
+    }
+  });
 });

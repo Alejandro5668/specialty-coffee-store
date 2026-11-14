@@ -161,3 +161,36 @@ describe('AppStack: the site', () => {
     expect(api.toJSON().Outputs).toHaveProperty('SiteUrl');
   });
 });
+
+describe('AppStack: finding the project in the console', () => {
+  // CDK's own helper that empties the bucket on destroy is a raw resource it cannot tag.
+  const tagged = (type: string) =>
+    Object.entries(api.findResources(type))
+      .filter(([id]) => !id.startsWith('CustomS3AutoDelete'))
+      .every(([, r]) =>
+        JSON.stringify(r.Properties.Tags ?? r.Properties.TagSet ?? []).includes('coffee-store'),
+      );
+
+  it.each(['AWS::Lambda::Function', 'AWS::S3::Bucket', 'AWS::ApiGatewayV2::Api'])(
+    'tags %s with the project',
+    (type) => expect(tagged(type)).toBe(true),
+  );
+
+  it('tags the CloudFront distribution too, which the console does not list by itself', () => {
+    const [dist] = Object.values(api.findResources('AWS::CloudFront::Distribution'));
+    expect(dist.Properties.Tags).toEqual(
+      expect.arrayContaining([{ Key: 'Project', Value: 'coffee-store' }]),
+    );
+  });
+
+  it('creates one resource group that gathers everything with that tag', () => {
+    api.resourceCountIs('AWS::ResourceGroups::Group', 1);
+    api.hasResourceProperties('AWS::ResourceGroups::Group', {
+      Name: 'coffee-store',
+      ResourceQuery: {
+        Type: 'TAG_FILTERS_1_0',
+        Query: { TagFilters: [{ Key: 'Project', Values: ['coffee-store'] }] },
+      },
+    });
+  });
+});

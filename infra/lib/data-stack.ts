@@ -1,8 +1,9 @@
-import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { RemovalPolicy, Stack, StackProps, Tags } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 
 export const TABLE_PREFIX = 'coffee-store';
+export const PROJECT = 'coffee-store';
 
 export type Tables = { products: Table; variants: Table; customers: Table; transactions: Table };
 
@@ -12,6 +13,7 @@ export class DataStack extends Stack {
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+    Tags.of(this).add('Project', PROJECT);
     const table = (name: string, key: string, recovery = false) =>
       new Table(this, name, {
         tableName: `${TABLE_PREFIX}-${name}`,
