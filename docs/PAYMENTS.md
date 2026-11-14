@@ -39,7 +39,7 @@ Verified against the provider docs and the sandbox on 2026-11-13, except the web
 | Checksum | `SHA256(values of signature.properties in order + timestamp + events_secret)`; also in `X-Event-Checksum` |
 | Retries  | After 30 min, 3 h and 24 h on any non-200                                                                 |
 
-**Unverified:** the docs example does not reproduce with this formula. Confirm with a real event once the API is public. Compare the checksum case-insensitively.
+**Unverified:** the docs example does not reproduce with this formula. Confirm with a real event once the API is public. Compare the checksum case-insensitively. The signed properties do not cover `reference`, so a settlement also checks that the event amount equals ours.
 
 ## Test cards
 
