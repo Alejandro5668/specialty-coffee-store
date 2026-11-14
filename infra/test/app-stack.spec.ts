@@ -41,6 +41,13 @@ describe('AppStack: the API', () => {
     );
   });
 
+  it('trusts the two proxies in front of the Lambda, CloudFront and API Gateway', () => {
+    const fn = Object.values(api.findResources('AWS::Lambda::Function')).find(
+      (f) => f.Properties.Handler === 'lambda.handler',
+    )!;
+    expect(fn.Properties.Environment.Variables.TRUST_PROXY_HOPS).toBe('2');
+  });
+
   it('closes CORS: the browser only ever calls the same origin', () => {
     const fn = Object.values(api.findResources('AWS::Lambda::Function')).find(
       (f) => f.Properties.Handler === 'lambda.handler',

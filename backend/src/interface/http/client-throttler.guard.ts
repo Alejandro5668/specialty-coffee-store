@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import proxyaddr from 'proxy-addr';
 
@@ -28,5 +28,17 @@ export class ClientThrottlerGuard extends ThrottlerGuard {
           )
         : (req.socket?.remoteAddress ?? req.connection?.remoteAddress ?? req.ip);
     return Promise.resolve(address ?? 'unknown');
+  }
+
+  /** The library's own message is technical; the shopper gets what happened and what to do. */
+  protected throwThrottlingException(): Promise<void> {
+    throw new HttpException(
+      {
+        statusCode: 429,
+        code: 'TOO_MANY_REQUESTS',
+        message: 'Too many requests. Wait a minute and try again.',
+      },
+      429,
+    );
   }
 }
