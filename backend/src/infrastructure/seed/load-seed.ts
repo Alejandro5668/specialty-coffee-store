@@ -6,24 +6,35 @@ import { seedProducts, seedVariants } from './coffees';
 
 export type SeedSummary = { written: number; skipped: number };
 
-/** Put-if-absent: running it again never resets the stock of a live store. */
+/**
+ * Products hold only catalog text, so they are rewritten and an edit reaches a live store.
+ * Variants hold the stock, so they are put-if-absent: running it again never resets it.
+ */
 export const loadSeed = async (
   client: DynamoDBDocumentClient,
   config: DynamoConfig,
 ): Promise<SeedSummary> => {
   const rows = [
-    ...seedProducts.map((item) => ({ table: config.tables.products, item: { ...item } })),
-    ...seedVariants.map((v) => ({ table: config.tables.variants, item: fromVariant(v) })),
+    ...seedProducts.map((item) => ({
+      table: config.tables.products,
+      item: { ...item },
+      onlyIfAbsent: false,
+    })),
+    ...seedVariants.map((v) => ({
+      table: config.tables.variants,
+      item: fromVariant(v),
+      onlyIfAbsent: true,
+    })),
   ];
 
   const outcomes = await Promise.all(
-    rows.map(async ({ table, item }) => {
+    rows.map(async ({ table, item, onlyIfAbsent }) => {
       try {
         await client.send(
           new PutCommand({
             TableName: table,
             Item: item,
-            ConditionExpression: 'attribute_not_exists(id)',
+            ...(onlyIfAbsent && { ConditionExpression: 'attribute_not_exists(id)' }),
           }),
         );
         return 'written' as const;

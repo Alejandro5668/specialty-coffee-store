@@ -30,6 +30,13 @@ describe('coffee seed', () => {
     expect(seedVariants.every((v) => v.stock >= 1)).toBe(true);
   });
 
+  it('describes every coffee in Spanish', () => {
+    for (const p of seedProducts) {
+      expect(p.description).not.toMatch(/\b(and|the|with|of|a)\b/i);
+      expect(p.description).toMatch(/[áéíóúñ]|\b(y|con|de|un|una)\b/i);
+    }
+  });
+
   it('has a name, a description and an image path for each product', () => {
     for (const p of seedProducts) {
       expect(p.name.length).toBeGreaterThan(0);
