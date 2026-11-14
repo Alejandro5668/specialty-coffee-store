@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^11.2.10",
+    "@types/aws-lambda": "^8.10.164",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.6",
     "@types/supertest": "^7.2.1",
@@ -23,7 +24,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1169.0",
+    "@aws-sdk/client-ssm": "^3.1169.0",
     "@aws-sdk/lib-dynamodb": "^3.1169.0",
+    "@codegenie/serverless-express": "^5.0.0",
     "@nestjs/common": "^11.2.10",
     "@nestjs/core": "^11.2.10",
     "@nestjs/platform-express": "^11.2.10",
