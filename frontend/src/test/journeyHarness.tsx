@@ -144,7 +144,7 @@ export const fillTheForm = async (user: ReturnType<typeof userEvent.setup>) => {
   await type('Name on the card', 'Ana Pérez');
   await type('Full name', 'Ana Pérez');
   await type('Email', 'ana@example.com');
-  await type('Recipient name', 'Ana Pérez');
+  await type('Recipient name (optional)', 'Ana Pérez');
   await type('Address', 'Calle 10 # 5-20');
   await type('City', 'Medellín');
   await type('Phone', '300 123 4567');

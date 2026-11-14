@@ -13,8 +13,8 @@ const text = (value: string, max: number, required: string): string | null => {
 };
 
 export const validateFullName = (v: string) => text(v, 100, 'Enter your full name.');
-export const validateRecipient = (v: string) =>
-  text(v, 200, 'Enter the name of the person who will receive the order.');
+/** Optional: when it is empty the order goes to the buyer (see placeOrder). */
+export const validateRecipient = (v: string) => (v.trim() === '' ? null : text(v, 200, ''));
 export const validateAddress = (v: string) => text(v, 200, 'Enter the delivery address.');
 export const validateCity = (v: string) => text(v, 200, 'Enter the city.');
 

@@ -71,7 +71,7 @@ export const fillCard = async (user: ReturnType<typeof userEvent.setup>) => {
 export const fillPerson = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.type(screen.getByLabelText('Full name'), 'Ana Pérez');
   await user.type(screen.getByLabelText('Email'), 'ana@example.com');
-  await user.type(screen.getByLabelText('Recipient name'), 'Ana Pérez');
+  await user.type(screen.getByLabelText('Recipient name (optional)'), 'Ana Pérez');
   await user.type(screen.getByLabelText('Address'), 'Calle 10 # 5-20');
   await user.type(screen.getByLabelText('City'), 'Medellín');
   await user.type(screen.getByLabelText('Phone'), '300 123 4567');

@@ -70,4 +70,5 @@ Routes: `/` coffees, `/checkout/details` card and delivery (dialog), `/checkout/
 | Only the selection and details are saved; never an amount | Prices come from the API every time, so editing the storage cannot show a wrong amount     |
 | The `idempotencyKey` is saved before the payment is sent  | A refresh in the middle sends the same key, so the order is never created or charged twice |
 | The card token is kept 30 minutes at most                 | After that the card is asked again                                                         |
+| The recipient name is optional                            | Empty means the buyer receives it; the form says so, and the order always carries a name   |
 | After a result the page returns to the coffees in 8 s     | Cancelable. Declined or failed keeps the details; approved forgets everything              |
