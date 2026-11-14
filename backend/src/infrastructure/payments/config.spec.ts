@@ -38,9 +38,11 @@ describe('loadPaymentConfig', () => {
   });
 
   it('never puts a secret in an error message', () => {
+    expect.assertions(2);
     try {
       loadPaymentConfig({ ...env, PAYMENT_API_URL: 'http://x.test' });
     } catch (e) {
+      expect(String(e)).toContain('https');
       expect(String(e)).not.toContain('prv_test_x');
     }
   });
