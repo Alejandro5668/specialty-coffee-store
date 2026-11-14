@@ -6,6 +6,7 @@
     "build": "tsc -p tsconfig.build.json",
     "start:dev": "ts-node src/main.ts",
     "seed": "ts-node src/infrastructure/seed/seed.cli.ts",
+    "openapi": "ts-node src/interface/http/openapi.cli.ts",
     "test": "jest",
     "test:cov": "jest --coverage"
   },
@@ -26,6 +27,7 @@
     "@nestjs/common": "^11.2.10",
     "@nestjs/core": "^11.2.10",
     "@nestjs/platform-express": "^11.2.10",
+    "@nestjs/swagger": "^11.4.8",
     "@nestjs/throttler": "^6.7.1",
     "helmet": "^8.3.0",
     "reflect-metadata": "^0.2.2",
