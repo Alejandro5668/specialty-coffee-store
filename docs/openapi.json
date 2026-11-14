@@ -1,0 +1,571 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/products": {
+      "get": {
+        "operationId": "ProductsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductDto"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List the coffees with their sizes, prices and current stock",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/checkout": {
+      "post": {
+        "operationId": "CheckoutController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The order, also on a repeated idempotencyKey.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing data or wrong type of data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The coffee size does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Not enough stock",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body larger than 16 KB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Data rejected by the order rules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests (10 per minute)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Place an order: reserve the stock, create it as PENDING and charge the card",
+        "tags": [
+          "Checkout"
+        ]
+      }
+    },
+    "/transactions/{id}": {
+      "get": {
+        "operationId": "TransactionsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Order id returned by POST /checkout.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Never includes delivery data or the customer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the status of an order; asks the provider if it is still PENDING",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/webhooks/payments": {
+      "post": {
+        "operationId": "WebhooksController_payments",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Provider event with its signed checksum."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookReceivedDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body larger than 16 KB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Amount does not match the order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Receive a payment event from the provider. Idempotent: replays change nothing",
+        "tags": [
+          "Webhooks"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Specialty Coffee Store API",
+    "description": "Amounts are always computed by the server. Errors answer `{ statusCode, code, message }`; the `code` is stable and the `message` is safe to show to a shopper.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "VariantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "huila-washed-250"
+          },
+          "sizeGrams": {
+            "type": "number",
+            "enum": [
+              250,
+              500
+            ]
+          },
+          "priceInCents": {
+            "type": "number",
+            "example": 3200000,
+            "description": "Price in cents of COP."
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "COP"
+            ]
+          },
+          "stock": {
+            "type": "number",
+            "example": 20,
+            "description": "Units available now."
+          }
+        },
+        "required": [
+          "id",
+          "sizeGrams",
+          "priceInCents",
+          "currency",
+          "stock"
+        ]
+      },
+      "ProductDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "huila-washed"
+          },
+          "name": {
+            "type": "string",
+            "example": "Huila Washed"
+          },
+          "description": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "/images/coffees/huila-washed.webp"
+          },
+          "variants": {
+            "description": "Sizes, smallest first.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariantDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "imageUrl",
+          "variants"
+        ]
+      },
+      "ErrorDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 409
+          },
+          "code": {
+            "type": "string",
+            "example": "OUT_OF_STOCK",
+            "description": "Stable code for the frontend."
+          },
+          "message": {
+            "type": "string",
+            "example": "There is not enough stock for that quantity. Choose fewer units."
+          },
+          "fields": {
+            "description": "Fields with missing or wrongly typed data (400 only).",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "statusCode",
+          "code",
+          "message"
+        ]
+      },
+      "CustomerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Ana Pérez",
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "example": "ana@example.com"
+          }
+        },
+        "required": [
+          "name",
+          "email"
+        ]
+      },
+      "DeliveryDto": {
+        "type": "object",
+        "properties": {
+          "recipientName": {
+            "type": "string",
+            "example": "Ana Pérez",
+            "maxLength": 200
+          },
+          "address": {
+            "type": "string",
+            "example": "Calle 10 # 5-20",
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "example": "Medellín",
+            "maxLength": 200
+          },
+          "phone": {
+            "type": "string",
+            "example": "3001234567",
+            "description": "7 to 15 digits, optional leading +."
+          }
+        },
+        "required": [
+          "recipientName",
+          "address",
+          "city",
+          "phone"
+        ]
+      },
+      "CheckoutRequestDto": {
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "example": "0b8f5c3e-6f1a-4c47-9d71-2f6a4a1d9c11",
+            "description": "Chosen by the client once per purchase. Repeating it returns the same order and never charges twice."
+          },
+          "variantId": {
+            "type": "string",
+            "example": "huila-washed-250"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2,
+            "minimum": 1,
+            "maximum": 10
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerDto"
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/DeliveryDto"
+          },
+          "cardToken": {
+            "type": "string",
+            "description": "Card token from the payment provider. The card number never reaches this API."
+          },
+          "acceptanceToken": {
+            "type": "string",
+            "description": "Acceptance token for the terms. Single use: request a new one per attempt."
+          },
+          "personalAuthToken": {
+            "type": "string",
+            "description": "Acceptance token for personal data processing."
+          }
+        },
+        "required": [
+          "idempotencyKey",
+          "variantId",
+          "quantity",
+          "customer",
+          "delivery",
+          "cardToken",
+          "acceptanceToken",
+          "personalAuthToken"
+        ]
+      },
+      "AmountsDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "enum": [
+              "COP"
+            ]
+          },
+          "productAmountInCents": {
+            "type": "number",
+            "example": 6400000
+          },
+          "baseFeeInCents": {
+            "type": "number",
+            "example": 300000
+          },
+          "deliveryFeeInCents": {
+            "type": "number",
+            "example": 800000
+          },
+          "totalInCents": {
+            "type": "number",
+            "example": 7500000
+          }
+        },
+        "required": [
+          "currency",
+          "productAmountInCents",
+          "baseFeeInCents",
+          "deliveryFeeInCents",
+          "totalInCents"
+        ]
+      },
+      "TransactionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "DECLINED",
+              "ERROR"
+            ]
+          },
+          "variantId": {
+            "type": "string",
+            "example": "huila-washed-250"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          },
+          "amounts": {
+            "description": "Computed by the server, never taken from the client.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AmountsDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "variantId",
+          "quantity",
+          "amounts",
+          "createdAt"
+        ]
+      },
+      "WebhookReceivedDto": {
+        "type": "object",
+        "properties": {
+          "received": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "received"
+        ]
+      }
+    }
+  }
+}
