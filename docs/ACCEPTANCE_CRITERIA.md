@@ -29,7 +29,7 @@ Agrupados por el criterio de evaluación de la prueba. Cada casilla debe poder v
 - [x] Los importes se calculan en el backend; los importes del cliente se ignoran.
 - [x] Si dos clientes compran la última unidad a la vez, solo uno lo consigue.
 - [x] Un pago fallido libera el stock.
-- [ ] El webhook verifica su firma y es idempotente. _Pendiente: Implementado y probado; falta confirmar el checksum con un evento real del proveedor._
+- [ ] El webhook verifica su firma y es idempotente. _Pendiente: Implementado y probado con eventos simulados; el checksum no se verificó con un evento real porque la cuenta del sandbox es compartida y no se registró la URL del webhook. Los pagos se confirman consultando al proveedor._
 
 ## Pruebas unitarias (30 pts)
 

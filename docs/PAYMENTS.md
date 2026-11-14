@@ -42,7 +42,7 @@ Verificado contra la documentación del proveedor y su sandbox el 2026-11-14, sa
 | Checksum   | `SHA256(valores de signature.properties en orden + timestamp + events_secret)`; también llega en `X-Event-Checksum` |
 | Reintentos | A los 30 minutos, a las 3 horas y a las 24 horas, ante cualquier respuesta distinta de 200                          |
 
-**Sin verificar:** el ejemplo de la documentación no se reproduce con esta fórmula. Hay que confirmarla con un evento real cuando la API sea pública. El checksum se compara sin distinguir mayúsculas de minúsculas. Las propiedades firmadas no incluyen `reference`, por lo que al cerrar un pago también se comprueba que el importe del evento sea igual al nuestro.
+**Sin verificar:** el ejemplo de la documentación no se reproduce con esta fórmula. No se confirmó con un evento real porque no se registró la URL del webhook: la cuenta del sandbox es compartida entre candidatos y registrarla reemplazaría la de otros y haría llegar eventos ajenos a esta API. Para confirmarla, registrar `/api/webhooks/payments` en una cuenta propia y leer en los logs de la Lambda `Webhook accepted` o `Webhook rejected: INVALID_SIGNATURE`. El checksum se compara sin distinguir mayúsculas de minúsculas. Las propiedades firmadas no incluyen `reference`, por lo que al cerrar un pago también se comprueba que el importe del evento sea igual al nuestro.
 
 ## Tarjetas de prueba
 
@@ -56,5 +56,5 @@ Cualquier vencimiento futuro y un CVC de 3 dígitos. `ERROR`, los tiempos de esp
 
 ## Pendiente
 
-- Verificar el checksum del webhook con un evento real.
+- Verificar el checksum del webhook con un evento real (ver [Webhook](#webhook)). Mientras tanto, el estado final se obtiene consultando al proveedor (`GET /transactions/:id`).
 - Tokenización cifrada (el sandbox acepta datos sin cifrar).
