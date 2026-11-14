@@ -1,6 +1,6 @@
 # Payments flow
 
-Verified against the provider docs and the sandbox on 2026-11-13. Sandbox only. Keys come from `.env` (see `.env.example`); base URL is `PAYMENT_API_URL`.
+Verified against the provider docs and the sandbox on 2026-11-13, except the webhook checksum (see [Webhook](#webhook)). Sandbox only. Keys come from `.env` (see `.env.example`); base URL is `PAYMENT_API_URL`.
 
 ## Flow
 
@@ -16,15 +16,15 @@ Verified against the provider docs and the sandbox on 2026-11-13. Sandbox only. 
 
 ## Rules found in the sandbox
 
-| Rule                                                                                | Consequence                                      |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------ |
-| The acceptance token is single use (422 on reuse).                                  | Fetch a fresh one for every payment attempt.     |
-| `reference` must be unique (422 on reuse).                                          | Use the transaction id.                          |
-| `amount_in_cents` is an integer; currency is only `COP`.                            | Matches our Money type.                          |
-| Minimum amount is 1,500 COP.                                                        | Always below our minimum total.                  |
-| A new transaction is always `PENDING`, then `APPROVED`/`DECLINED`/`ERROR`/`VOIDED`. | Stock is reserved before the call.               |
-| A card token is valid about 2 days.                                                 | Do not cache it; never reuse it more than twice. |
-| `accept_personal_auth` was optional; send it anyway.                                | Docs disagree on whether it is required.         |
+| Rule                                                                                | Consequence                                                              |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| The acceptance token is single use (422 on reuse).                                  | Fetch a fresh one for every payment attempt.                             |
+| `reference` must be unique (422 on reuse).                                          | Send our transaction id; the provider's own id is kept as `providerRef`. |
+| `amount_in_cents` is an integer; currency is only `COP`.                            | Matches our Money type.                                                  |
+| Minimum amount is 1,500 COP.                                                        | Never applies: the two fees alone are 11,000 COP.                        |
+| A new transaction is always `PENDING`, then `APPROVED`/`DECLINED`/`ERROR`/`VOIDED`. | Stock is reserved before the call.                                       |
+| A card token expires after about 2 days; the docs say to use it at most twice.      | Tokenize per attempt and use each token once.                            |
+| `accept_personal_auth` was optional in the sandbox; the docs disagree.              | Always send it.                                                          |
 
 ## Integrity signature
 
@@ -43,13 +43,13 @@ Verified against the provider docs and the sandbox on 2026-11-13. Sandbox only. 
 
 ## Test cards
 
-| Number                | Result                                                                        |
-| --------------------- | ----------------------------------------------------------------------------- |
-| `4242 4242 4242 4242` | `APPROVED`                                                                    |
-| `4111 1111 1111 1111` | `DECLINED`                                                                    |
-| Any other             | Rejected at tokenization (422); `ERROR` is not reproducible, use a fake port. |
+| Number                | Result                          |
+| --------------------- | ------------------------------- |
+| `4242 4242 4242 4242` | `APPROVED`                      |
+| `4111 1111 1111 1111` | `DECLINED`                      |
+| Any other             | Rejected at tokenization (422). |
 
-Any future expiry and a 3-digit CVC.
+Any future expiry and a 3-digit CVC. `ERROR`, timeouts and 5xx cannot be triggered with a card: tests cover them with a fake payment port (an in-memory stand-in for the provider).
 
 ## Open items
 
