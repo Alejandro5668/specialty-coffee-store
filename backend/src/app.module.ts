@@ -23,6 +23,7 @@ import { CheckoutController } from './interface/http/checkout.controller';
 import { HealthController } from './interface/http/health.controller';
 import { ProductsController } from './interface/http/products.controller';
 import { TransactionsController } from './interface/http/transactions.controller';
+import { WebhooksController } from './interface/http/webhooks.controller';
 
 const adapters: Provider[] = [
   {
@@ -101,7 +102,13 @@ const useCases: Provider[] = [
 ];
 
 @Module({
-  controllers: [HealthController, ProductsController, CheckoutController, TransactionsController],
+  controllers: [
+    HealthController,
+    ProductsController,
+    CheckoutController,
+    TransactionsController,
+    WebhooksController,
+  ],
   providers: [...adapters, ...useCases],
 })
 export class AppModule {}
