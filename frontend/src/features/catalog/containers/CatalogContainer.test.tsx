@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ApiError, CoffeeApi } from '../../../api/client';
 import { ProductView } from '../../../api/types';
 import { createStore } from '../../../app/store';
+import { fakeApi } from '../../../test/fakeApi';
 import { loadCatalog } from '../../../store/catalogSlice';
 import { PERSIST_KEY } from '../../../store/persistence';
 import { CatalogContainer } from './CatalogContainer';
@@ -35,7 +36,7 @@ const memory = (saved?: unknown) => {
 };
 
 const setup = (listProducts: CoffeeApi['listProducts'], storage = memory()) => {
-  const store = createStore({ api: { listProducts }, storage });
+  const store = createStore({ api: fakeApi({ listProducts }), storage });
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={['/']}>

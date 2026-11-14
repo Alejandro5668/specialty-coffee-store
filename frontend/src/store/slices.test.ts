@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { ApiError, CoffeeApi } from '../api/client';
+import { fakeApi } from '../test/fakeApi';
 import { ProductView } from '../api/types';
 import { catalogReducer, loadCatalog } from './catalogSlice';
 import { checkoutReducer, clearCheckout, selectCoffee } from './checkoutSlice';
@@ -15,7 +16,7 @@ const coffee: ProductView = {
 const storeWith = (listProducts: CoffeeApi['listProducts']) =>
   configureStore({
     reducer: { catalog: catalogReducer },
-    middleware: (gdm) => gdm({ thunk: { extraArgument: { api: { listProducts } } } }),
+    middleware: (gdm) => gdm({ thunk: { extraArgument: { api: fakeApi({ listProducts }) } } }),
   });
 
 describe('catalog', () => {

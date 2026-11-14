@@ -2,12 +2,15 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { fakeApi } from '../test/fakeApi';
 import { createStore } from './store';
 import { App } from './App';
 
 const renderAt = (path: string) =>
   render(
-    <Provider store={createStore({ api: { listProducts: async () => [] }, storage: null })}>
+    <Provider
+      store={createStore({ api: fakeApi({ listProducts: async () => [] }), storage: null })}
+    >
       <MemoryRouter initialEntries={[path]}>
         <App />
       </MemoryRouter>

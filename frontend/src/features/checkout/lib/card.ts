@@ -1,4 +1,6 @@
-export type CardBrand = 'visa' | 'mastercard' | 'unknown';
+import { CardBrand } from '../../../api/types';
+
+export type { CardBrand };
 
 const MAX_DIGITS = 19;
 const LENGTHS: Record<Exclude<CardBrand, 'unknown'>, number[]> = {
@@ -47,6 +49,12 @@ export const validateCardNumber = (raw: string): string | null => {
     return 'Check the card number: it does not look valid.';
   }
   return null;
+};
+
+/** The month and year as the payment service wants them: two digits each. */
+export const splitExpiry = (raw: string): { expMonth: string; expYear: string } | null => {
+  const digits = digitsOnly(raw);
+  return digits.length === 4 ? { expMonth: digits.slice(0, 2), expYear: digits.slice(2) } : null;
 };
 
 const MAX_YEARS_AHEAD = 20;

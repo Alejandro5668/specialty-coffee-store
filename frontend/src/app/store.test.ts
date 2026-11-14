@@ -1,10 +1,10 @@
-import { CoffeeApi } from '../api/client';
+import { fakeApi } from '../test/fakeApi';
 import { PERSIST_KEY } from '../store/persistence';
 import { selectCoffee } from '../store/checkoutSlice';
 import { loadCatalog } from '../store/catalogSlice';
 import { createStore } from './store';
 
-const api: CoffeeApi = { listProducts: async () => [] };
+const api = fakeApi({ listProducts: async () => [] });
 const memory = (initial?: string) => {
   const data = new Map<string, string>();
   if (initial !== undefined) data.set(PERSIST_KEY, initial);

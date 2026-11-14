@@ -4,6 +4,7 @@ import {
   formatCardNumber,
   formatExpiry,
   luhnValid,
+  splitExpiry,
   validateCardNumber,
   validateCvc,
   validateExpiry,
@@ -145,4 +146,13 @@ describe('validateHolder', () => {
     'x'.repeat(101),
     '<script>alert(1)</script>',
   ])('rejects %p', (h) => expect(validateHolder(h)).not.toBeNull());
+});
+
+describe('splitExpiry', () => {
+  it.each([
+    ['12 / 30', { expMonth: '12', expYear: '30' }],
+    ['0127', { expMonth: '01', expYear: '27' }],
+    ['1/30', null],
+    ['', null],
+  ])('reads %p', (raw, parts) => expect(splitExpiry(raw)).toEqual(parts));
 });
