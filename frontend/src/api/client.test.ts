@@ -1,3 +1,4 @@
+import { html, json, recordFetch } from '../test/http';
 import { ApiError, createCoffeeApi } from './client';
 
 const product = (over: Record<string, unknown> = {}) => ({
@@ -12,23 +13,10 @@ const product = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 
-type Call = { url: string; init: RequestInit };
 const withFetch = (respond: () => Response | Promise<Response>) => {
-  const calls: Call[] = [];
-  const fetchFn = (async (url: string, init: RequestInit) => {
-    calls.push({ url, init });
-    return respond();
-  }) as unknown as typeof fetch;
+  const { fetchFn, calls } = recordFetch(respond);
   return { api: createCoffeeApi('https://api.example.test/', fetchFn), calls };
 };
-/** jsdom has no Response, and the client only needs these three members. */
-const reply = (status: number, read: () => Promise<unknown>) =>
-  ({ ok: status >= 200 && status < 300, status, json: read }) as unknown as Response;
-const json = (status: number, body: unknown) => reply(status, async () => body);
-const html = (status: number) =>
-  reply(status, async () => {
-    throw new SyntaxError('Unexpected token <');
-  });
 
 const failure = async (promise: Promise<unknown>): Promise<ApiError> => {
   try {

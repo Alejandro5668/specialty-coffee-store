@@ -1,25 +1,46 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { CoffeeApi } from '../api/client';
-import { catalogReducer, ThunkExtra } from '../store/catalogSlice';
+import { catalogReducer } from '../store/catalogSlice';
 import { checkoutReducer } from '../store/checkoutSlice';
-import { loadPersisted, savePersisted } from '../store/persistence';
+import { ThunkExtra } from '../store/extra';
+import { optionsReducer } from '../store/optionsSlice';
+import { orderReducer } from '../store/orderSlice';
+import { loadPersisted, savePersisted, toPersistable } from '../store/persistence';
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
+type Options = {
+  api: CoffeeApi;
+  storage: StorageLike | null;
+  newId?: () => string;
+  now?: () => number;
+};
 
-export const createStore = ({ api, storage }: { api: CoffeeApi; storage: StorageLike | null }) => {
+export const createStore = ({
+  api,
+  storage,
+  newId = () => crypto.randomUUID(),
+  now = Date.now,
+}: Options) => {
+  const extra: ThunkExtra = { api, newId, now };
   const store = configureStore({
-    reducer: { catalog: catalogReducer, checkout: checkoutReducer },
-    preloadedState: loadPersisted(storage),
-    middleware: (getDefault) =>
-      getDefault({ thunk: { extraArgument: { api } satisfies ThunkExtra } }),
+    reducer: {
+      catalog: catalogReducer,
+      options: optionsReducer,
+      order: orderReducer,
+      checkout: checkoutReducer,
+    },
+    preloadedState: loadPersisted(storage, now()),
+    middleware: (getDefault) => getDefault({ thunk: { extraArgument: extra } }),
   });
 
-  let saved = store.getState().checkout;
+  // Saves the draft only when something worth keeping changed, not on every screen-only update.
+  let saved = JSON.stringify(toPersistable(store.getState().checkout));
   store.subscribe(() => {
     const { checkout } = store.getState();
-    if (checkout === saved) return;
-    saved = checkout;
-    savePersisted(storage, { checkout });
+    const next = JSON.stringify(toPersistable(checkout));
+    if (next === saved) return;
+    saved = next;
+    savePersisted(storage, checkout);
   });
 
   return store;

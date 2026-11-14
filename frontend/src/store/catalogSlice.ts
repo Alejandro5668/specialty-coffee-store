@@ -1,14 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { ApiError, CoffeeApi } from '../api/client';
+import { ApiError } from '../api/client';
 import { ProductView } from '../api/types';
+import { ThunkExtra } from './extra';
 
 export type CatalogState = {
   status: 'idle' | 'loading' | 'ready' | 'failed';
   products: ProductView[];
   error: string | null;
 };
-
-export type ThunkExtra = { api: CoffeeApi };
 
 const FALLBACK = 'Something went wrong. Try again in a minute.';
 

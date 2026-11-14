@@ -1,3 +1,4 @@
+import { Outlet } from 'react-router-dom';
 import { CatalogContainer } from '../features/catalog/containers/CatalogContainer';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
@@ -10,6 +11,7 @@ export const CatalogPage = () => {
         <p>Choose a size, then pay with your card.</p>
       </div>
       <CatalogContainer />
+      <Outlet />
     </div>
   );
 };

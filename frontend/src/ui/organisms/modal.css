@@ -1,0 +1,70 @@
+.modal {
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: 100dvh;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--color-milk);
+  color: var(--color-ink);
+  overflow: auto;
+}
+
+.modal::backdrop {
+  background: rgb(20 40 31 / 0.6);
+}
+
+.modal__header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-milk);
+  border-block-end: 1px solid var(--color-leaf);
+}
+
+.modal__title {
+  font-size: var(--text-xl);
+}
+
+.modal__title:focus {
+  outline: none;
+}
+
+.modal__body {
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+
+/* The page behind a modal must not scroll. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+.modal--sheet {
+  /* fit-content, not auto: a fixed box with auto height would stretch to fill the screen. */
+  block-size: fit-content;
+  max-block-size: 92dvh;
+  margin-block-start: auto;
+  border-start-start-radius: var(--radius-field);
+  border-start-end-radius: var(--radius-field);
+}
+
+@media (min-width: 40rem) {
+  .modal {
+    inline-size: min(100% - 2rem, 36rem);
+    block-size: fit-content;
+    max-block-size: min(100dvh - 2rem, 54rem);
+    margin: auto;
+    border-radius: var(--radius-field);
+  }
+
+  .modal--sheet {
+    margin-block: auto;
+    border-radius: var(--radius-field);
+  }
+}

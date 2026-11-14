@@ -2,12 +2,18 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { selectCoffee } from '../store/checkoutSlice';
+import { fakeApi } from '../test/fakeApi';
+import { NOW } from '../test/state';
+import { ServicesProvider } from './services';
 import { createStore } from './store';
 import { App } from './App';
 
 const renderAt = (path: string) =>
   render(
-    <Provider store={createStore({ api: { listProducts: async () => [] }, storage: null })}>
+    <Provider
+      store={createStore({ api: fakeApi({ listProducts: async () => [] }), storage: null })}
+    >
       <MemoryRouter initialEntries={[path]}>
         <App />
       </MemoryRouter>
@@ -65,5 +71,37 @@ describe('unknown pages', () => {
     await userEvent.click(screen.getByRole('link', { name: 'See the coffees' }));
     expect(screen.getByRole('main')).toHaveFocus();
     expect(screen.getByRole('heading', { name: 'Coffees' })).toBeInTheDocument();
+  });
+});
+
+describe('checkout route', () => {
+  const renderCheckout = (selected: boolean) => {
+    const store = createStore({
+      api: fakeApi({ listProducts: async () => [] }),
+      storage: null,
+      now: () => NOW,
+    });
+    if (selected) store.dispatch(selectCoffee({ variantId: 'huila-washed-250', quantity: 1 }));
+    render(
+      <Provider store={store}>
+        <ServicesProvider value={{ tokenizer: { tokenize: jest.fn() }, now: () => NOW }}>
+          <MemoryRouter initialEntries={['/checkout/details']}>
+            <App />
+          </MemoryRouter>
+        </ServicesProvider>
+      </Provider>,
+    );
+  };
+
+  it('opens the card and delivery dialog on top of the coffees', () => {
+    renderCheckout(true);
+    expect(screen.getByRole('dialog', { name: 'Card and delivery' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Coffees' })).toBeInTheDocument();
+  });
+
+  it('goes back to the coffees when nothing was chosen', async () => {
+    renderCheckout(false);
+    expect(await screen.findByRole('heading', { name: 'Coffees' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });
