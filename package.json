@@ -7,7 +7,8 @@
   "workspaces": [
     "backend",
     "frontend",
-    "infra"
+    "infra",
+    "e2e"
   ],
   "scripts": {
     "lint": "eslint .",
