@@ -22,6 +22,7 @@ import { SystemClock, UuidIdGenerator } from './infrastructure/system/system';
 import { CheckoutController } from './interface/http/checkout.controller';
 import { HealthController } from './interface/http/health.controller';
 import { ProductsController } from './interface/http/products.controller';
+import { TransactionsController } from './interface/http/transactions.controller';
 
 const adapters: Provider[] = [
   {
@@ -100,7 +101,7 @@ const useCases: Provider[] = [
 ];
 
 @Module({
-  controllers: [HealthController, ProductsController, CheckoutController],
+  controllers: [HealthController, ProductsController, CheckoutController, TransactionsController],
   providers: [...adapters, ...useCases],
 })
 export class AppModule {}
