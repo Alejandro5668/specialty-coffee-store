@@ -35,3 +35,15 @@ export const unwrap = <T>(result: Result<T, ApiErrorCode>): T => {
   if (result.ok) return result.value;
   throw apiError(result.error);
 };
+
+/** A body of the wrong shape. Lists field names only, so hostile input is never echoed back. */
+export const validationFailed = (fields: string[]): HttpException =>
+  new HttpException(
+    {
+      statusCode: 400,
+      code: 'VALIDATION_FAILED',
+      message: 'The request is missing data or has the wrong type of data.',
+      fields,
+    },
+    400,
+  );

@@ -19,6 +19,7 @@ import { DynamoTransactionRepository } from './infrastructure/dynamodb/transacti
 import { ChecksumEventVerifier } from './infrastructure/payments/checksum-event.verifier';
 import { HttpPaymentGateway } from './infrastructure/payments/http-payment.gateway';
 import { SystemClock, UuidIdGenerator } from './infrastructure/system/system';
+import { CheckoutController } from './interface/http/checkout.controller';
 import { HealthController } from './interface/http/health.controller';
 import { ProductsController } from './interface/http/products.controller';
 
@@ -99,7 +100,7 @@ const useCases: Provider[] = [
 ];
 
 @Module({
-  controllers: [HealthController, ProductsController],
+  controllers: [HealthController, ProductsController, CheckoutController],
   providers: [...adapters, ...useCases],
 })
 export class AppModule {}
