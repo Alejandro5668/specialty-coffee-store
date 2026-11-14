@@ -3,6 +3,7 @@ export const TOKENS = {
   catalog: Symbol('CatalogRepository'),
   transactions: Symbol('TransactionRepository'),
   orders: Symbol('OrderStore'),
+  shipments: Symbol('ShipmentRepository'),
   customers: Symbol('CustomerRepository'),
   gateway: Symbol('PaymentGateway'),
   verifier: Symbol('EventVerifier'),

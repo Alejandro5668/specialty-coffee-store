@@ -14,6 +14,7 @@ export const API_ERRORS = {
   AMOUNT_MISMATCH: { status: 422, message: 'The payment amount does not match the order.' },
   VARIANT_NOT_FOUND: { status: 404, message: 'That coffee size is not available.' },
   TRANSACTION_NOT_FOUND: { status: 404, message: 'We could not find that order.' },
+  DELIVERY_NOT_FOUND: { status: 404, message: 'There is no delivery for that order.' },
   UNKNOWN_TRANSACTION: { status: 404, message: 'We could not find that order.' },
   OUT_OF_STOCK: {
     status: 409,

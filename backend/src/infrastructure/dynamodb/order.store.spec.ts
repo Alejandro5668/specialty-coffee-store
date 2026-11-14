@@ -1,54 +1,5 @@
-import {
-  AttributeValue,
-  ConditionalCheckFailedException,
-  DynamoDBClient,
-  TransactionCanceledException,
-} from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocumentClient,
-  GetCommand,
-  TransactWriteCommand,
-  UpdateCommand,
-} from '@aws-sdk/lib-dynamodb';
-import { mockClient } from 'aws-sdk-client-mock';
-import { Transaction } from '../../domain/transaction/transaction';
-import { loadDynamoConfig } from './config';
-import { DynamoOrderStore } from './order.store';
-import { DynamoTransactionRepository } from './transaction.repository';
-
-const config = loadDynamoConfig({});
-const client = DynamoDBDocumentClient.from(new DynamoDBClient({ region: config.region }));
-const ddb = mockClient(client);
-const store = () =>
-  new DynamoOrderStore(client, config, new DynamoTransactionRepository(client, config));
-
-const cop = (amountInCents: number) => ({ amountInCents, currency: 'COP' as const });
-const tx = (over: Partial<Transaction> = {}): Transaction => ({
-  id: 't1',
-  status: 'PENDING',
-  customerId: 'c1',
-  variantId: 'huila-washed-250',
-  quantity: 2,
-  amounts: {
-    productAmount: cop(6_400_000),
-    baseFee: cop(300_000),
-    deliveryFee: cop(800_000),
-    total: cop(7_500_000),
-  },
-  delivery: { recipientName: 'Ana', address: 'Calle 1', city: 'Cali', phone: '3001234567' },
-  providerRef: null,
-  createdAt: '2026-01-01T00:00:00.000Z',
-  ...over,
-});
-
-const canceled = (
-  ...codes: Array<string | { Code: string; Item?: Record<string, AttributeValue> }>
-) =>
-  new TransactionCanceledException({
-    message: 'Transaction cancelled',
-    $metadata: {},
-    CancellationReasons: codes.map((c) => (typeof c === 'string' ? { Code: c } : c)),
-  });
+import { TransactWriteCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { ddb, config, store, tx, canceled } from '../../../test/order-store-kit';
 
 const storedItem = {
   id: 't1',
@@ -143,59 +94,5 @@ describe('DynamoOrderStore.place', () => {
   it('rethrows unexpected errors', async () => {
     ddb.on(TransactWriteCommand).rejects(new Error('boom'));
     await expect(store().place('key-0001-aaaa', tx())).rejects.toThrow('boom');
-  });
-});
-
-describe('DynamoOrderStore.settle', () => {
-  it('approves with a single conditional update and keeps the stock sold', async () => {
-    ddb.on(UpdateCommand).resolves({});
-    expect(await store().settle(tx({ status: 'APPROVED', providerRef: 'p1' }))).toBe(true);
-    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(0);
-    expect(ddb.commandCalls(UpdateCommand)[0].args[0].input).toMatchObject({
-      TableName: config.tables.transactions,
-      Key: { id: 't1' },
-      ConditionExpression: '#s = :pending',
-      ExpressionAttributeValues: { ':s': 'APPROVED', ':p': 'p1', ':pending': 'PENDING' },
-    });
-  });
-
-  it('answers false when the transaction was no longer PENDING', async () => {
-    ddb
-      .on(UpdateCommand)
-      .rejects(new ConditionalCheckFailedException({ message: 'x', $metadata: {} }));
-    expect(await store().settle(tx({ status: 'APPROVED', providerRef: 'p1' }))).toBe(false);
-  });
-
-  it.each(['DECLINED', 'ERROR'] as const)(
-    'settles %s and gives the stock back in one transaction',
-    async (status) => {
-      ddb.on(TransactWriteCommand).resolves({});
-      expect(await store().settle(tx({ status, providerRef: null }))).toBe(true);
-      const [order, stock] = ddb.commandCalls(TransactWriteCommand)[0].args[0].input.TransactItems!;
-      expect(order.Update).toMatchObject({
-        TableName: config.tables.transactions,
-        ConditionExpression: '#s = :pending',
-        ExpressionAttributeValues: { ':s': status, ':p': null, ':pending': 'PENDING' },
-      });
-      expect(stock.Update).toMatchObject({
-        TableName: config.tables.variants,
-        Key: { id: 'huila-washed-250' },
-        UpdateExpression: 'SET stock = stock + :q',
-        ConditionExpression: 'attribute_exists(id)',
-        ExpressionAttributeValues: { ':q': 2 },
-      });
-    },
-  );
-
-  it('answers false and returns nothing twice when the transaction was already settled', async () => {
-    ddb.on(TransactWriteCommand).rejects(canceled('ConditionalCheckFailed', 'None'));
-    expect(await store().settle(tx({ status: 'DECLINED' }))).toBe(false);
-  });
-
-  it('rethrows other cancellations instead of pretending the stock was released', async () => {
-    ddb.on(TransactWriteCommand).rejects(canceled('None', 'ConditionalCheckFailed'));
-    await expect(store().settle(tx({ status: 'DECLINED' }))).rejects.toThrow(
-      'Transaction cancelled',
-    );
   });
 });

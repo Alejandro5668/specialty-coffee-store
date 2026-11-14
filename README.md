@@ -33,9 +33,24 @@ Swagger UI at `/docs` on the running API; spec in [docs/openapi.json](docs/opena
 | `GET /checkout/options`   | Terms to accept (single use) and the fees    | 429, 503                     |
 | `POST /checkout`          | Reserve stock, create the order, charge      | 400, 404, 409, 413, 422, 429 |
 | `GET /transactions/:id`   | Order status; asks the provider if `PENDING` | 404, 429                     |
+| `GET /deliveries/:id`     | Delivery assigned to a paid order            | 404, 429                     |
 | `POST /webhooks/payments` | Signed payment event (idempotent)            | 400, 401, 404, 413, 422      |
 
 Limits: 16 KB bodies, 60 requests per minute per client (10 for checkout), CORS only for `CORS_ORIGIN`. Payment flow: [docs/PAYMENTS.md](docs/PAYMENTS.md).
+
+## Data model
+
+DynamoDB, one table per entity, on demand. Table names are `<TABLE_PREFIX>-<name>`.
+
+| Table          | Key                  | Holds                                                                                                     |
+| -------------- | -------------------- | --------------------------------------------------------------------------------------------------------- |
+| `products`     | `id`                 | Name, description, image                                                                                  |
+| `variants`     | `id`                 | `productId`, size in grams, price in cents, `stock` (changed only by conditional writes)                  |
+| `customers`    | `email`              | `id`, name                                                                                                |
+| `transactions` | `id`                 | Status, `customerId`, variant, quantity, amounts, delivery data, provider reference; `IDEM#<key>` markers |
+| `deliveries`   | `id` (= transaction) | Customer, variant, quantity, recipient, address, city, phone, status `ASSIGNED`                           |
+
+A payment is settled in one atomic write: approved, the transaction closes and its delivery is assigned; declined or failed, the transaction closes and the stock goes back. A delivery exists only for an approved payment.
 
 ## Deploy
 

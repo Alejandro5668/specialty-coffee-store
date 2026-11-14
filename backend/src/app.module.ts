@@ -6,10 +6,12 @@ import { CustomerRepository } from './application/ports/customer.repository';
 import { EventVerifier } from './application/ports/event.verifier';
 import { OrderStore } from './application/ports/order.store';
 import { PaymentGateway } from './application/ports/payment.gateway';
+import { ShipmentRepository } from './application/ports/shipment.repository';
 import { Clock, IdGenerator } from './application/ports/system.ports';
 import { TransactionRepository } from './application/ports/transaction.repository';
 import { Checkout } from './application/use-cases/checkout';
 import { GetCheckoutOptions } from './application/use-cases/get-checkout-options';
+import { GetShipment } from './application/use-cases/get-shipment';
 import { GetTransaction } from './application/use-cases/get-transaction';
 import { ListProducts } from './application/use-cases/list-products';
 import { ProcessPaymentEvent } from './application/use-cases/process-payment-event';
@@ -18,12 +20,14 @@ import { TOKENS } from './composition/tokens';
 import { DynamoCatalogRepository } from './infrastructure/dynamodb/catalog.repository';
 import { DynamoCustomerRepository } from './infrastructure/dynamodb/customer.repository';
 import { DynamoOrderStore } from './infrastructure/dynamodb/order.store';
+import { DynamoShipmentRepository } from './infrastructure/dynamodb/shipment.repository';
 import { DynamoTransactionRepository } from './infrastructure/dynamodb/transaction.repository';
 import { ChecksumEventVerifier } from './infrastructure/payments/checksum-event.verifier';
 import { HttpPaymentGateway } from './infrastructure/payments/http-payment.gateway';
 import { SystemClock, UuidIdGenerator } from './infrastructure/system/system';
 import { CheckoutController } from './interface/http/checkout.controller';
 import { ClientThrottlerGuard } from './interface/http/client-throttler.guard';
+import { DeliveriesController } from './interface/http/deliveries.controller';
 import { HealthController } from './interface/http/health.controller';
 import { ProductsController } from './interface/http/products.controller';
 import { TransactionsController } from './interface/http/transactions.controller';
@@ -43,6 +47,10 @@ const adapters: Provider[] = [
     inject: [TOKENS.transactions],
     useFactory: (transactions: TransactionRepository) =>
       new DynamoOrderStore(runtime().client, runtime().dynamo, transactions),
+  },
+  {
+    provide: TOKENS.shipments,
+    useFactory: () => new DynamoShipmentRepository(runtime().client, runtime().dynamo),
   },
   {
     provide: TOKENS.customers,
@@ -100,6 +108,11 @@ const useCases: Provider[] = [
     ) => new GetTransaction(transactions, gateway, orders, clock),
   },
   {
+    provide: GetShipment,
+    inject: [TOKENS.shipments],
+    useFactory: (shipments: ShipmentRepository) => new GetShipment(shipments),
+  },
+  {
     provide: ProcessPaymentEvent,
     inject: [TOKENS.verifier, TOKENS.transactions, TOKENS.orders],
     useFactory: (
@@ -116,6 +129,7 @@ const useCases: Provider[] = [
     ProductsController,
     CheckoutController,
     TransactionsController,
+    DeliveriesController,
     WebhooksController,
   ],
   imports: [ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }])],

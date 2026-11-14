@@ -1,6 +1,7 @@
 import { Product } from '../../domain/product/product';
 import { createVariant, Variant } from '../../domain/product/variant';
 import { Money, money } from '../../domain/shared/money';
+import { Shipment } from '../../domain/shipment/shipment';
 import { Transaction, TransactionStatus } from '../../domain/transaction/transaction';
 
 type Item = Record<string, unknown>;
@@ -89,3 +90,21 @@ export const fromTransaction = (tx: Transaction): Item => ({
   providerRef: tx.providerRef,
   createdAt: tx.createdAt,
 });
+
+export const fromShipment = (s: Shipment): Item => ({ ...s });
+
+/** Stored data is trusted but never blindly: an unknown status must not reach a customer. */
+export const toShipment = (item: Item): Shipment => {
+  if (item.status !== 'ASSIGNED') throw new Error(`Corrupt delivery ${String(item.id)}`);
+  return {
+    id: String(item.id),
+    customerId: String(item.customerId),
+    variantId: String(item.variantId),
+    quantity: Number(item.quantity),
+    recipientName: String(item.recipientName),
+    address: String(item.address),
+    city: String(item.city),
+    phone: String(item.phone),
+    status: 'ASSIGNED',
+  };
+};

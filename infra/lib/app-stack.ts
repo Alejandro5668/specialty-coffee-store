@@ -85,6 +85,8 @@ export class AppStack extends Stack {
     props.tables.variants.grantReadWriteData(handler);
     props.tables.customers.grantReadWriteData(handler);
     props.tables.transactions.grantReadWriteData(handler);
+    // Assigned once and read back: no updates and no deletes.
+    props.tables.deliveries.grant(handler, 'dynamodb:PutItem', 'dynamodb:GetItem');
     handler.addToRolePolicy(
       new PolicyStatement({
         actions: ['ssm:GetParameters'],
