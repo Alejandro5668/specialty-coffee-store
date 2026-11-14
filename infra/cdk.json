@@ -1,0 +1,5 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/coffee-store.ts",
+  "watch": { "include": ["**"], "exclude": ["node_modules", "cdk.out", "test"] },
+  "context": { "@aws-cdk/core:checkSecretUsage": true }
+}
