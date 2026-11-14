@@ -11,6 +11,8 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (previous.current === pathname) return;
     previous.current = pathname;
+    // Steps that open as a dialog keep the focus inside the dialog.
+    if (pathname.startsWith('/checkout/')) return;
     mainRef.current?.focus();
     mainRef.current?.scrollIntoView?.({ block: 'start' });
   }, [pathname]);

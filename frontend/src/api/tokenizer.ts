@@ -112,3 +112,10 @@ export const createCardTokenizer = (
     return { token: data.id, brand: toBrand(data.brand), last4: data.last_four };
   },
 });
+
+/** Used when the payment settings are missing, so the form says so instead of failing in a strange way. */
+export const unavailableTokenizer: CardTokenizer = {
+  async tokenize() {
+    throw new TokenizeError('Payments are not set up in this environment.', null);
+  },
+};

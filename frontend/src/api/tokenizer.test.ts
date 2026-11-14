@@ -1,5 +1,5 @@
 import { html, json, recordFetch } from '../test/http';
-import { createCardTokenizer, TokenizeError } from './tokenizer';
+import { createCardTokenizer, TokenizeError, unavailableTokenizer } from './tokenizer';
 
 const card = {
   number: '4242424242424242',
@@ -147,5 +147,16 @@ describe('tokenize', () => {
       expect(everything).not.toContain('4242424242424242');
       expect(everything).not.toMatch(/"?cvc"?:\s*"?123/);
     }
+  });
+});
+
+describe('unavailableTokenizer', () => {
+  it('says plainly that payments are not set up, and never sends anything anywhere', async () => {
+    const error = await failure(unavailableTokenizer.tokenize(card));
+    expect(error).toBeInstanceOf(TokenizeError);
+    expect(error).toMatchObject({
+      field: null,
+      message: 'Payments are not set up in this environment.',
+    });
   });
 });

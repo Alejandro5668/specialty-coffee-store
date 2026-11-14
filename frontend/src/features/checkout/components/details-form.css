@@ -1,0 +1,36 @@
+.details__group {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.details.stack > .details__group + .details__group {
+  margin-block-start: var(--space-6);
+}
+
+.details__group > legend {
+  padding: 0;
+  margin-block-end: var(--space-3);
+  font-weight: 800;
+  font-size: var(--text-lg);
+}
+
+.details__pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.details__saved {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.details__saved p {
+  flex: 1;
+  font-weight: 700;
+}
