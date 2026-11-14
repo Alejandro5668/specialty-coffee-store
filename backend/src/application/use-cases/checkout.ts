@@ -113,14 +113,17 @@ export class Checkout {
 
   /** The outcome of the charge never fails the request: the transaction already exists and tells the story. */
   private async charge(transaction: Transaction, p: Parsed): Promise<Result<Transaction, never>> {
-    const charged = await this.gateway.charge({
-      reference: transaction.id,
-      amountInCents: transaction.amounts.total.amountInCents,
-      customerEmail: p.customer.email,
-      cardToken: p.cardToken,
-      acceptanceToken: p.acceptanceToken,
-      personalAuthToken: p.personalAuthToken,
-    });
+    const charged = await this.gateway
+      .charge({
+        reference: transaction.id,
+        amountInCents: transaction.amounts.total.amountInCents,
+        customerEmail: p.customer.email,
+        cardToken: p.cardToken,
+        acceptanceToken: p.acceptanceToken,
+        personalAuthToken: p.personalAuthToken,
+      })
+      // An exception is a transport failure: the outcome is unknown, same as UNAVAILABLE.
+      .catch((): Result<never, 'GATEWAY_UNAVAILABLE'> => err('GATEWAY_UNAVAILABLE'));
     if (!charged.ok) {
       // REJECTED: the provider refused it. UNAVAILABLE: unknown outcome, stay PENDING and reconcile later.
       return ok(
