@@ -28,6 +28,7 @@ Swagger UI at `/docs` on the running API; spec in [docs/openapi.json](docs/opena
 | Endpoint                  | Purpose                                      | Errors                       |
 | ------------------------- | -------------------------------------------- | ---------------------------- |
 | `GET /products`           | Coffees with sizes, prices and stock         | 429                          |
+| `GET /checkout/options`   | Terms to accept (single use) and the fees    | 429, 503                     |
 | `POST /checkout`          | Reserve stock, create the order, charge      | 400, 404, 409, 413, 422, 429 |
 | `GET /transactions/:id`   | Order status; asks the provider if `PENDING` | 404, 429                     |
 | `POST /webhooks/payments` | Signed payment event (idempotent)            | 400, 401, 404, 413, 422      |

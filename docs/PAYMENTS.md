@@ -1,30 +1,31 @@
 # Payments flow
 
-Verified against the provider docs and the sandbox on 2026-11-13, except the webhook checksum (see [Webhook](#webhook)). Sandbox only. Keys come from `.env` (see `.env.example`); base URL is `PAYMENT_API_URL`.
+Verified against the provider docs and the sandbox on 2026-11-14, except the webhook checksum (see [Webhook](#webhook)). Sandbox only. Keys come from `.env` (see `.env.example`); base URL is `PAYMENT_API_URL`.
 
 ## Flow
 
 | #   | Who      | Call                               | Key              | Notes                                                                                                                       |
 | --- | -------- | ---------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Frontend | `GET /merchants/info`              | public (header)  | Header `x-merchant-public-key`. Returns both contracts and their tokens. Single use: fetch again for every attempt.         |
+| 1   | Backend  | `GET /merchants/info`              | public (header)  | Served to the frontend by `GET /checkout/options`, with the fees. Single use: fetch again for every attempt.                |
 | 2   | Frontend | show `permalink` of both contracts | -                | The user must accept each one.                                                                                              |
 | 3   | Frontend | `POST /tokens/cards`               | public (Bearer)  | The card goes browser → provider, never through our API.                                                                    |
-| 4   | Frontend | `POST /checkout` (ours)            | -                | Sends card token, both acceptance tokens, `idempotencyKey`, variant, quantity, customer, delivery. Never amounts.           |
+| 4   | Frontend | `POST /checkout` (ours)            | -                | Sends the card token, both acceptance tokens, `idempotencyKey`, variant, quantity, customer, delivery. Never amounts.       |
 | 5   | Backend  | `POST /transactions`               | private (Bearer) | Returns 201 with `PENDING`. A 4xx marks the transaction `ERROR`; a timeout or 5xx keeps it `PENDING`.                       |
 | 6   | Provider | `POST /webhooks/payments` (ours)   | events secret    | Final status. Must answer 200.                                                                                              |
 | 7   | Backend  | `GET /transactions/:id`            | private (Bearer) | Fallback when the webhook is late or lost. A `PENDING` transaction unknown to the provider becomes `ERROR` after 5 minutes. |
 
 ## Rules found in the sandbox
 
-| Rule                                                                                | Consequence                                                              |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| The acceptance token is single use (422 on reuse).                                  | Fetch a fresh one for every payment attempt.                             |
-| `reference` must be unique (422 on reuse).                                          | Send our transaction id; the provider's own id is kept as `providerRef`. |
-| `amount_in_cents` is an integer; currency is only `COP`.                            | Matches our Money type.                                                  |
-| Minimum amount is 1,500 COP.                                                        | Never applies: the two fees alone are 11,000 COP.                        |
-| A new transaction is always `PENDING`, then `APPROVED`/`DECLINED`/`ERROR`/`VOIDED`. | Stock is reserved before the call.                                       |
-| A card token expires after about 2 days; the docs say to use it at most twice.      | Tokenize per attempt and use each token once.                            |
-| `accept_personal_auth` was optional in the sandbox; the docs disagree.              | Always send it.                                                          |
+| Rule                                                                                                               | Consequence                                                              |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| The browser cannot call `GET /merchants/info`: its preflight has no CORS headers. `POST /tokens/cards` is allowed. | The backend fetches the acceptance tokens (`GET /checkout/options`).     |
+| The acceptance token is single use (422 on reuse).                                                                 | Fetch a fresh one for every payment attempt.                             |
+| `reference` must be unique (422 on reuse).                                                                         | Send our transaction id; the provider's own id is kept as `providerRef`. |
+| `amount_in_cents` is an integer; currency is only `COP`.                                                           | Matches our Money type.                                                  |
+| Minimum amount is 1,500 COP.                                                                                       | Never applies: the two fees alone are 11,000 COP.                        |
+| A new transaction is always `PENDING`, then `APPROVED`/`DECLINED`/`ERROR`/`VOIDED`.                                | Stock is reserved before the call.                                       |
+| A card token expires after about 2 days; the docs say to use it at most twice.                                     | Tokenize per attempt and use each token once.                            |
+| `accept_personal_auth` was optional in the sandbox; the docs disagree.                                             | Always send it.                                                          |
 
 ## Integrity signature
 
@@ -55,4 +56,3 @@ Any future expiry and a 3-digit CVC. `ERROR`, timeouts and 5xx cannot be trigger
 
 - Webhook checksum against a real event.
 - Encrypted tokenization (the sandbox accepts plain).
-- Lookup by reference (`GET /transactions?reference=`): the sandbox was down (503) when the gateway was written, so the query and response shape are unconfirmed.
