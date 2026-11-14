@@ -3,7 +3,7 @@ import { ApiError, createCoffeeApi } from './client';
 
 const product = (over: Record<string, unknown> = {}) => ({
   id: 'huila-washed',
-  name: 'Huila Washed',
+  name: 'Huila Lavado',
   description: 'Caramel and red apple.',
   imageUrl: '/images/coffees/huila-washed.webp',
   variants: [

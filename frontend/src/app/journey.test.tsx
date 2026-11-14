@@ -35,7 +35,7 @@ describe('the whole purchase', () => {
     // 3. finish the form and reach the summary
     await fillTheForm(user);
     const summary = await screen.findByRole('dialog', { name: 'Resumen del pedido' });
-    expect(summary).toHaveTextContent('Huila Washed, 500 g × 2');
+    expect(summary).toHaveTextContent('Huila Lavado, 500 g × 2');
     expect(await screen.findByTestId('line-total')).toHaveTextContent('$127.000');
 
     // 4. refresh on the summary: the same summary comes back, with the saved card
@@ -55,7 +55,7 @@ describe('the whole purchase', () => {
     // 6. back to the coffees: the stock shows what is left
     await user.click(screen.getByRole('button', { name: 'Volver a los cafés' }));
     const card = within(
-      (await screen.findByRole('heading', { name: 'Huila Washed' })).closest('article')!,
+      (await screen.findByRole('heading', { name: 'Huila Lavado' })).closest('article')!,
     );
     await user.click(card.getByRole('radio', { name: /500 g/ }));
     expect(card.getByText('Queda 1')).toBeInTheDocument();

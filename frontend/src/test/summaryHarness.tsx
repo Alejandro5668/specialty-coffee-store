@@ -22,7 +22,7 @@ export const options: CheckoutOptions = {
 
 export const coffee = (stocks: [number, number] = [20, 3]): ProductView => ({
   id: 'huila-washed',
-  name: 'Huila Washed',
+  name: 'Huila Lavado',
   description: 'Caramel.',
   imageUrl: '/images/coffees/huila-washed.webp',
   variants: [

@@ -23,7 +23,7 @@ describe('GET /products', () => {
     expect(res.body).toHaveLength(6);
     const huila = res.body.find((p: { id: string }) => p.id === 'huila-washed');
     expect(huila).toMatchObject({
-      name: 'Huila Washed',
+      name: 'Huila Lavado',
       description: expect.any(String),
       imageUrl: '/images/coffees/huila-washed.webp',
     });

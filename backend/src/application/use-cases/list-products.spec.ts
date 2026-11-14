@@ -9,7 +9,7 @@ describe('ListProducts', () => {
     expect(result.value).toHaveLength(6);
     const huila = result.value.find((p) => p.id === 'huila-washed')!;
     expect(huila).toMatchObject({
-      name: 'Huila Washed',
+      name: 'Huila Lavado',
       imageUrl: '/images/coffees/huila-washed.webp',
     });
     expect(huila.variants).toEqual([

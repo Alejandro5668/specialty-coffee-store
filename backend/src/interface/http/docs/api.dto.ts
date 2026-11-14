@@ -12,7 +12,7 @@ export class VariantDto {
 
 export class ProductDto {
   @ApiProperty({ example: 'huila-washed' }) id!: string;
-  @ApiProperty({ example: 'Huila Washed' }) name!: string;
+  @ApiProperty({ example: 'Huila Lavado' }) name!: string;
   @ApiProperty() description!: string;
   @ApiProperty({ example: '/images/coffees/huila-washed.webp' }) imageUrl!: string;
   @ApiProperty({ type: [VariantDto], description: 'Sizes, smallest first.' })
