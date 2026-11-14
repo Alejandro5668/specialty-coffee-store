@@ -62,6 +62,17 @@ describe('GET /checkout/options', () => {
     expect(statuses.slice(20)).toEqual([429, 429]);
   });
 
+  it('answers a flood with a plain message and a stable code, never the library text', async () => {
+    for (let i = 0; i < 20; i++) await get();
+    const res = await get();
+    expect(res.status).toBe(429);
+    expect(res.body).toEqual({
+      statusCode: 429,
+      code: 'TOO_MANY_REQUESTS',
+      message: 'Too many requests. Wait a minute and try again.',
+    });
+  });
+
   it('only answers GET', async () => {
     expect(
       (await request(built.app.getHttpServer()).post('/checkout/options').send({})).status,
