@@ -70,12 +70,14 @@ export class Checkout {
   }
 
   private parse(input: CheckoutInput): Result<Parsed, 'INVALID_INPUT'> {
+    if (typeof input !== 'object' || input === null) return err('INVALID_INPUT');
     const customer = createCustomer({ id: '', ...input.customer });
     const delivery = createDelivery({ ...input.delivery });
     if (!customer.ok || !delivery.ok) return err('INVALID_INPUT');
     if (typeof input.idempotencyKey !== 'string' || !KEY.test(input.idempotencyKey)) {
       return err('INVALID_INPUT');
     }
+    if (typeof input.variantId !== 'string' || input.variantId === '') return err('INVALID_INPUT');
     const tokens = [input.cardToken, input.acceptanceToken, input.personalAuthToken];
     if (!tokens.every((t) => typeof t === 'string' && TOKEN.test(t))) return err('INVALID_INPUT');
     return ok({
@@ -83,7 +85,7 @@ export class Checkout {
       acceptanceToken: input.acceptanceToken,
       personalAuthToken: input.personalAuthToken,
       key: input.idempotencyKey,
-      variantId: String(input.variantId),
+      variantId: input.variantId,
       quantity: input.quantity,
       customer: customer.value,
       delivery: delivery.value,

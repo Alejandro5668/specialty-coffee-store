@@ -116,6 +116,31 @@ describe('Checkout', () => {
     expect(transactions.all()).toHaveLength(0);
   });
 
+  it.each([
+    null,
+    undefined,
+    'text',
+    42,
+    {},
+    { ...input(), customer: null },
+    { ...input(), delivery: undefined },
+  ])('answers INVALID_INPUT instead of throwing on a malformed body %p', async (body) => {
+    const { checkout, catalog, transactions } = setup();
+    const result = await checkout.execute(body as unknown as CheckoutInput);
+    expect(result).toEqual({ ok: false, error: 'INVALID_INPUT' });
+    expect(catalog.stockOf(VARIANT_ID)).toBe(5);
+    expect(transactions.all()).toHaveLength(0);
+  });
+
+  it.each([123, null, { id: 'x' }, ''])(
+    'rejects a variantId that is not a string: %p',
+    async (v) => {
+      const { checkout } = setup();
+      const result = await checkout.execute(input({ variantId: v as unknown as string }));
+      expect(result).toEqual({ ok: false, error: 'INVALID_INPUT' });
+    },
+  );
+
   it('does not charge when the input is invalid or the stock is short', async () => {
     const { checkout, gateway } = setup(1);
     await checkout.execute(input({ quantity: 2 }));
