@@ -55,3 +55,4 @@ Any future expiry and a 3-digit CVC. `ERROR`, timeouts and 5xx cannot be trigger
 
 - Webhook checksum against a real event.
 - Encrypted tokenization (the sandbox accepts plain).
+- Lookup by reference (`GET /transactions?reference=`): the sandbox was down (503) when the gateway was written, so the query and response shape are unconfirmed.
