@@ -1,74 +1,74 @@
-# Acceptance Criteria
+# Criterios de aceptación
 
-Grouped by test rubric item. Each box must be verifiable by a test, a command or a public URL.
+Agrupados por el criterio de evaluación de la prueba. Cada casilla debe poder verificarse con una prueba, un comando o una URL pública.
 
 ## README (5 pts)
 
-- [ ] Data model, API docs link (Swagger or Postman), coverage results, run and deploy steps.
-- [ ] Decisions and trade-offs section.
+- [ ] Modelo de datos, enlace a la documentación de la API (Swagger o Postman), resultados de cobertura y pasos de ejecución y despliegue.
+- [ ] Sección de decisiones y compromisos asumidos.
 
 ## UI/UX (5 pts)
 
-- [ ] Usable from 375 px wide with no overflow.
-- [ ] Images load fast (optimized, lazy loaded).
+- [ ] Se puede usar desde 375 px de ancho sin desbordamientos.
+- [ ] Las imágenes cargan rápido (optimizadas y con carga diferida).
 
-## Checkout flow (20 pts)
+## Flujo de compra (20 pts)
 
-- [ ] Product page shows description, price and stock.
-- [ ] "Pay with credit card" opens a modal with card and delivery data.
-- [ ] Card validated (Luhn, expiry, CVV); Visa and Mastercard logos detected.
-- [ ] Summary shows product + base fee + delivery fee in a backdrop.
-- [ ] Payment creates a PENDING transaction, calls the provider, then updates the transaction, assigns the delivery and updates the stock.
-- [ ] Final status is shown, then redirect to the product page with updated stock.
-- [ ] Refreshing at any step recovers the progress.
+- [ ] La página de productos muestra descripción, precio y stock.
+- [ ] "Pay with credit card" abre un modal con los datos de la tarjeta y de la entrega.
+- [ ] La tarjeta se valida (Luhn, vencimiento y CVV) y se detectan los logotipos de Visa y Mastercard.
+- [ ] El resumen muestra producto, tarifa base y costo de envío en un panel superpuesto (backdrop).
+- [ ] El pago crea una transacción `PENDING`, llama al proveedor y luego actualiza la transacción, asigna la entrega y actualiza el stock.
+- [ ] Se muestra el estado final y después se redirige a la página de productos con el stock actualizado.
+- [ ] Si se recarga la página en cualquier paso, se recupera el progreso.
 
 ## API (20 pts)
 
-- [ ] `GET /products`, `POST /checkout`, `GET /transactions/:id`, `POST /webhooks/payments`.
-- [ ] Validation with correct HTTP codes (400, 404, 409, 422).
-- [ ] Amounts computed in the backend; client amounts ignored.
-- [ ] Last unit bought by two clients at once: exactly one succeeds.
-- [ ] Failed payment releases the stock.
-- [ ] Webhook verifies its signature and is idempotent.
+- [ ] `GET /products`, `POST /checkout`, `GET /transactions/:id` y `POST /webhooks/payments`.
+- [ ] Validación con los códigos HTTP correctos (400, 404, 409 y 422).
+- [ ] Los importes se calculan en el backend; los importes del cliente se ignoran.
+- [ ] Si dos clientes compran la última unidad a la vez, solo uno lo consigue.
+- [ ] Un pago fallido libera el stock.
+- [ ] El webhook verifica su firma y es idempotente.
 
-## Unit tests (30 pts)
+## Pruebas unitarias (30 pts)
 
-- [ ] Backend coverage above 80 % (Jest).
-- [ ] Frontend coverage above 80 % (Jest).
-- [ ] Threshold enforced in CI; results copied to the README.
+- [ ] Cobertura del backend superior al 80 % (Jest).
+- [ ] Cobertura del frontend superior al 80 % (Jest).
+- [ ] El umbral se exige en CI y los resultados se copian al README.
 
-## Deployment (20 pts)
+## Despliegue (20 pts)
 
-- [ ] Frontend on CloudFront over HTTPS.
-- [ ] API deployed and connected to the frontend.
-- [ ] Infrastructure reproducible with one CDK command.
-- [ ] A full purchase works on the public URL.
+- [ ] Frontend en CloudFront con HTTPS.
+- [ ] API desplegada y conectada al frontend.
+- [ ] Infraestructura reproducible con un solo comando de CDK.
+- [ ] Una compra completa funciona en la URL pública.
 
-## Bonus
+## Bonificación
 
-- [ ] **Security (5)**: security headers, restricted CORS, HTTPS, no secrets in the repo.
-- [ ] **Responsive (5)**: checked in two browsers.
-- [ ] **CSS (10)**: flexbox and grid layout.
-- [ ] **Clean code (10)**: lint rules, small modules.
-- [ ] **Hexagonal (10)**: domain imports nothing from framework, database or provider.
-- [ ] **ROP (10)**: use cases chain steps returning success or error.
+- [ ] **Seguridad (5)**: cabeceras de seguridad, CORS restringido, HTTPS y ningún secreto en el repositorio.
+- [ ] **Responsive (5)**: verificado en dos navegadores.
+- [ ] **CSS (10)**: maquetación con flexbox y grid.
+- [ ] **Código limpio (10)**: reglas de lint y módulos pequeños.
+- [ ] **Hexagonal (10)**: el dominio no importa nada del framework, la base de datos ni el proveedor.
+- [ ] **ROP (10)**: los casos de uso encadenan pasos que devuelven éxito o error.
 
-## Adversarial testing
+## Pruebas adversarias
 
-Try to break the app on purpose. Each case is an automated test where possible.
+Se intenta romper la aplicación a propósito. Cada caso es una prueba automatizada siempre que sea posible.
 
-- [ ] Hostile inputs on validators (fuzzing or property-based).
-- [ ] Forged prices, negative or huge quantities are rejected.
-- [ ] Parallel purchases on stock 1: stock never goes negative.
-- [ ] Double submit creates one transaction and one charge.
-- [ ] Forged or replayed webhook changes nothing.
-- [ ] Provider timeout, 5xx or declined card leaves a consistent state.
-- [ ] Injection and XSS payloads in delivery fields are neutralized.
-- [ ] No card number or CVV in logs, responses, Redux or localStorage.
-- [ ] Edited localStorage or back button never shows a wrong amount.
-- [ ] Oversized payloads and floods return 413 or 429.
-- [ ] Mozilla Observatory and OWASP ZAP baseline show no high findings.
+- [ ] Entradas maliciosas en los validadores (fuzzing o pruebas basadas en propiedades).
+- [ ] Se rechazan precios alterados y cantidades negativas o excesivas.
+- [ ] Compras en paralelo con stock 1: el stock nunca queda negativo.
+- [ ] Un doble envío crea una sola transacción y un solo cobro.
+- [ ] Un webhook falsificado o reenviado no cambia nada.
+- [ ] Un tiempo de espera agotado, un error 5xx o una tarjeta rechazada del proveedor dejan un estado consistente.
+- [ ] Los payloads de inyección y XSS en los campos de entrega quedan neutralizados.
+- [ ] El número de tarjeta y el CVV no aparecen en logs, respuestas, Redux ni localStorage.
+- [ ] Editar localStorage o usar el botón de retroceso nunca muestra un importe incorrecto.
+- [ ] Los payloads demasiado grandes y las ráfagas de peticiones devuelven 413 o 429.
+- [ ] Mozilla Observatory y la prueba base de OWASP ZAP no muestran hallazgos de severidad alta.
 
-## Repository rules
+## Reglas del repositorio
 
-- [ ] Public repo, no company name in it, commits spread over time, one PR per feature.
+- [ ] Repositorio público, sin el nombre de la empresa, con commits distribuidos en el tiempo y un pull request por funcionalidad.

@@ -1,60 +1,60 @@
-# Payments flow
+# Flujo de pagos
 
-Verified against the provider docs and the sandbox on 2026-11-14, except the webhook checksum (see [Webhook](#webhook)). Sandbox only. Keys come from `.env` (see `.env.example`); base URL is `PAYMENT_API_URL`.
+Verificado contra la documentación del proveedor y su sandbox el 2026-11-14, salvo el checksum del webhook (ver [Webhook](#webhook)). Solo sandbox. Las claves se leen de `.env` (ver `.env.example`) y la URL base es `PAYMENT_API_URL`.
 
-## Flow
+## Flujo
 
-| #   | Who      | Call                               | Key              | Notes                                                                                                                       |
-| --- | -------- | ---------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Backend  | `GET /merchants/info`              | public (header)  | Served to the frontend by `GET /checkout/options`, with the fees. Single use: fetch again for every attempt.                |
-| 2   | Frontend | show `permalink` of both contracts | -                | The user must accept each one.                                                                                              |
-| 3   | Frontend | `POST /tokens/cards`               | public (Bearer)  | The card goes browser → provider, never through our API.                                                                    |
-| 4   | Frontend | `POST /checkout` (ours)            | -                | Sends the card token, both acceptance tokens, `idempotencyKey`, variant, quantity, customer, delivery. Never amounts.       |
-| 5   | Backend  | `POST /transactions`               | private (Bearer) | Returns 201 with `PENDING`. A 4xx marks the transaction `ERROR`; a timeout or 5xx keeps it `PENDING`.                       |
-| 6   | Provider | `POST /webhooks/payments` (ours)   | events secret    | Final status. Must answer 200.                                                                                              |
-| 7   | Backend  | `GET /transactions/:id`            | private (Bearer) | Fallback when the webhook is late or lost. A `PENDING` transaction unknown to the provider becomes `ERROR` after 5 minutes. |
+| #   | Quién     | Llamada                                   | Clave              | Notas                                                                                                                                    |
+| --- | --------- | ----------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Backend   | `GET /merchants/info`                     | pública (cabecera) | La entrega al frontend `GET /checkout/options`, junto con las tarifas. Es de un solo uso: se consulta de nuevo en cada intento.          |
+| 2   | Frontend  | mostrar el `permalink` de ambos contratos | -                  | El usuario debe aceptar cada uno.                                                                                                        |
+| 3   | Frontend  | `POST /tokens/cards`                      | pública (Bearer)   | La tarjeta va del navegador al proveedor; nunca pasa por nuestra API.                                                                    |
+| 4   | Frontend  | `POST /checkout` (nuestra API)            | -                  | Envía el token de la tarjeta, ambos tokens de aceptación, `idempotencyKey`, variante, cantidad, cliente y entrega. Nunca envía importes. |
+| 5   | Backend   | `POST /transactions`                      | privada (Bearer)   | Responde 201 con `PENDING`. Un error 4xx marca la transacción como `ERROR`; un tiempo de espera agotado o un 5xx la deja en `PENDING`.   |
+| 6   | Proveedor | `POST /webhooks/payments` (nuestra API)   | secreto de eventos | Estado final. Debe responder 200.                                                                                                        |
+| 7   | Backend   | `GET /transactions/:id`                   | privada (Bearer)   | Respaldo cuando el webhook llega tarde o se pierde. Una transacción `PENDING` que el proveedor no conoce pasa a `ERROR` a los 5 minutos. |
 
-## Rules found in the sandbox
+## Reglas encontradas en el sandbox
 
-| Rule                                                                                                               | Consequence                                                                           |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| The browser cannot call `GET /merchants/info`: its preflight has no CORS headers. `POST /tokens/cards` is allowed. | The backend fetches the acceptance tokens (`GET /checkout/options`).                  |
-| The acceptance token is single use (422 on reuse).                                                                 | Fetch a fresh one for every payment attempt.                                          |
-| `reference` must be unique (422 on reuse).                                                                         | Send our transaction id; the provider's own id is kept as `providerRef`.              |
-| `amount_in_cents` is an integer; currency is only `COP`.                                                           | Matches our Money type.                                                               |
-| Minimum amount is 1,500 COP.                                                                                       | Never applies: the two fees alone are 11,000 COP.                                     |
-| A new transaction is always `PENDING`, then `APPROVED`/`DECLINED`/`ERROR`/`VOIDED`.                                | Stock is reserved before the call.                                                    |
-| The provider does not check the expiry date, and requires a card holder name of 5 or more characters.              | The form validates the expiry itself and asks for 5 or more characters.               |
-| In the sandbox only `4242 4242 4242 4242` and `4111 1111 1111 1111` tokenize; test Mastercards are refused (422).  | The form shows the Mastercard logo when it detects one; the sandbox refuses it.       |
-| A card token expires after about 2 days; the docs say to use it at most twice.                                     | Tokenize per attempt, use each token once, and keep it 30 minutes at most in the tab. |
-| `accept_personal_auth` was optional in the sandbox; the docs disagree.                                             | Always send it.                                                                       |
+| Regla                                                                                                                                                        | Consecuencia                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| El navegador no puede llamar a `GET /merchants/info`: la verificación previa (preflight) no devuelve cabeceras CORS. `POST /tokens/cards` sí está permitido. | El backend obtiene los tokens de aceptación (`GET /checkout/options`).                                  |
+| El token de aceptación es de un solo uso (422 si se reutiliza).                                                                                              | Se obtiene uno nuevo en cada intento de pago.                                                           |
+| `reference` debe ser única (422 si se repite).                                                                                                               | Se envía el id de nuestra transacción; el id del proveedor se guarda como `providerRef`.                |
+| `amount_in_cents` es un entero y la moneda solo puede ser `COP`.                                                                                             | Coincide con nuestro tipo `Money`.                                                                      |
+| El importe mínimo es 1.500 COP.                                                                                                                              | No se aplica: solo las dos tarifas suman 11.000 COP.                                                    |
+| Una transacción nueva siempre es `PENDING` y después pasa a `APPROVED`, `DECLINED`, `ERROR` o `VOIDED`.                                                      | El stock se reserva antes de la llamada.                                                                |
+| El proveedor no comprueba la fecha de vencimiento y exige un nombre del titular de 5 o más caracteres.                                                       | El formulario valida el vencimiento por sí mismo y pide 5 o más caracteres.                             |
+| En el sandbox solo generan token las tarjetas `4242 4242 4242 4242` y `4111 1111 1111 1111`; las Mastercard de prueba se rechazan (422).                     | El formulario muestra el logotipo de Mastercard cuando la detecta; el sandbox la rechaza.               |
+| El token de una tarjeta caduca a los 2 días aproximadamente; la documentación indica usarlo como máximo dos veces.                                           | Se genera un token por intento, se usa una sola vez y se conserva como máximo 30 minutos en la pestaña. |
+| `accept_personal_auth` era opcional en el sandbox, pero la documentación dice lo contrario.                                                                  | Se envía siempre.                                                                                       |
 
-## Integrity signature
+## Firma de integridad
 
-`signature = SHA256(reference + amount_in_cents + currency + integrity_secret)`, lowercase hex, no separators. Computed in the backend only. A wrong value returns 422.
+`signature = SHA256(reference + amount_in_cents + currency + integrity_secret)`, en hexadecimal minúsculas y sin separadores. Se calcula solo en el backend. Un valor incorrecto devuelve 422.
 
 ## Webhook
 
-| Item     | Value                                                                                                     |
-| -------- | --------------------------------------------------------------------------------------------------------- |
-| Event    | `transaction.updated`                                                                                     |
-| Body     | `event`, `data.transaction`, `signature.properties`, `signature.checksum`, `timestamp`, `sent_at`         |
-| Checksum | `SHA256(values of signature.properties in order + timestamp + events_secret)`; also in `X-Event-Checksum` |
-| Retries  | After 30 min, 3 h and 24 h on any non-200                                                                 |
+| Elemento   | Valor                                                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| Evento     | `transaction.updated`                                                                                               |
+| Cuerpo     | `event`, `data.transaction`, `signature.properties`, `signature.checksum`, `timestamp`, `sent_at`                   |
+| Checksum   | `SHA256(valores de signature.properties en orden + timestamp + events_secret)`; también llega en `X-Event-Checksum` |
+| Reintentos | A los 30 minutos, a las 3 horas y a las 24 horas, ante cualquier respuesta distinta de 200                          |
 
-**Unverified:** the docs example does not reproduce with this formula. Confirm with a real event once the API is public. Compare the checksum case-insensitively. The signed properties do not cover `reference`, so a settlement also checks that the event amount equals ours.
+**Sin verificar:** el ejemplo de la documentación no se reproduce con esta fórmula. Hay que confirmarla con un evento real cuando la API sea pública. El checksum se compara sin distinguir mayúsculas de minúsculas. Las propiedades firmadas no incluyen `reference`, por lo que al cerrar un pago también se comprueba que el importe del evento sea igual al nuestro.
 
-## Test cards
+## Tarjetas de prueba
 
-| Number                | Result                          |
-| --------------------- | ------------------------------- |
-| `4242 4242 4242 4242` | `APPROVED`                      |
-| `4111 1111 1111 1111` | `DECLINED`                      |
-| Any other             | Rejected at tokenization (422). |
+| Número                | Resultado                             |
+| --------------------- | ------------------------------------- |
+| `4242 4242 4242 4242` | `APPROVED`                            |
+| `4111 1111 1111 1111` | `DECLINED`                            |
+| Cualquier otra        | Se rechaza al generar el token (422). |
 
-Any future expiry and a 3-digit CVC. `ERROR`, timeouts and 5xx cannot be triggered with a card: tests cover them with a fake payment port (an in-memory stand-in for the provider).
+Cualquier vencimiento futuro y un CVC de 3 dígitos. `ERROR`, los tiempos de espera agotados y los 5xx no se pueden provocar con una tarjeta: las pruebas los cubren con un puerto de pago falso (una implementación en memoria que reemplaza al proveedor).
 
-## Open items
+## Pendiente
 
-- Webhook checksum against a real event.
-- Encrypted tokenization (the sandbox accepts plain).
+- Verificar el checksum del webhook con un evento real.
+- Tokenización cifrada (el sandbox acepta datos sin cifrar).

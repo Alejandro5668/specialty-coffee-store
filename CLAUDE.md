@@ -52,6 +52,7 @@ Work backwards from the user: decide what they need to see, do and feel, then bu
 ## Language
 
 - Code, comments, docs, commit titles and PR titles: **English**.
+- `README.md` and every `.md` file in `docs/`: **Spanish**, precise and short, with no metaphors or figures of speech (owner's decision). Commands, identifiers and endpoint names stay as they are.
 - PR descriptions: **Spanish**, clear and precise.
 - The company name of the payment provider must never appear in the repository.
 
