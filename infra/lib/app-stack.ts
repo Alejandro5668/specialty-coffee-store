@@ -1,4 +1,4 @@
-import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps, Tags } from 'aws-cdk-lib';
 import { HttpApi, HttpStage, HttpMethod } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import {
@@ -17,11 +17,12 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin, S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { CfnGroup } from 'aws-cdk-lib/aws-resourcegroups';
 import { Architecture, Code, Function as LambdaFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
-import { TABLE_PREFIX, Tables } from './data-stack';
+import { PROJECT, TABLE_PREFIX, Tables } from './data-stack';
 
 export const SECRET_PARAMETERS = {
   PAYMENT_PRIVATE_KEY: '/coffee-store/payment-private-key',
@@ -58,6 +59,7 @@ const SPA_FALLBACK = `function handler(event) {
 export class AppStack extends Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
+    Tags.of(this).add('Project', PROJECT);
 
     const handler = new LambdaFunction(this, 'Api', {
       runtime: Runtime.NODEJS_22_X,
@@ -198,6 +200,19 @@ export class AppStack extends Stack {
       destinationBucket: bucket,
       distribution,
       distributionPaths: ['/*'],
+    });
+
+    // One view in the console (Resource Groups) with everything the project created.
+    new CfnGroup(this, 'ProjectGroup', {
+      name: PROJECT,
+      description: 'Everything the coffee store created',
+      resourceQuery: {
+        type: 'TAG_FILTERS_1_0',
+        query: {
+          resourceTypeFilters: ['AWS::AllSupported'],
+          tagFilters: [{ key: 'Project', values: [PROJECT] }],
+        },
+      },
     });
 
     new CfnOutput(this, 'SiteUrl', { value: `https://${distribution.distributionDomainName}` });
