@@ -115,7 +115,7 @@ describe('Checkbox', () => {
     const onChange = jest.fn();
     render(
       <Checkbox checked={false} onChange={onChange} error={null}>
-        Acepto los <a href="https://example.test/terms.pdf">terms</a>
+        I accept the <a href="https://example.test/terms.pdf">terms</a>
       </Checkbox>,
     );
     await userEvent.click(screen.getByRole('checkbox'));

@@ -6,6 +6,7 @@ import {
   updateCustomer,
   updateDelivery,
 } from '../../../store/checkoutSlice';
+import { CARD_TTL_MS } from '../../../store/checkoutState';
 import { NOW } from '../../../test/state';
 import { ready, setup, submit } from '../../../test/detailsHarness';
 
@@ -33,6 +34,19 @@ describe('DetailsContainer: coming back', () => {
     await submit(user);
     expect(await screen.findByText('Summary step')).toBeInTheDocument();
     expect(tokenize).not.toHaveBeenCalled();
+  });
+
+  it('asks for the card again, in plain words, when the saved one went stale while the form was open', async () => {
+    let clock = NOW;
+    const { user, store } = await setup({ prepare: withSavedCard, now: () => clock });
+    await ready();
+    clock = NOW + CARD_TTL_MS + 1;
+    await submit(user);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Tu tarjeta guardada ya no es válida. Ingrésala de nuevo.',
+    );
+    expect(screen.getByLabelText('Número de tarjeta')).toBeInTheDocument();
+    expect(store.getState().checkout.card).toBeNull();
   });
 
   it('lets the shopper use another card, and forgets the saved one', async () => {

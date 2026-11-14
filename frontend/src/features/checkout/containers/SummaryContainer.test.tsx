@@ -85,6 +85,15 @@ describe('SummaryContainer: the amounts', () => {
   });
 });
 
+describe('SummaryContainer: when there is less stock than the quantity', () => {
+  it('says "quedan" when more than one unit is left', async () => {
+    await setupSummary({ state: draft({ quantity: 3 }), catalog: [coffee([2, 2])] });
+    expect(
+      await screen.findByText('Solo quedan 2. Vuelve y elige menos unidades.'),
+    ).toBeInTheDocument();
+  });
+});
+
 describe('SummaryContainer: when it cannot be paid', () => {
   it.each([
     [

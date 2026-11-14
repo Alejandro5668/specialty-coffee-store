@@ -1,3 +1,4 @@
+import { remaining } from '../../../lib/stock';
 import { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
@@ -53,8 +54,7 @@ export const SummaryContainer = () => {
     }
     if (variant.v.stock <= 0) return blocked('Este tamaño está agotado. Vuelve y elige otro café.');
     if (variant.v.stock < checkout.quantity) {
-      const left = variant.v.stock === 1 ? 'Solo queda 1' : `Solo quedan ${variant.v.stock}`;
-      return blocked(`${left}. Vuelve y elige menos unidades.`);
+      return blocked(`Solo ${remaining(variant.v.stock)}. Vuelve y elige menos unidades.`);
     }
     if (options.status === 'failed')
       return blocked(options.error ?? '', () => void dispatch(loadOptions()));

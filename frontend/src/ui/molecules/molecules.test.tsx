@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VariantView } from '../../api/types';
+import { AmountLines } from './AmountLines';
 import { QuantityStepper } from './QuantityStepper';
 import { SizePicker } from './SizePicker';
 
@@ -8,6 +9,24 @@ const variants: VariantView[] = [
   { id: 'a-250', sizeGrams: 250, priceInCents: 3_200_000, currency: 'COP', stock: 4 },
   { id: 'a-500', sizeGrams: 500, priceInCents: 5_800_000, currency: 'COP', stock: 0 },
 ];
+
+describe('AmountLines', () => {
+  it('names each line in Spanish and writes every amount in pesos', () => {
+    render(
+      <AmountLines
+        label="Café × 2"
+        productInCents={6_400_000}
+        baseFeeInCents={300_000}
+        deliveryFeeInCents={800_000}
+        totalInCents={7_500_000}
+      />,
+    );
+    expect(screen.getByText('Café × 2')).toBeInTheDocument();
+    expect(screen.getByText('Tarifa base').nextSibling).toHaveTextContent('$3.000');
+    expect(screen.getByText('Envío').nextSibling).toHaveTextContent('$8.000');
+    expect(screen.getByText('Total').nextSibling).toHaveTextContent('$75.000');
+  });
+});
 
 describe('SizePicker', () => {
   it('offers each size with its price and marks the selected one', () => {
