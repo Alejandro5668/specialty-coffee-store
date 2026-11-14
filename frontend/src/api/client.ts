@@ -24,10 +24,11 @@ export interface CoffeeApi {
   getTransaction(id: string): Promise<TransactionView>;
 }
 
-const NETWORK_MESSAGE = 'We could not reach the store. Check your connection and try again.';
+const NETWORK_MESSAGE =
+  'No pudimos conectar con la tienda. Revisa tu conexión e inténtalo de nuevo.';
 const ORDER_NETWORK_MESSAGE =
-  'We could not confirm your order. Press Pay again: you will not be charged twice.';
-const SERVER_MESSAGE = 'Something went wrong on our side. Try again in a minute.';
+  'No pudimos confirmar tu pedido. Pulsa Pagar de nuevo: no se te cobrará dos veces.';
+const SERVER_MESSAGE = 'Algo salió mal de nuestro lado. Inténtalo de nuevo en un minuto.';
 const READ_TIMEOUT_MS = 10_000;
 /** Paying waits for the card network, so it gets more time than a read. */
 const WRITE_TIMEOUT_MS = 20_000;

@@ -29,7 +29,7 @@ export const SummarySheet = (props: Props) => {
   if (props.state === 'loading') {
     return (
       <p role="status" aria-live="polite">
-        Loading your order…
+        Cargando tu pedido…
       </p>
     );
   }
@@ -40,11 +40,11 @@ export const SummarySheet = (props: Props) => {
         <p>{props.message}</p>
         {props.onRetry && (
           <Button block onClick={props.onRetry}>
-            Try again
+            Intentar de nuevo
           </Button>
         )}
         <Button block variant="quiet" onClick={props.onBack}>
-          Back to the coffees
+          Volver a los cafés
         </Button>
       </div>
     );
@@ -57,7 +57,7 @@ export const SummarySheet = (props: Props) => {
         <div role="alert" className="notice notice--error stack">
           <p>{props.error}</p>
           <Button variant="quiet" onClick={props.onBack}>
-            Back to the coffees
+            Volver a los cafés
           </Button>
         </div>
       )}
@@ -71,20 +71,20 @@ export const SummarySheet = (props: Props) => {
       />
 
       <section className="summary__block">
-        <h3>Payment</h3>
+        <h3>Pago</h3>
         <p>{props.payment}</p>
       </section>
       <section className="summary__block">
-        <h3>Delivery</h3>
+        <h3>Entrega</h3>
         <p>{props.recipient}</p>
         <p>{props.address}</p>
       </section>
 
       <Button block disabled={props.paying} onClick={props.onPay}>
-        {props.paying ? 'Paying…' : `Pay ${formatCop(totals.totalInCents)}`}
+        {props.paying ? 'Pagando…' : `Pagar ${formatCop(totals.totalInCents)}`}
       </Button>
       <Button block variant="quiet" onClick={props.onEdit}>
-        Edit details
+        Editar datos
       </Button>
     </div>
   );

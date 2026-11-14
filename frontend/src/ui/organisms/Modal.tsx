@@ -43,7 +43,7 @@ export const Modal = ({ title, onClose, children, variant = 'dialog' }: Props) =
           {title}
         </h2>
         <Button variant="quiet" onClick={onClose}>
-          Close
+          Cerrar
         </Button>
       </div>
       <div className="modal__body">{children}</div>

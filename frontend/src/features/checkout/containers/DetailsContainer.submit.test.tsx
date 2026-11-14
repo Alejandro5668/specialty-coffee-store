@@ -16,51 +16,58 @@ describe('DetailsContainer: continuing', () => {
     const { user, tokenize } = await setup();
     await ready();
     await submit(user);
-    expect(screen.getByLabelText('Card number')).toHaveAccessibleDescription(
-      'Enter the card number.',
+    expect(screen.getByLabelText('Número de tarjeta')).toHaveAccessibleDescription(
+      'Ingresa el número de tarjeta.',
     );
-    expect(screen.getByLabelText('Expiry date')).toHaveAccessibleDescription(
-      'Enter the expiry date as MM / YY.',
+    expect(screen.getByLabelText('Fecha de vencimiento')).toHaveAccessibleDescription(
+      'Ingresa la fecha de vencimiento como MM / AA.',
     );
-    expect(screen.getByLabelText('Security code')).toHaveAccessibleDescription(
-      'Enter the 3 digits on the back of the card.',
+    expect(screen.getByLabelText('Código de seguridad')).toHaveAccessibleDescription(
+      'Ingresa los 3 dígitos del reverso de la tarjeta.',
     );
-    expect(screen.getByLabelText('Full name')).toHaveAccessibleDescription('Enter your full name.');
-    expect(screen.getByLabelText('Email')).toHaveAccessibleDescription(
-      'Enter a valid email, like ana@example.com.',
+    expect(screen.getByLabelText('Nombre completo')).toHaveAccessibleDescription(
+      'Ingresa tu nombre completo.',
     );
-    expect(screen.getByLabelText('Phone')).toHaveAccessibleDescription(
-      'Enter a phone number with 7 to 15 digits.',
+    expect(screen.getByLabelText('Correo electrónico')).toHaveAccessibleDescription(
+      'Ingresa un correo válido, como ana@example.com.',
+    );
+    expect(screen.getByLabelText('Teléfono')).toHaveAccessibleDescription(
+      'Ingresa un teléfono de 7 a 15 dígitos.',
     );
     expect(
-      screen.getByRole('checkbox', { name: /terms and conditions/i }),
-    ).toHaveAccessibleDescription('Accept the terms and conditions to continue.');
-    expect(screen.getByRole('checkbox', { name: /personal data/i })).toHaveAccessibleDescription(
-      'Authorize the use of your personal data to continue.',
+      screen.getByRole('checkbox', { name: /términos y condiciones/i }),
+    ).toHaveAccessibleDescription('Acepta los términos y condiciones para continuar.');
+    expect(screen.getByRole('checkbox', { name: /datos personales/i })).toHaveAccessibleDescription(
+      'Autoriza el uso de tus datos personales para continuar.',
     );
-    expect(screen.getByLabelText('Card number')).toHaveFocus();
+    expect(screen.getByLabelText('Número de tarjeta')).toHaveFocus();
     expect(tokenize).not.toHaveBeenCalled();
   });
 
   it.each([
     [
       'a card number that does not add up',
-      'Card number',
+      'Número de tarjeta',
       '4242 4242 4242 4241',
-      'Check the card number: it does not look valid.',
+      'Revisa el número de tarjeta: no parece válido.',
     ],
     [
       'a card we do not take',
-      'Card number',
+      'Número de tarjeta',
       '3782 8224 6310 005',
-      'We accept Visa and Mastercard.',
+      'Aceptamos Visa y Mastercard.',
     ],
-    ['an expired card', 'Expiry date', '1020', 'This card has expired. Use another card.'],
+    [
+      'an expired card',
+      'Fecha de vencimiento',
+      '1020',
+      'Esta tarjeta está vencida. Usa otra tarjeta.',
+    ],
     [
       'a short name',
-      'Name on the card',
+      'Nombre en la tarjeta',
       'Ana',
-      'Enter the name as it appears on the card (at least 5 characters).',
+      'Ingresa el nombre como aparece en la tarjeta (mínimo 5 caracteres).',
     ],
   ])('refuses %s without calling the service', async (_label, field, value, message) => {
     const { user, tokenize } = await setup();
@@ -80,12 +87,12 @@ describe('DetailsContainer: continuing', () => {
     await ready();
     await fillCard(user);
     await fillPerson(user);
-    await user.clear(screen.getByLabelText('Address'));
-    await user.type(screen.getByLabelText('Address'), '<script>alert(1)</script>');
+    await user.clear(screen.getByLabelText('Dirección'));
+    await user.type(screen.getByLabelText('Dirección'), '<script>alert(1)</script>');
     await accept(user);
     await submit(user);
-    expect(screen.getByLabelText('Address')).toHaveAccessibleDescription(
-      'Remove special characters such as < or >.',
+    expect(screen.getByLabelText('Dirección')).toHaveAccessibleDescription(
+      'Quita los caracteres especiales, como < o >.',
     );
     expect(tokenize).not.toHaveBeenCalled();
   });
@@ -145,7 +152,7 @@ describe('DetailsContainer: continuing', () => {
     await fillPerson(user);
     await accept(user);
     await submit(user);
-    const button = screen.getByRole('button', { name: 'Checking your card…' });
+    const button = screen.getByRole('button', { name: 'Verificando tu tarjeta…' });
     expect(button).toBeDisabled();
     await user.click(button);
     expect(tokenize).toHaveBeenCalledTimes(1);

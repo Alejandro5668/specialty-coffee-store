@@ -3,7 +3,7 @@ import { ApiError } from '../../../api/client';
 import { OrderRequest, TransactionView } from '../../../api/types';
 import { placed, setupSummary } from '../../../test/summaryHarness';
 
-const pay = () => screen.findByRole('button', { name: 'Pay $75.000' });
+const pay = () => screen.findByRole('button', { name: 'Pagar $75.000' });
 
 describe('SummaryContainer: paying', () => {
   it('places the order with fresh terms and goes to the order page', async () => {
@@ -40,7 +40,7 @@ describe('SummaryContainer: paying', () => {
       },
     });
     await user.click(await pay());
-    const working = await screen.findByRole('button', { name: 'Paying…' });
+    const working = await screen.findByRole('button', { name: 'Pagando…' });
     expect(working).toBeDisabled();
     await user.click(working);
     expect(calls).toBe(1);
@@ -65,7 +65,7 @@ describe('SummaryContainer: paying', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'There is not enough stock for that quantity. Choose fewer units.',
     );
-    expect(screen.getByRole('button', { name: 'Pay $75.000' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Pagar $75.000' })).toBeEnabled();
     expect(screen.queryByText('Order page')).not.toBeInTheDocument();
   });
 
@@ -80,16 +80,16 @@ describe('SummaryContainer: paying', () => {
             throw new ApiError(
               0,
               'NETWORK',
-              'We could not confirm your order. Press Pay again: you will not be charged twice.',
+              'No pudimos confirmar tu pedido. Pulsa Pagar de nuevo: no se te cobrará dos veces.',
             );
           return placed();
         },
       },
     });
     await user.click(await pay());
-    expect(await screen.findByRole('alert')).toHaveTextContent('you will not be charged twice');
+    expect(await screen.findByRole('alert')).toHaveTextContent('no se te cobrará dos veces');
     fail = false;
-    await user.click(screen.getByRole('button', { name: 'Pay $75.000' }));
+    await user.click(screen.getByRole('button', { name: 'Pagar $75.000' }));
     expect(await screen.findByText('Order page')).toBeInTheDocument();
     expect(keys).toEqual(['key-new-0001', 'key-new-0001']);
   });
@@ -98,14 +98,14 @@ describe('SummaryContainer: paying', () => {
 describe('SummaryContainer: leaving', () => {
   it('goes back to edit the details without losing them', async () => {
     const { user, store } = await setupSummary();
-    await user.click(await screen.findByRole('button', { name: 'Edit details' }));
+    await user.click(await screen.findByRole('button', { name: 'Editar datos' }));
     expect(await screen.findByText('Details step')).toBeInTheDocument();
     expect(store.getState().checkout.customer.name).toBe('Ana Pérez');
   });
 
   it('closes to the coffees and keeps the draft', async () => {
     const { user, store } = await setupSummary();
-    await user.click(await screen.findByRole('button', { name: 'Close' }));
+    await user.click(await screen.findByRole('button', { name: 'Cerrar' }));
     expect(await screen.findByText('Catalog page')).toBeInTheDocument();
     expect(store.getState().checkout.card).not.toBeNull();
   });

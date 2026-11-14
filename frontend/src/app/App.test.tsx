@@ -26,19 +26,22 @@ describe('App shell', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Skip to content' })).toHaveAttribute('href', '#main');
+    expect(screen.getByRole('link', { name: 'Saltar al contenido' })).toHaveAttribute(
+      'href',
+      '#main',
+    );
   });
 
   it('tells shoppers that payments run in a test environment', () => {
     renderAt('/');
     expect(screen.getByRole('contentinfo')).toHaveTextContent(
-      'Demo store. Payments run in a test environment and no real money is charged.',
+      'Tienda de demostración. Los pagos se hacen en un entorno de pruebas y no se cobra dinero real.',
     );
   });
 
   it('links the brand name to the first page', () => {
     renderAt('/nowhere');
-    expect(screen.getByRole('link', { name: 'Specialty Coffee Store' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Tienda de café de especialidad' })).toHaveAttribute(
       'href',
       '/',
     );
@@ -46,18 +49,16 @@ describe('App shell', () => {
 
   it('sets the page title for each page', () => {
     renderAt('/');
-    expect(document.title).toBe('Coffees - Specialty Coffee Store');
+    expect(document.title).toBe('Cafés - Tienda de café de especialidad');
   });
 });
 
 describe('unknown pages', () => {
   it('say what happened and how to get back', () => {
     renderAt('/does/not/exist');
-    expect(
-      screen.getByRole('heading', { name: 'We could not find that page' }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'See the coffees' })).toHaveAttribute('href', '/');
-    expect(document.title).toBe('Page not found - Specialty Coffee Store');
+    expect(screen.getByRole('heading', { name: 'No encontramos esa página' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ver los cafés' })).toHaveAttribute('href', '/');
+    expect(document.title).toBe('Página no encontrada - Tienda de café de especialidad');
   });
 
   it('do not echo the address into the page', () => {
@@ -68,9 +69,9 @@ describe('unknown pages', () => {
 
   it('move the focus to the main content when the shopper navigates, so a screen reader follows', async () => {
     renderAt('/does/not/exist');
-    await userEvent.click(screen.getByRole('link', { name: 'See the coffees' }));
+    await userEvent.click(screen.getByRole('link', { name: 'Ver los cafés' }));
     expect(screen.getByRole('main')).toHaveFocus();
-    expect(screen.getByRole('heading', { name: 'Coffees' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Cafés' })).toBeInTheDocument();
   });
 });
 
@@ -95,13 +96,13 @@ describe('checkout route', () => {
 
   it('opens the card and delivery dialog on top of the coffees', () => {
     renderCheckout(true);
-    expect(screen.getByRole('dialog', { name: 'Card and delivery' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Coffees' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Tarjeta y entrega' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Cafés' })).toBeInTheDocument();
   });
 
   it('goes back to the coffees when nothing was chosen', async () => {
     renderCheckout(false);
-    expect(await screen.findByRole('heading', { name: 'Coffees' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Cafés' })).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

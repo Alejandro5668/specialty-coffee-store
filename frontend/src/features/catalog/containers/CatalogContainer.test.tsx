@@ -61,10 +61,10 @@ const card = (name: string) => within(screen.getByRole('heading', { name }).clos
 describe('CatalogContainer', () => {
   it('shows a loading state, then the coffees', async () => {
     setup(async () => catalog);
-    expect(screen.getByRole('status')).toHaveTextContent('Loading coffees');
+    expect(screen.getByRole('status')).toHaveTextContent('Cargando cafés');
     expect(await screen.findByRole('heading', { name: 'Huila Washed' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Nariño Honey' })).toBeInTheDocument();
-    expect(screen.queryByText('Loading coffees')).not.toBeInTheDocument();
+    expect(screen.queryByText('Cargando cafés')).not.toBeInTheDocument();
   });
 
   it('says what happened when the store cannot be reached and lets the shopper retry', async () => {
@@ -74,13 +74,15 @@ describe('CatalogContainer', () => {
         throw new ApiError(
           0,
           'NETWORK',
-          'We could not reach the store. Check your connection and try again.',
+          'No pudimos conectar con la tienda. Revisa tu conexión e inténtalo de nuevo.',
         );
       return catalog;
     });
-    expect(await screen.findByRole('alert')).toHaveTextContent('We could not reach the store.');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No pudimos conectar con la tienda.',
+    );
     fail = false;
-    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Intentar de nuevo' }));
     expect(await screen.findByRole('heading', { name: 'Huila Washed' })).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -88,7 +90,7 @@ describe('CatalogContainer', () => {
   it('invites the shopper to come back when there are no coffees', async () => {
     setup(async () => []);
     expect(
-      await screen.findByText('No coffees are available right now. Check back soon.'),
+      await screen.findByText('No hay cafés disponibles en este momento. Vuelve pronto.'),
     ).toBeInTheDocument();
   });
 
@@ -97,11 +99,11 @@ describe('CatalogContainer', () => {
     await screen.findByRole('heading', { name: 'Huila Washed' });
     const huila = card('Huila Washed');
     expect(huila.getByTestId('coffee-total')).toHaveTextContent('$32.000');
-    await userEvent.click(huila.getByRole('button', { name: 'Increase quantity' }));
+    await userEvent.click(huila.getByRole('button', { name: 'Aumentar cantidad' }));
     expect(huila.getByTestId('coffee-total')).toHaveTextContent('$64.000');
     await userEvent.click(huila.getByRole('radio', { name: /500 g/ }));
     expect(huila.getByTestId('coffee-total')).toHaveTextContent('$116.000');
-    expect(huila.getByText('Only 3 left')).toBeInTheDocument();
+    expect(huila.getByText('Quedan 3')).toBeInTheDocument();
   });
 
   it('never lets the quantity exceed the stock of the size the shopper switches to', async () => {
@@ -109,27 +111,27 @@ describe('CatalogContainer', () => {
     await screen.findByRole('heading', { name: 'Huila Washed' });
     const huila = card('Huila Washed');
     for (let i = 0; i < 6; i++)
-      await userEvent.click(huila.getByRole('button', { name: 'Increase quantity' }));
+      await userEvent.click(huila.getByRole('button', { name: 'Aumentar cantidad' }));
     expect(huila.getByRole('status')).toHaveTextContent('7');
     await userEvent.click(huila.getByRole('radio', { name: /500 g/ }));
     expect(huila.getByRole('status')).toHaveTextContent('3');
-    expect(huila.getByRole('button', { name: 'Increase quantity' })).toBeDisabled();
+    expect(huila.getByRole('button', { name: 'Aumentar cantidad' })).toBeDisabled();
   });
 
-  it('cannot buy a sold out coffee', async () => {
+  it('cannot buy a sold-out coffee', async () => {
     setup(async () => catalog);
     await screen.findByRole('heading', { name: 'Nariño Honey' });
     const narino = card('Nariño Honey');
-    expect(narino.getByRole('button', { name: 'Pay with credit card' })).toBeDisabled();
-    expect(narino.getAllByText(/sold out/i).length).toBeGreaterThan(0);
+    expect(narino.getByRole('button', { name: 'Pagar con tarjeta de crédito' })).toBeDisabled();
+    expect(narino.getAllByText(/agotado/i).length).toBeGreaterThan(0);
   });
 
   it('saves the selection and goes on to the card step when the shopper pays', async () => {
     const { store, storage } = setup(async () => catalog);
     await screen.findByRole('heading', { name: 'Huila Washed' });
     const huila = card('Huila Washed');
-    await userEvent.click(huila.getByRole('button', { name: 'Increase quantity' }));
-    await userEvent.click(huila.getByRole('button', { name: 'Pay with credit card' }));
+    await userEvent.click(huila.getByRole('button', { name: 'Aumentar cantidad' }));
+    await userEvent.click(huila.getByRole('button', { name: 'Pagar con tarjeta de crédito' }));
     expect(await screen.findByText('Details step')).toBeInTheDocument();
     expect(store.getState().checkout).toMatchObject({ variantId: 'huila-250', quantity: 2 });
     expect(storage.data.get(PERSIST_KEY)).toContain('"variantId":"huila-250"');
@@ -169,7 +171,7 @@ describe('CatalogContainer', () => {
     const { store } = setup(() => answers.shift()!());
     await screen.findByRole('heading', { name: 'Huila Washed' });
     await store.dispatch(loadCatalog());
-    expect(await screen.findByText(/could not refresh the stock/i)).toBeInTheDocument();
+    expect(await screen.findByText(/No pudimos actualizar el stock/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Huila Washed' })).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });

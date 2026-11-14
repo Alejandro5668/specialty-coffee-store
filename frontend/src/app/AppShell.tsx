@@ -20,12 +20,12 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
   return (
     <div className="shell">
       <a className="skip-link" href="#main">
-        Skip to content
+        Saltar al contenido
       </a>
       <header className="shell__header">
         <div className="container">
           <Link className="shell__brand display" to="/">
-            Specialty Coffee Store
+            Tienda de café de especialidad
           </Link>
         </div>
       </header>
@@ -34,7 +34,10 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
       </main>
       <footer className="shell__footer">
         <div className="container">
-          <p>Demo store. Payments run in a test environment and no real money is charged.</p>
+          <p>
+            Tienda de demostración. Los pagos se hacen en un entorno de pruebas y no se cobra dinero
+            real.
+          </p>
         </div>
       </footer>
     </div>

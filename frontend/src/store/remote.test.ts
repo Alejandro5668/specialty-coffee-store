@@ -66,7 +66,7 @@ describe('options', () => {
       },
     });
     await store.dispatch(loadOptions());
-    expect(store.getState().options.error).toBe('Something went wrong. Try again in a minute.');
+    expect(store.getState().options.error).toBe('Algo salió mal. Inténtalo de nuevo en un minuto.');
   });
 });
 

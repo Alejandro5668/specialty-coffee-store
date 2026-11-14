@@ -25,16 +25,17 @@ export interface CardTokenizer {
 }
 
 const TIMEOUT_MS = 10_000;
-const NOW_MESSAGE = 'We could not check the card right now. Try again in a minute.';
+const NOW_MESSAGE =
+  'No pudimos verificar la tarjeta en este momento. Inténtalo de nuevo en un minuto.';
 const NETWORK_MESSAGE =
-  'We could not reach the payment service. Check your connection and try again.';
-const GENERAL_MESSAGE = 'We could not check the card. Review it or use another card.';
+  'No pudimos conectar con el servicio de pagos. Revisa tu conexión e inténtalo de nuevo.';
+const GENERAL_MESSAGE = 'No pudimos verificar la tarjeta. Revísala o usa otra.';
 
 const FIELD_MESSAGES: Record<TokenizeField, string> = {
-  number: 'This card number is not accepted. Check it or use another card.',
-  cvc: 'Check the 3 digits on the back of the card.',
-  expiry: 'Check the expiry date.',
-  holder: 'Check the name on the card.',
+  number: 'Este número de tarjeta no es aceptado. Revísalo o usa otra tarjeta.',
+  cvc: 'Revisa los 3 dígitos del reverso de la tarjeta.',
+  expiry: 'Revisa la fecha de vencimiento.',
+  holder: 'Revisa el nombre que aparece en la tarjeta.',
 };
 /** The service's own field names, in the order they should be shown. */
 const SERVICE_FIELDS: Array<[string, TokenizeField]> = [
@@ -116,6 +117,6 @@ export const createCardTokenizer = (
 /** Used when the payment settings are missing, so the form says so instead of failing in a strange way. */
 export const unavailableTokenizer: CardTokenizer = {
   async tokenize() {
-    throw new TokenizeError('Payments are not set up in this environment.', null);
+    throw new TokenizeError('Los pagos no están configurados en este entorno.', null);
   },
 };

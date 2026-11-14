@@ -27,9 +27,9 @@ describe('DetailsContainer: coming back', () => {
   it('shows the saved card instead of asking for it again, and goes on without calling the service', async () => {
     const { user, tokenize } = await setup({ prepare: withSavedCard });
     await ready();
-    expect(screen.getByText('Visa ending 4242')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Card number')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Full name')).toHaveValue('Ana Pérez');
+    expect(screen.getByText('Visa terminada en 4242')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Número de tarjeta')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Nombre completo')).toHaveValue('Ana Pérez');
     await submit(user);
     expect(await screen.findByText('Summary step')).toBeInTheDocument();
     expect(tokenize).not.toHaveBeenCalled();
@@ -38,17 +38,17 @@ describe('DetailsContainer: coming back', () => {
   it('lets the shopper use another card, and forgets the saved one', async () => {
     const { user, store } = await setup({ prepare: withSavedCard });
     await ready();
-    await user.click(screen.getByRole('button', { name: 'Use another card' }));
-    expect(screen.getByLabelText('Card number')).toBeInTheDocument();
-    expect(screen.queryByText('Visa ending 4242')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Usar otra tarjeta' }));
+    expect(screen.getByLabelText('Número de tarjeta')).toBeInTheDocument();
+    expect(screen.queryByText('Visa terminada en 4242')).not.toBeInTheDocument();
     expect(store.getState().checkout.card).toBeNull();
   });
 
   it('closes without losing what was typed', async () => {
     const { user, store } = await setup();
     await ready();
-    await user.type(screen.getByLabelText('Full name'), 'Ana');
-    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.type(screen.getByLabelText('Nombre completo'), 'Ana');
+    await user.click(screen.getByRole('button', { name: 'Cerrar' }));
     expect(await screen.findByText('Catalog page')).toBeInTheDocument();
     expect(store.getState().checkout.customer.name).toBe('Ana');
   });

@@ -45,16 +45,16 @@ export const SummaryContainer = () => {
   const content = (() => {
     if (!variant) {
       if (catalog.status === 'ready') {
-        return blocked('That coffee is no longer available. Go back and choose another one.');
+        return blocked('Ese café ya no está disponible. Vuelve y elige otro.');
       }
       if (catalog.status === 'failed')
         return blocked(catalog.error ?? '', () => void dispatch(loadCatalog()));
       return <SummarySheet state="loading" />;
     }
-    if (variant.v.stock <= 0)
-      return blocked('This size is sold out. Go back and choose another coffee.');
+    if (variant.v.stock <= 0) return blocked('Este tamaño está agotado. Vuelve y elige otro café.');
     if (variant.v.stock < checkout.quantity) {
-      return blocked(`Only ${variant.v.stock} left. Go back and choose fewer units.`);
+      const left = variant.v.stock === 1 ? 'Solo queda 1' : `Solo quedan ${variant.v.stock}`;
+      return blocked(`${left}. Vuelve y elige menos unidades.`);
     }
     if (options.status === 'failed')
       return blocked(options.error ?? '', () => void dispatch(loadOptions()));
@@ -70,7 +70,7 @@ export const SummaryContainer = () => {
         sizeGrams={variant.v.sizeGrams}
         quantity={checkout.quantity}
         totals={computeTotals(variant.v.priceInCents, checkout.quantity, options.data.fees)}
-        payment={`${brandName(card!.brand)} ending ${card!.last4}`}
+        payment={`${brandName(card!.brand)} terminada en ${card!.last4}`}
         recipient={delivery.recipientName.trim() || customer.name.trim()}
         address={`${delivery.address.trim()}, ${delivery.city.trim()}`}
         paying={checkout.placing === 'placing'}
@@ -83,7 +83,7 @@ export const SummaryContainer = () => {
   })();
 
   return (
-    <Modal title="Order summary" variant="sheet" onClose={back}>
+    <Modal title="Resumen del pedido" variant="sheet" onClose={back}>
       {content}
     </Modal>
   );

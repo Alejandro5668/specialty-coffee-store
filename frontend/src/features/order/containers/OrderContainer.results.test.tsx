@@ -11,13 +11,13 @@ describe('OrderContainer: the result', () => {
       state: stateWithOrder(),
       api: { getTransaction: async () => orderView('APPROVED') },
     });
-    expect(await screen.findByRole('heading', { name: 'Payment approved' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pago aprobado' })).toBeInTheDocument();
     expect(screen.getByText('Huila Washed, 250 g × 2')).toBeInTheDocument();
     expect(await screen.findByTestId('line-product')).toHaveTextContent('$64.000');
     expect(screen.getByTestId('line-base')).toHaveTextContent('$3.000');
     expect(screen.getByTestId('line-delivery')).toHaveTextContent('$8.000');
     expect(screen.getByTestId('line-total')).toHaveTextContent('$75.000');
-    expect(screen.getByText('Order reference: order-1')).toBeInTheDocument();
+    expect(screen.getByText('Referencia del pedido: order-1')).toBeInTheDocument();
   });
 
   it('shows the server amounts even if the catalog price has changed since', async () => {
@@ -53,10 +53,10 @@ describe('OrderContainer: the result', () => {
       api: { getTransaction: async () => orderView('DECLINED') },
     });
     expect(
-      await screen.findByRole('heading', { name: 'Your card was declined' }),
+      await screen.findByRole('heading', { name: 'Tu tarjeta fue rechazada' }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Nothing was charged/)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Try another card' }));
+    expect(screen.getByText(/No se hizo ningún cobro/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Probar con otra tarjeta' }));
     expect(await screen.findByText('Details step')).toBeInTheDocument();
     expect(store.getState().checkout).toMatchObject({
       orderId: null,
@@ -74,10 +74,10 @@ describe('OrderContainer: the result', () => {
       api: { getTransaction: async () => orderView('ERROR') },
     });
     expect(
-      await screen.findByRole('heading', { name: 'We could not complete the payment' }),
+      await screen.findByRole('heading', { name: 'No pudimos completar el pago' }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Nothing was charged/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Try another card' })).toBeInTheDocument();
+    expect(screen.getByText(/No se hizo ningún cobro/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Probar con otra tarjeta' })).toBeInTheDocument();
   });
 
   it('forgets the purchase and shows the coffees again when the shopper goes back', async () => {
@@ -85,7 +85,7 @@ describe('OrderContainer: the result', () => {
       state: stateWithOrder(),
       api: { getTransaction: async () => orderView('APPROVED') },
     });
-    await user.click(await screen.findByRole('button', { name: 'Back to the coffees' }));
+    await user.click(await screen.findByRole('button', { name: 'Volver a los cafés' }));
     expect(await screen.findByText('Catalog page')).toBeInTheDocument();
     expect(store.getState().checkout).toMatchObject({
       variantId: null,
@@ -103,7 +103,7 @@ describe('OrderContainer: the result', () => {
       state: stateWithOrder(),
       api: { getTransaction: async () => orderView('APPROVED') },
     });
-    const heading = await screen.findByRole('heading', { name: 'Payment approved' });
+    const heading = await screen.findByRole('heading', { name: 'Pago aprobado' });
     expect(heading.closest('[role="status"]')).not.toBeNull();
   });
 });

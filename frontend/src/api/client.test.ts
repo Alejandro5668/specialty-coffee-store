@@ -51,7 +51,7 @@ describe('listProducts', () => {
     const { api } = withFetch(() => html(status));
     const error = await failure(api.listProducts());
     expect(error.status).toBe(status);
-    expect(error.message).toBe('Something went wrong on our side. Try again in a minute.');
+    expect(error.message).toBe('Algo salió mal de nuestro lado. Inténtalo de nuevo en un minuto.');
   });
 
   it('says so plainly when the network fails or times out', async () => {
@@ -59,7 +59,7 @@ describe('listProducts', () => {
     const error = await failure(api.listProducts());
     expect(error).toMatchObject({ code: 'NETWORK', status: 0 });
     expect(error.message).toBe(
-      'We could not reach the store. Check your connection and try again.',
+      'No pudimos conectar con la tienda. Revisa tu conexión e inténtalo de nuevo.',
     );
   });
 
@@ -107,6 +107,6 @@ describe('listProducts', () => {
     const { api } = withFetch(() => json(200, body));
     const error = await failure(api.listProducts());
     expect(error).toMatchObject({ code: 'BAD_RESPONSE' });
-    expect(error.message).toBe('Something went wrong on our side. Try again in a minute.');
+    expect(error.message).toBe('Algo salió mal de nuestro lado. Inténtalo de nuevo en un minuto.');
   });
 });

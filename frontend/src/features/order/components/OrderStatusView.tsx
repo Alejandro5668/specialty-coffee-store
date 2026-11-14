@@ -25,35 +25,32 @@ type Props =
 
 const WORDS = {
   confirming: [
-    'We are confirming your payment',
-    'This usually takes a few seconds. Keep this page open.',
+    'Estamos confirmando tu pago',
+    'Suele tardar unos segundos. Mantén esta página abierta.',
   ],
   slow: [
-    'Your payment is still being confirmed',
-    'It is taking longer than usual. Your order is reserved. Check again in a moment.',
+    'Tu pago aún se está confirmando',
+    'Está tardando más de lo habitual. Tu pedido está reservado. Vuelve a consultar en un momento.',
   ],
-  approved: [
-    'Payment approved',
-    'Thank you! We received your payment and your order is confirmed.',
-  ],
+  approved: ['Pago aprobado', '¡Gracias! Recibimos tu pago y tu pedido está confirmado.'],
   declined: [
-    'Your card was declined',
-    'Nothing was charged. Try another card, or check with your bank.',
+    'Tu tarjeta fue rechazada',
+    'No se hizo ningún cobro. Prueba con otra tarjeta o consulta con tu banco.',
   ],
   error: [
-    'We could not complete the payment',
-    'Nothing was charged. Try again in a moment, or use another card.',
+    'No pudimos completar el pago',
+    'No se hizo ningún cobro. Inténtalo de nuevo en un momento o usa otra tarjeta.',
   ],
 } as const;
 
 const label = ({ coffee, sizeGrams, quantity }: Summary): string =>
-  coffee && sizeGrams ? `${coffee}, ${sizeGrams} g × ${quantity}` : `Your coffee × ${quantity}`;
+  coffee && sizeGrams ? `${coffee}, ${sizeGrams} g × ${quantity}` : `Tu café × ${quantity}`;
 
 export const OrderStatusView = (props: Props) => {
   if (props.kind === 'checking') {
     return (
       <p role="status" aria-live="polite">
-        Checking your order…
+        Consultando tu pedido…
       </p>
     );
   }
@@ -64,11 +61,11 @@ export const OrderStatusView = (props: Props) => {
         <p>{props.message}</p>
         {props.canRetry && (
           <Button block onClick={props.onRetry}>
-            Try again
+            Intentar de nuevo
           </Button>
         )}
         <Button block variant="quiet" onClick={props.onBack}>
-          Back to the coffees
+          Volver a los cafés
         </Button>
       </div>
     );
@@ -91,27 +88,27 @@ export const OrderStatusView = (props: Props) => {
         deliveryFeeInCents={summary.amounts.deliveryFeeInCents}
         totalInCents={summary.amounts.totalInCents}
       />
-      <p className="order__reference">Order reference: {summary.reference}</p>
+      <p className="order__reference">Referencia del pedido: {summary.reference}</p>
 
       {props.kind === 'slow' && (
         <Button block onClick={props.onCheckAgain}>
-          Check again
+          Consultar de nuevo
         </Button>
       )}
       {(props.kind === 'declined' || props.kind === 'error') && (
         <Button block onClick={props.onTryAnotherCard}>
-          Try another card
+          Probar con otra tarjeta
         </Button>
       )}
       {'returnIn' in props && props.returnIn !== null && (
         <div className="order__return stack">
           {/* A timer is not announced every second; the result above already was. */}
           <p role="timer">
-            Returning to the coffees in {props.returnIn}{' '}
-            {props.returnIn === 1 ? 'second' : 'seconds'}.
+            Volviendo a los cafés en {props.returnIn}{' '}
+            {props.returnIn === 1 ? 'segundo' : 'segundos'}.
           </p>
           <Button block variant="quiet" onClick={props.onStay}>
-            Stay on this page
+            Quedarme en esta página
           </Button>
         </div>
       )}
@@ -121,7 +118,7 @@ export const OrderStatusView = (props: Props) => {
           variant={props.kind === 'approved' ? 'primary' : 'quiet'}
           onClick={props.onBack}
         >
-          Back to the coffees
+          Volver a los cafés
         </Button>
       )}
     </div>

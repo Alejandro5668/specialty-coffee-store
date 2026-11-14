@@ -72,18 +72,18 @@ describe('validateCardNumber', () => {
   );
 
   it('asks for the number when it is empty', () => {
-    expect(validateCardNumber('')).toBe('Enter the card number.');
-    expect(validateCardNumber('   ')).toBe('Enter the card number.');
+    expect(validateCardNumber('')).toBe('Ingresa el número de tarjeta.');
+    expect(validateCardNumber('   ')).toBe('Ingresa el número de tarjeta.');
   });
 
   it.each(['4242', '4242 4242 4242 4241', '4242 4242 4242 42424'])(
     'says %p does not look valid',
-    (n) => expect(validateCardNumber(n)).toBe('Check the card number: it does not look valid.'),
+    (n) => expect(validateCardNumber(n)).toBe('Revisa el número de tarjeta: no parece válido.'),
   );
 
   it('only accepts Visa and Mastercard, and says so', () => {
-    expect(validateCardNumber('3782 8224 6310 005')).toBe('We accept Visa and Mastercard.');
-    expect(validateCardNumber('6011 1111 1111 1117')).toBe('We accept Visa and Mastercard.');
+    expect(validateCardNumber('3782 8224 6310 005')).toBe('Aceptamos Visa y Mastercard.');
+    expect(validateCardNumber('6011 1111 1111 1117')).toBe('Aceptamos Visa y Mastercard.');
   });
 
   it.each(['<script>alert(1)</script>', "4242'; DROP TABLE", '４２４２'])(
@@ -101,20 +101,20 @@ describe('validateExpiry', () => {
 
   it('asks for a complete date', () => {
     for (const e of ['', '1', '12', '12 / 3', 'ab']) {
-      expect(validateExpiry(e, now)).toBe('Enter the expiry date as MM / YY.');
+      expect(validateExpiry(e, now)).toBe('Ingresa la fecha de vencimiento como MM / AA.');
     }
   });
 
   it.each(['00 / 30', '13 / 30', '99 / 30'])('rejects the month in %s', (e) =>
-    expect(validateExpiry(e, now)).toBe('Enter the expiry date as MM / YY.'),
+    expect(validateExpiry(e, now)).toBe('Ingresa la fecha de vencimiento como MM / AA.'),
   );
 
   it.each(['10 / 26', '12 / 25', '01 / 20'])('says %s has expired', (e) =>
-    expect(validateExpiry(e, now)).toBe('This card has expired. Use another card.'),
+    expect(validateExpiry(e, now)).toBe('Esta tarjeta está vencida. Usa otra tarjeta.'),
   );
 
   it('rejects a year that is too far away to be real', () => {
-    expect(validateExpiry('12 / 60', now)).toBe('Check the expiry year.');
+    expect(validateExpiry('12 / 60', now)).toBe('Revisa el año de vencimiento.');
   });
 });
 
@@ -124,7 +124,7 @@ describe('validateCvc', () => {
     expect(validateCvc('000')).toBeNull();
   });
   it.each(['', '12', '1234', 'abc', '12a', ' 12 '])('rejects %p', (c) =>
-    expect(validateCvc(c)).toBe('Enter the 3 digits on the back of the card.'),
+    expect(validateCvc(c)).toBe('Ingresa los 3 dígitos del reverso de la tarjeta.'),
   );
 });
 
@@ -134,10 +134,10 @@ describe('validateHolder', () => {
   );
   it('needs at least five characters, because the payment service requires it', () => {
     expect(validateHolder('Ana')).toBe(
-      'Enter the name as it appears on the card (at least 5 characters).',
+      'Ingresa el nombre como aparece en la tarjeta (mínimo 5 caracteres).',
     );
     expect(validateHolder('')).toBe(
-      'Enter the name as it appears on the card (at least 5 characters).',
+      'Ingresa el nombre como aparece en la tarjeta (mínimo 5 caracteres).',
     );
   });
   it.each([
@@ -162,6 +162,6 @@ describe('brandName', () => {
   it.each([
     ['visa', 'Visa'],
     ['mastercard', 'Mastercard'],
-    ['unknown', 'Card'],
+    ['unknown', 'Tarjeta'],
   ] as const)('writes %s as %s', (brand, name) => expect(brandName(brand)).toBe(name));
 });

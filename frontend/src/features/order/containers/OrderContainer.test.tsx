@@ -21,9 +21,9 @@ describe('OrderContainer: while the payment is confirmed', () => {
         },
       },
     });
-    expect(screen.getByText('Checking your order…')).toBeInTheDocument();
-    expect(await heading('We are confirming your payment')).toBeInTheDocument();
-    expect(await heading('Payment approved')).toBeInTheDocument();
+    expect(screen.getByText('Consultando tu pedido…')).toBeInTheDocument();
+    expect(await heading('Estamos confirmando tu pago')).toBeInTheDocument();
+    expect(await heading('Pago aprobado')).toBeInTheDocument();
     expect(calls.length).toBeGreaterThanOrEqual(3);
     expect(new Set(calls)).toEqual(new Set(['order-1']));
   });
@@ -31,7 +31,7 @@ describe('OrderContainer: while the payment is confirmed', () => {
   it('stops asking once the result is final', async () => {
     const getTransaction = jest.fn(async () => orderView('APPROVED'));
     setupOrder({ api: { getTransaction } });
-    await heading('Payment approved');
+    await heading('Pago aprobado');
     await new Promise((r) => setTimeout(r, 40));
     expect(getTransaction).toHaveBeenCalledTimes(1);
   });
@@ -42,7 +42,7 @@ describe('OrderContainer: while the payment is confirmed', () => {
       api: { getTransaction },
       poll: { intervalMs: 10, maxChecks: 100 },
     });
-    await heading('We are confirming your payment');
+    await heading('Estamos confirmando tu pago');
     unmount();
     const seen = getTransaction.mock.calls.length;
     await new Promise((r) => setTimeout(r, 60));
@@ -55,11 +55,11 @@ describe('OrderContainer: while the payment is confirmed', () => {
       poll: { intervalMs: 5, maxChecks: 3 },
       api: { getTransaction: async () => orderView(approve ? 'APPROVED' : 'PENDING') },
     });
-    expect(await heading('Your payment is still being confirmed')).toBeInTheDocument();
-    expect(screen.getByText(/taking longer than usual/i)).toBeInTheDocument();
+    expect(await heading('Tu pago aún se está confirmando')).toBeInTheDocument();
+    expect(screen.getByText(/más de lo habitual/i)).toBeInTheDocument();
     approve = true;
-    await user.click(screen.getByRole('button', { name: 'Check again' }));
-    expect(await heading('Payment approved')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Consultar de nuevo' }));
+    expect(await heading('Pago aprobado')).toBeInTheDocument();
   });
 
   it('never asks two things at once', async () => {
@@ -77,7 +77,7 @@ describe('OrderContainer: while the payment is confirmed', () => {
         },
       },
     });
-    await heading('Your payment is still being confirmed');
+    await heading('Tu pago aún se está confirmando');
     expect(most).toBe(1);
   });
 });
@@ -91,7 +91,7 @@ describe('OrderContainer: when it cannot be read', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('We could not find that order.');
     await new Promise((r) => setTimeout(r, 40));
     expect(getTransaction).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('button', { name: 'Back to the coffees' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volver a los cafés' })).toBeInTheDocument();
   });
 
   it('does not repeat a hostile address in the page', async () => {
@@ -118,16 +118,18 @@ describe('OrderContainer: when it cannot be read', () => {
             throw new ApiError(
               0,
               'NETWORK',
-              'We could not reach the store. Check your connection and try again.',
+              'No pudimos conectar con la tienda. Revisa tu conexión e inténtalo de nuevo.',
             );
           return orderView('APPROVED');
         },
       },
     });
-    expect(await screen.findByRole('alert')).toHaveTextContent('We could not reach the store.');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No pudimos conectar con la tienda.',
+    );
     expect(calls).toBe(3);
-    await user.click(screen.getByRole('button', { name: 'Try again' }));
-    expect(await heading('Payment approved')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Intentar de nuevo' }));
+    expect(await heading('Pago aprobado')).toBeInTheDocument();
   });
 
   it('never shows a raw error from the code', async () => {
@@ -140,7 +142,7 @@ describe('OrderContainer: when it cannot be read', () => {
       },
     });
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Something went wrong. Try again in a minute.',
+      'Algo salió mal. Inténtalo de nuevo en un minuto.',
     );
     await waitFor(() => expect(document.body.textContent).not.toContain('Cannot read'));
   });

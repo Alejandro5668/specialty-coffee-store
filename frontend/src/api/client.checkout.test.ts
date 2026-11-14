@@ -50,7 +50,7 @@ const failure = async (p: Promise<unknown>): Promise<ApiError> => {
   }
   throw new Error('expected a failure');
 };
-const SERVER = 'Something went wrong on our side. Try again in a minute.';
+const SERVER = 'Algo salió mal de nuestro lado. Inténtalo de nuevo en un minuto.';
 
 describe('getCheckoutOptions', () => {
   it('reads the terms and the fees with a plain GET', async () => {
@@ -127,7 +127,7 @@ describe('createOrder', () => {
     const error = await failure(api.createOrder(order));
     expect(error).toMatchObject({ code: 'NETWORK', status: 0 });
     expect(error.message).toBe(
-      'We could not confirm your order. Press Pay again: you will not be charged twice.',
+      'No pudimos confirmar tu pedido. Pulsa Pagar de nuevo: no se te cobrará dos veces.',
     );
   });
 

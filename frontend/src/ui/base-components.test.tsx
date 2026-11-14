@@ -35,7 +35,7 @@ describe('TextField', () => {
   it('connects the label, the hint and the error to the input', () => {
     render(
       <TextField
-        label="Email"
+        label="Correo electrónico"
         name="email"
         value=""
         onChange={jest.fn()}
@@ -43,7 +43,7 @@ describe('TextField', () => {
         error={null}
       />,
     );
-    const input = screen.getByLabelText('Email');
+    const input = screen.getByLabelText('Correo electrónico');
     expect(input).toHaveAccessibleDescription('We send the receipt here.');
     expect(input).not.toHaveAttribute('aria-invalid', 'true');
   });
@@ -51,7 +51,7 @@ describe('TextField', () => {
   it('marks the input invalid and reads the error instead of the hint', () => {
     render(
       <TextField
-        label="Email"
+        label="Correo electrónico"
         name="email"
         value="x"
         onChange={jest.fn()}
@@ -59,7 +59,7 @@ describe('TextField', () => {
         error="Enter a valid email."
       />,
     );
-    const input = screen.getByLabelText('Email');
+    const input = screen.getByLabelText('Correo electrónico');
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAccessibleDescription('Enter a valid email.');
     expect(screen.queryByText('We send the receipt here.')).not.toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('TextField', () => {
       const [value, setValue] = useState('');
       return (
         <TextField
-          label="Card"
+          label="Tarjeta"
           name="card"
           value={value}
           onChange={setValue}
@@ -81,7 +81,7 @@ describe('TextField', () => {
       );
     };
     render(<Harness />);
-    const input = screen.getByLabelText('Card');
+    const input = screen.getByLabelText('Tarjeta');
     await userEvent.type(input, '12345678');
     expect(input).toHaveValue('12345');
     expect(input).toHaveAttribute('inputmode', 'numeric');
@@ -92,7 +92,7 @@ describe('TextField', () => {
   it('shows something next to the input, such as a card brand', () => {
     render(
       <TextField
-        label="Card"
+        label="Tarjeta"
         name="card"
         value=""
         onChange={jest.fn()}
@@ -115,7 +115,7 @@ describe('Checkbox', () => {
     const onChange = jest.fn();
     render(
       <Checkbox checked={false} onChange={onChange} error={null}>
-        I accept the <a href="https://example.test/terms.pdf">terms</a>
+        Acepto los <a href="https://example.test/terms.pdf">terms</a>
       </Checkbox>,
     );
     await userEvent.click(screen.getByRole('checkbox'));
@@ -129,7 +129,7 @@ describe('Checkbox', () => {
   it('reads its error', () => {
     render(
       <Checkbox checked={false} onChange={jest.fn()} error="Accept the terms to continue.">
-        Terms
+        Términos
       </Checkbox>,
     );
     expect(screen.getByRole('checkbox')).toHaveAttribute('aria-invalid', 'true');
@@ -157,22 +157,22 @@ describe('CardBrandMark', () => {
 describe('Modal', () => {
   it('opens as a modal dialog named by its title', () => {
     render(
-      <Modal title="Card and delivery" onClose={jest.fn()}>
+      <Modal title="Tarjeta y entrega" onClose={jest.fn()}>
         <p>Body</p>
       </Modal>,
     );
-    const dialog = screen.getByRole('dialog', { name: 'Card and delivery' });
+    const dialog = screen.getByRole('dialog', { name: 'Tarjeta y entrega' });
     expect(dialog).toHaveAttribute('open');
     expect(screen.getByText('Body')).toBeInTheDocument();
   });
 
   it('starts on its title, so a screen reader reads where it is and the phone keyboard does not pop up', () => {
     render(
-      <Modal title="Card and delivery" onClose={jest.fn()}>
+      <Modal title="Tarjeta y entrega" onClose={jest.fn()}>
         <input aria-label="First field" />
       </Modal>,
     );
-    expect(screen.getByRole('heading', { name: 'Card and delivery' })).toHaveFocus();
+    expect(screen.getByRole('heading', { name: 'Tarjeta y entrega' })).toHaveFocus();
   });
 
   it('closes with its button and with the Escape key, without leaving the page by itself', async () => {
@@ -182,7 +182,7 @@ describe('Modal', () => {
         <p>Body</p>
       </Modal>,
     );
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
     expect(onClose).toHaveBeenCalledTimes(1);
     const cancel = new Event('cancel', { cancelable: true });
     screen.getByRole('dialog').dispatchEvent(cancel);

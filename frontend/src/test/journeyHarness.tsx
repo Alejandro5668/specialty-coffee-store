@@ -128,29 +128,29 @@ export const choose500gTwice = async (user: ReturnType<typeof userEvent.setup>) 
     (await screen.findByRole('heading', { name: 'Huila Washed' })).closest('article')!,
   );
   await user.click(card.getByRole('radio', { name: /500 g/ }));
-  await user.click(card.getByRole('button', { name: 'Increase quantity' }));
-  await user.click(card.getByRole('button', { name: 'Pay with credit card' }));
+  await user.click(card.getByRole('button', { name: 'Aumentar cantidad' }));
+  await user.click(card.getByRole('button', { name: 'Pagar con tarjeta de crédito' }));
 };
 
 export const fillTheForm = async (user: ReturnType<typeof userEvent.setup>) => {
-  await screen.findByRole('link', { name: 'terms and conditions' });
+  await screen.findByRole('link', { name: 'términos y condiciones' });
   const type = async (label: string, text: string) => {
     await user.clear(screen.getByLabelText(label));
     await user.type(screen.getByLabelText(label), text);
   };
-  await type('Card number', PAN);
-  await type('Expiry date', '1230');
-  await type('Security code', CVC);
-  await type('Name on the card', 'Ana Pérez');
-  await type('Full name', 'Ana Pérez');
-  await type('Email', 'ana@example.com');
-  await type('Recipient name (optional)', 'Ana Pérez');
-  await type('Address', 'Calle 10 # 5-20');
-  await type('City', 'Medellín');
-  await type('Phone', '300 123 4567');
-  for (const name of [/terms and conditions/i, /personal data/i]) {
+  await type('Número de tarjeta', PAN);
+  await type('Fecha de vencimiento', '1230');
+  await type('Código de seguridad', CVC);
+  await type('Nombre en la tarjeta', 'Ana Pérez');
+  await type('Nombre completo', 'Ana Pérez');
+  await type('Correo electrónico', 'ana@example.com');
+  await type('Nombre del destinatario (opcional)', 'Ana Pérez');
+  await type('Dirección', 'Calle 10 # 5-20');
+  await type('Ciudad', 'Medellín');
+  await type('Teléfono', '300 123 4567');
+  for (const name of [/términos y condiciones/i, /datos personales/i]) {
     const box = screen.getByRole('checkbox', { name });
     if (!(box as HTMLInputElement).checked) await user.click(box);
   }
-  await user.click(screen.getByRole('button', { name: 'Continue to summary' }));
+  await user.click(screen.getByRole('button', { name: 'Continuar al resumen' }));
 };
