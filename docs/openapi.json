@@ -222,6 +222,58 @@
         ]
       }
     },
+    "/deliveries/{id}": {
+      "get": {
+        "operationId": "DeliveriesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Order id returned by POST /checkout.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Never includes the recipient, the address, the phone or the customer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unpaid or unknown order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the delivery assigned to a paid order",
+        "tags": [
+          "Deliveries"
+        ]
+      }
+    },
     "/webhooks/payments": {
       "post": {
         "operationId": "WebhooksController_payments",
@@ -676,6 +728,36 @@
           "quantity",
           "amounts",
           "createdAt"
+        ]
+      },
+      "DeliveryStatusDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of the paid order."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ASSIGNED"
+            ]
+          },
+          "variantId": {
+            "type": "string",
+            "example": "huila-washed-250"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "variantId",
+          "quantity"
         ]
       },
       "WebhookReceivedDto": {

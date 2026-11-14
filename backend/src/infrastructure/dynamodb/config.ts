@@ -3,7 +3,13 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 
 export type DynamoConfig = {
   region: string;
-  tables: { products: string; variants: string; customers: string; transactions: string };
+  tables: {
+    products: string;
+    variants: string;
+    customers: string;
+    transactions: string;
+    deliveries: string;
+  };
 };
 
 const PREFIX = /^[A-Za-z0-9_.-]{1,100}$/;
@@ -18,6 +24,7 @@ export const loadDynamoConfig = (env: Record<string, string | undefined>): Dynam
       variants: `${prefix}-variants`,
       customers: `${prefix}-customers`,
       transactions: `${prefix}-transactions`,
+      deliveries: `${prefix}-deliveries`,
     },
   };
 };

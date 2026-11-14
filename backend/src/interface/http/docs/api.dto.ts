@@ -40,6 +40,13 @@ export class TransactionDto {
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
 }
 
+export class DeliveryStatusDto {
+  @ApiProperty({ format: 'uuid', description: 'The id of the paid order.' }) id!: string;
+  @ApiProperty({ enum: ['ASSIGNED'] }) status!: string;
+  @ApiProperty({ example: 'huila-washed-250' }) variantId!: string;
+  @ApiProperty({ example: 2 }) quantity!: number;
+}
+
 export class CustomerDto {
   @ApiProperty({ example: 'Ana Pérez', maxLength: 100 }) name!: string;
   @ApiProperty({ example: 'ana@example.com' }) email!: string;

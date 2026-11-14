@@ -25,13 +25,14 @@ describe('API documentation', () => {
     expect(res.headers['x-content-type-options']).toBe('nosniff');
   });
 
-  it('documents exactly the five public endpoints, and not the health check', async () => {
+  it('documents exactly the six public endpoints, and not the health check', async () => {
     const { paths } = await fetchDoc();
     const operations = Object.entries(paths).flatMap(([path, methods]) =>
       Object.keys(methods).map((method) => `${method.toUpperCase()} ${path}`),
     );
     expect(operations.sort()).toEqual([
       'GET /checkout/options',
+      'GET /deliveries/{id}',
       'GET /products',
       'GET /transactions/{id}',
       'POST /checkout',

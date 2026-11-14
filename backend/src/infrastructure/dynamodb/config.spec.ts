@@ -9,6 +9,7 @@ describe('loadDynamoConfig', () => {
         variants: 'coffee-store-variants',
         customers: 'coffee-store-customers',
         transactions: 'coffee-store-transactions',
+        deliveries: 'coffee-store-deliveries',
       },
     });
   });
@@ -16,6 +17,7 @@ describe('loadDynamoConfig', () => {
   it('uses the table prefix and the region from the environment', () => {
     const config = loadDynamoConfig({ AWS_REGION: 'us-east-2', TABLE_PREFIX: 'shop' });
     expect(config.tables.transactions).toBe('shop-transactions');
+    expect(config.tables.deliveries).toBe('shop-deliveries');
   });
 
   it.each(['', '  ', 'has space', 'a'.repeat(200)])('rejects the table prefix %p', (prefix) => {

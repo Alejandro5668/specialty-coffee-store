@@ -1,15 +1,17 @@
+import { TransactionCanceledException } from '@aws-sdk/client-dynamodb';
 import {
-  ConditionalCheckFailedException,
-  TransactionCanceledException,
-} from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, TransactWriteCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+  DynamoDBDocumentClient,
+  TransactWriteCommand,
+  TransactWriteCommandInput,
+} from '@aws-sdk/lib-dynamodb';
 import { err, ok, Result } from '../../domain/shared/result';
+import { assignShipment } from '../../domain/shipment/shipment';
 import { Transaction } from '../../domain/transaction/transaction';
 import { StockError } from '../../application/ports/catalog.repository';
 import { OrderStore } from '../../application/ports/order.store';
 import { TransactionRepository } from '../../application/ports/transaction.repository';
 import { DynamoConfig } from './config';
-import { fromTransaction, IDEMPOTENCY_PREFIX } from './mappers';
+import { fromShipment, fromTransaction, IDEMPOTENCY_PREFIX } from './mappers';
 
 const FAILED = 'ConditionalCheckFailed';
 
@@ -70,7 +72,7 @@ export class DynamoOrderStore implements OrderStore {
   }
 
   async settle(transaction: Transaction): Promise<boolean> {
-    const { variants, transactions } = this.config.tables;
+    const { transactions } = this.config.tables;
     const order = {
       TableName: transactions,
       Key: { id: transaction.id },
@@ -84,31 +86,11 @@ export class DynamoOrderStore implements OrderStore {
       },
     };
 
-    if (transaction.status === 'APPROVED') {
-      try {
-        await this.client.send(new UpdateCommand(order));
-        return true;
-      } catch (error) {
-        if (error instanceof ConditionalCheckFailedException) return false;
-        throw error;
-      }
-    }
-
     try {
       await this.client.send(
         new TransactWriteCommand({
-          TransactItems: [
-            { Update: order },
-            {
-              Update: {
-                TableName: variants,
-                Key: { id: transaction.variantId },
-                UpdateExpression: 'SET stock = stock + :q',
-                ConditionExpression: 'attribute_exists(id)',
-                ExpressionAttributeValues: { ':q': transaction.quantity },
-              },
-            },
-          ],
+          // Approved: the delivery is assigned in the same step. Otherwise the stock goes back.
+          TransactItems: [{ Update: order }, this.secondLeg(transaction)],
         }),
       );
       return true;
@@ -118,6 +100,30 @@ export class DynamoOrderStore implements OrderStore {
         return false;
       throw error;
     }
+  }
+
+  private secondLeg(
+    transaction: Transaction,
+  ): NonNullable<TransactWriteCommandInput['TransactItems']>[number] {
+    const shipment = assignShipment(transaction);
+    if (shipment.ok) {
+      return {
+        Put: {
+          TableName: this.config.tables.deliveries,
+          Item: fromShipment(shipment.value),
+          ConditionExpression: 'attribute_not_exists(id)',
+        },
+      };
+    }
+    return {
+      Update: {
+        TableName: this.config.tables.variants,
+        Key: { id: transaction.variantId },
+        UpdateExpression: 'SET stock = stock + :q',
+        ConditionExpression: 'attribute_exists(id)',
+        ExpressionAttributeValues: { ':q': transaction.quantity },
+      },
+    };
   }
 
   private async explainPlaceFailure(

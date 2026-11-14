@@ -10,13 +10,15 @@ import { FakeVerifier } from './fakes/fake-verifier';
 import { catalogWithStock, fixedClock, sequentialIds, VARIANT_ID } from './fakes/fixtures';
 import { InMemoryCustomers } from './fakes/in-memory-customers';
 import { InMemoryOrders } from './fakes/in-memory-orders';
+import { InMemoryShipments } from './fakes/in-memory-shipments';
 import { InMemoryTransactions } from './fakes/in-memory-transactions';
 
 /** The real Nest module with every port replaced by an in-memory fake: no network, no AWS. */
 export const buildTestApp = async (stock = 5, config: { trustProxyHops?: number } = {}) => {
   const catalog = catalogWithStock(VARIANT_ID, stock);
   const transactions = new InMemoryTransactions();
-  const orders = new InMemoryOrders(catalog, transactions);
+  const shipments = new InMemoryShipments();
+  const orders = new InMemoryOrders(catalog, transactions, shipments);
   const customers = new InMemoryCustomers();
   const gateway = new FakeGateway();
 
@@ -27,6 +29,8 @@ export const buildTestApp = async (stock = 5, config: { trustProxyHops?: number 
     .useValue(transactions)
     .overrideProvider(TOKENS.orders)
     .useValue(orders)
+    .overrideProvider(TOKENS.shipments)
+    .useValue(shipments)
     .overrideProvider(TOKENS.customers)
     .useValue(customers)
     .overrideProvider(TOKENS.gateway)
@@ -49,5 +53,5 @@ export const buildTestApp = async (stock = 5, config: { trustProxyHops?: number 
   );
   setupSwagger(app);
   await app.init();
-  return { app, catalog, transactions, orders, customers, gateway };
+  return { app, catalog, transactions, orders, shipments, customers, gateway };
 };
