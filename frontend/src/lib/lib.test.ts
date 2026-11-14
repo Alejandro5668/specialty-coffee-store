@@ -20,13 +20,13 @@ describe('formatCop', () => {
 
 describe('stockLabel', () => {
   it.each([
-    [0, 'Sold out'],
-    [1, 'Only 1 left'],
-    [5, 'Only 5 left'],
-    [6, '6 in stock'],
-    [20, '20 in stock'],
-    [-3, 'Sold out'],
-    [NaN, 'Sold out'],
+    [0, 'Agotado'],
+    [1, 'Queda 1'],
+    [5, 'Quedan 5'],
+    [6, '6 disponibles'],
+    [20, '20 disponibles'],
+    [-3, 'Agotado'],
+    [NaN, 'Agotado'],
   ])('says %p as "%s"', (stock, text) => {
     expect(stockLabel(stock)).toBe(text);
   });

@@ -71,7 +71,7 @@ describe('catalog', () => {
       throw new TypeError("Cannot read properties of undefined (reading 'x')");
     });
     await store.dispatch(loadCatalog());
-    expect(store.getState().catalog.error).toBe('Something went wrong. Try again in a minute.');
+    expect(store.getState().catalog.error).toBe('Algo salió mal. Inténtalo de nuevo en un minuto.');
   });
 
   it('can retry after a failure', async () => {

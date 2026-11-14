@@ -56,9 +56,9 @@ export const CoffeeCard = ({
           </p>
         </div>
         <p className="coffee__stock">{stockLabel(variant.stock)}</p>
-        <p className="coffee__note">Fees and shipping are added in the summary.</p>
+        <p className="coffee__note">La tarifa base y el envío se suman en el resumen.</p>
         <Button disabled={maxQuantity < 1} onClick={onPay}>
-          Pay with credit card
+          Pagar con tarjeta de crédito
         </Button>
       </div>
     </article>

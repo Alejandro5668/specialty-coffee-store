@@ -9,7 +9,7 @@ export type CatalogState = {
   error: string | null;
 };
 
-const FALLBACK = 'Something went wrong. Try again in a minute.';
+const FALLBACK = 'Algo salió mal. Inténtalo de nuevo en un minuto.';
 
 export const loadCatalog = createAsyncThunk<
   ProductView[],

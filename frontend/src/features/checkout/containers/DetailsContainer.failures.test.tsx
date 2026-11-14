@@ -15,7 +15,7 @@ describe('DetailsContainer: when the payment service says no', () => {
     const { user } = await setup({
       tokenizer: async () => {
         throw new TokenizeError(
-          'This card number is not accepted. Check it or use another card.',
+          'Este número de tarjeta no es aceptado. Revísalo o usa otra tarjeta.',
           'number',
         );
       },
@@ -25,12 +25,12 @@ describe('DetailsContainer: when the payment service says no', () => {
     await fillPerson(user);
     await accept(user);
     await submit(user);
-    expect(await screen.findByLabelText('Card number')).toHaveAccessibleDescription(
-      'This card number is not accepted. Check it or use another card.',
+    expect(await screen.findByLabelText('Número de tarjeta')).toHaveAccessibleDescription(
+      'Este número de tarjeta no es aceptado. Revísalo o usa otra tarjeta.',
     );
-    expect(screen.getByLabelText('Card number')).toHaveValue(NUMBER);
-    expect(screen.getByLabelText('Card number')).toHaveFocus();
-    expect(screen.getByRole('button', { name: 'Continue to summary' })).toBeEnabled();
+    expect(screen.getByLabelText('Número de tarjeta')).toHaveValue(NUMBER);
+    expect(screen.getByLabelText('Número de tarjeta')).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Continuar al resumen' })).toBeEnabled();
   });
 
   it('says what happened when the payment service cannot be reached, and lets the shopper retry', async () => {
@@ -39,7 +39,7 @@ describe('DetailsContainer: when the payment service says no', () => {
       tokenizer: async () => {
         if (fail)
           throw new TokenizeError(
-            'We could not reach the payment service. Check your connection and try again.',
+            'No pudimos conectar con el servicio de pagos. Revisa tu conexión e inténtalo de nuevo.',
             null,
           );
         return { token: 'tok_test_123456', brand: 'visa' as const, last4: '4242' };
@@ -51,7 +51,7 @@ describe('DetailsContainer: when the payment service says no', () => {
     await accept(user);
     await submit(user);
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'We could not reach the payment service.',
+      'No pudimos conectar con el servicio de pagos.',
     );
     fail = false;
     await submit(user);
@@ -71,7 +71,7 @@ describe('DetailsContainer: when the payment service says no', () => {
     await accept(user);
     await submit(user);
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Something went wrong. Try again in a minute.',
+      'Algo salió mal. Inténtalo de nuevo en un minuto.',
     );
   });
 });

@@ -3,7 +3,7 @@ import { CARD_TTL_MS } from '../../../store/checkoutState';
 import { coffee, options, setupSummary } from '../../../test/summaryHarness';
 import { draft, NOW } from '../../../test/state';
 
-const sheet = () => screen.findByRole('dialog', { name: 'Order summary' });
+const sheet = () => screen.findByRole('dialog', { name: 'Resumen del pedido' });
 
 describe('SummaryContainer: who may see it', () => {
   it.each([
@@ -39,7 +39,7 @@ describe('SummaryContainer: the amounts', () => {
     expect(screen.getByTestId('line-base')).toHaveTextContent('$3.000');
     expect(screen.getByTestId('line-delivery')).toHaveTextContent('$8.000');
     expect(screen.getByTestId('line-total')).toHaveTextContent('$75.000');
-    expect(screen.getByRole('button', { name: 'Pay $75.000' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Pagar $75.000' })).toBeEnabled();
   });
 
   it('takes the price from the catalog now, never from anything saved', async () => {
@@ -58,15 +58,15 @@ describe('SummaryContainer: the amounts', () => {
   it('shows how the order will be paid and where it will go', async () => {
     await setupSummary();
     const dialog = await sheet();
-    expect(dialog).toHaveTextContent('Visa ending 4242');
+    expect(dialog).toHaveTextContent('Visa terminada en 4242');
     expect(dialog).toHaveTextContent('Ana Pérez');
     expect(dialog).toHaveTextContent('Calle 10 # 5-20, Medellín');
   });
 
   it('waits for the coffees and the fees before it asks for money', async () => {
     await setupSummary({ catalog: 'pending' });
-    expect(await screen.findByText('Loading your order…')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /^Pay/ })).not.toBeInTheDocument();
+    expect(await screen.findByText('Cargando tu pedido…')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Pagar/ })).not.toBeInTheDocument();
   });
 
   it('shows hostile saved text as plain text', async () => {
@@ -80,7 +80,7 @@ describe('SummaryContainer: the amounts', () => {
         },
       }),
     });
-    await screen.findByText('Loading your order…').catch(() => undefined);
+    await screen.findByText('Cargando tu pedido…').catch(() => undefined);
     expect(document.querySelectorAll('script, img[onerror]')).toHaveLength(0);
   });
 });
@@ -90,26 +90,24 @@ describe('SummaryContainer: when it cannot be paid', () => {
     [
       'the size is sold out',
       [0, 0] as [number, number],
-      'This size is sold out. Go back and choose another coffee.',
+      'Este tamaño está agotado. Vuelve y elige otro café.',
     ],
     [
       'there is less stock than the quantity',
       [1, 1] as [number, number],
-      'Only 1 left. Go back and choose fewer units.',
+      'Solo queda 1. Vuelve y elige menos unidades.',
     ],
   ])('explains it when %s', async (_label, stocks, message) => {
     await setupSummary({ catalog: [coffee(stocks)] });
     expect(await screen.findByText(message)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /^Pay/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Back to the coffees' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Pagar/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volver a los cafés' })).toBeInTheDocument();
   });
 
   it('explains it when the coffee no longer exists', async () => {
     await setupSummary({ catalog: [] });
     expect(
-      await screen.findByText(
-        'That coffee is no longer available. Go back and choose another one.',
-      ),
+      await screen.findByText('Ese café ya no está disponible. Vuelve y elige otro.'),
     ).toBeInTheDocument();
   });
 
@@ -124,10 +122,10 @@ describe('SummaryContainer: when it cannot be paid', () => {
       },
     });
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Something went wrong. Try again in a minute.',
+      'Algo salió mal. Inténtalo de nuevo en un minuto.',
     );
     fail = false;
-    await user.click(screen.getByRole('button', { name: 'Try again' }));
-    expect(await screen.findByRole('button', { name: 'Pay $75.000' })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: 'Intentar de nuevo' }));
+    expect(await screen.findByRole('button', { name: 'Pagar $75.000' })).toBeEnabled();
   });
 });

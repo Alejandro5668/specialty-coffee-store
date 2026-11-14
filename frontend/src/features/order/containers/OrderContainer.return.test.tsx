@@ -20,10 +20,10 @@ afterEach(() => jest.useRealTimers());
 describe('OrderContainer: going back to the coffees by itself', () => {
   it('counts down after an approved payment and returns to the coffees with everything forgotten', async () => {
     const { store, tick } = open('APPROVED');
-    await final('Payment approved');
-    expect(screen.getByRole('timer')).toHaveTextContent('Returning to the coffees in 3 seconds.');
+    await final('Pago aprobado');
+    expect(screen.getByRole('timer')).toHaveTextContent('Volviendo a los cafés en 3 segundos.');
     tick(1000);
-    expect(screen.getByRole('timer')).toHaveTextContent('Returning to the coffees in 2 seconds.');
+    expect(screen.getByRole('timer')).toHaveTextContent('Volviendo a los cafés en 2 segundos.');
     tick(2000);
     expect(await screen.findByText('Catalog page')).toBeInTheDocument();
     expect(store.getState().checkout).toMatchObject({
@@ -35,24 +35,24 @@ describe('OrderContainer: going back to the coffees by itself', () => {
 
   it('says "1 second" in the singular', async () => {
     const { tick } = open('APPROVED');
-    await final('Payment approved');
+    await final('Pago aprobado');
     tick(2000);
-    expect(screen.getByRole('timer')).toHaveTextContent('Returning to the coffees in 1 second.');
+    expect(screen.getByRole('timer')).toHaveTextContent('Volviendo a los cafés en 1 segundo.');
   });
 
   it('lets the shopper stay on the page, and then never leaves by itself', async () => {
     const { user, tick } = open('APPROVED');
-    await final('Payment approved');
-    await user.click(screen.getByRole('button', { name: 'Stay on this page' }));
+    await final('Pago aprobado');
+    await user.click(screen.getByRole('button', { name: 'Quedarme en esta página' }));
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
     tick(10_000);
     expect(screen.queryByText('Catalog page')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Payment approved' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pago aprobado' })).toBeInTheDocument();
   });
 
   it('keeps the details after a declined payment, so the shopper does not have to type them again', async () => {
     const { store, tick } = open('DECLINED');
-    await final('Your card was declined');
+    await final('Tu tarjeta fue rechazada');
     expect(screen.getByRole('timer')).toBeInTheDocument();
     tick(3000);
     expect(await screen.findByText('Catalog page')).toBeInTheDocument();
@@ -67,7 +67,7 @@ describe('OrderContainer: going back to the coffees by itself', () => {
 
   it('does the same after a payment that failed', async () => {
     const { store, tick } = open('ERROR');
-    await final('We could not complete the payment');
+    await final('No pudimos completar el pago');
     tick(3000);
     expect(await screen.findByText('Catalog page')).toBeInTheDocument();
     expect(store.getState().checkout.customer.name).toBe('Ana Pérez');
@@ -81,7 +81,7 @@ describe('OrderContainer: going back to the coffees by itself', () => {
       poll: { intervalMs: 1000, maxChecks: 3 },
       api: { getTransaction: async () => orderView('PENDING') },
     });
-    await final('We are confirming your payment');
+    await final('Estamos confirmando tu pago');
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
     await act(async () => void jest.advanceTimersByTime(10_000));
     expect(screen.queryByText('Catalog page')).not.toBeInTheDocument();
@@ -90,7 +90,7 @@ describe('OrderContainer: going back to the coffees by itself', () => {
 
   it('can be turned off', async () => {
     const { tick } = open('APPROVED', 0);
-    await final('Payment approved');
+    await final('Pago aprobado');
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
     tick(60_000);
     expect(screen.queryByText('Catalog page')).not.toBeInTheDocument();
@@ -98,7 +98,7 @@ describe('OrderContainer: going back to the coffees by itself', () => {
 
   it('does not race the shopper who goes back by hand', async () => {
     const { user, tick } = open('APPROVED');
-    await user.click(await screen.findByRole('button', { name: 'Back to the coffees' }));
+    await user.click(await screen.findByRole('button', { name: 'Volver a los cafés' }));
     expect(await screen.findByText('Catalog page')).toBeInTheDocument();
     tick(10_000);
     expect(screen.getAllByText('Catalog page')).toHaveLength(1);

@@ -125,5 +125,6 @@ Rutas: `/` cafés, `/checkout/details` tarjeta y entrega (diálogo), `/checkout/
 | Solo se guardan la selección y los datos; nunca un importe      | Los precios vienen siempre de la API, así que editar el almacenamiento no puede mostrar un importe incorrecto   |
 | El `idempotencyKey` se guarda antes de enviar el pago           | Una recarga a mitad de la operación envía la misma clave, por lo que el pedido no se crea ni se cobra dos veces |
 | El token de la tarjeta se conserva 30 minutos como máximo       | Pasado ese tiempo se vuelve a pedir la tarjeta                                                                  |
+| La interfaz está en español (`lang="es"`)                       | Los textos de la aplicación y los mensajes de error están en español neutro, con tuteo                          |
 | El nombre del destinatario es opcional                          | Si está vacío, recibe el comprador; el formulario lo indica y el pedido siempre lleva un nombre                 |
 | Tras mostrar el resultado, la página vuelve a los cafés en 8 s  | Se puede cancelar. Si el pago se rechaza o falla se conservan los datos; si se aprueba, se borra todo           |

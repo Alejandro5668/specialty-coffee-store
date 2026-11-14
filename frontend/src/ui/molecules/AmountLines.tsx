@@ -23,11 +23,11 @@ export const AmountLines = ({
       <dd data-testid="line-product">{formatCop(productInCents)}</dd>
     </div>
     <div>
-      <dt>Base fee</dt>
+      <dt>Tarifa base</dt>
       <dd data-testid="line-base">{formatCop(baseFeeInCents)}</dd>
     </div>
     <div>
-      <dt>Delivery</dt>
+      <dt>Envío</dt>
       <dd data-testid="line-delivery">{formatCop(deliveryFeeInCents)}</dd>
     </div>
     <div className="amounts__total">

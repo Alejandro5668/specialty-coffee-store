@@ -63,23 +63,23 @@ export const setup = async (
 };
 
 export const fillCard = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.type(screen.getByLabelText('Card number'), NUMBER);
-  await user.type(screen.getByLabelText('Expiry date'), '1230');
-  await user.type(screen.getByLabelText('Security code'), CVC);
-  await user.type(screen.getByLabelText('Name on the card'), 'Ana Pérez');
+  await user.type(screen.getByLabelText('Número de tarjeta'), NUMBER);
+  await user.type(screen.getByLabelText('Fecha de vencimiento'), '1230');
+  await user.type(screen.getByLabelText('Código de seguridad'), CVC);
+  await user.type(screen.getByLabelText('Nombre en la tarjeta'), 'Ana Pérez');
 };
 export const fillPerson = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.type(screen.getByLabelText('Full name'), 'Ana Pérez');
-  await user.type(screen.getByLabelText('Email'), 'ana@example.com');
-  await user.type(screen.getByLabelText('Recipient name (optional)'), 'Ana Pérez');
-  await user.type(screen.getByLabelText('Address'), 'Calle 10 # 5-20');
-  await user.type(screen.getByLabelText('City'), 'Medellín');
-  await user.type(screen.getByLabelText('Phone'), '300 123 4567');
+  await user.type(screen.getByLabelText('Nombre completo'), 'Ana Pérez');
+  await user.type(screen.getByLabelText('Correo electrónico'), 'ana@example.com');
+  await user.type(screen.getByLabelText('Nombre del destinatario (opcional)'), 'Ana Pérez');
+  await user.type(screen.getByLabelText('Dirección'), 'Calle 10 # 5-20');
+  await user.type(screen.getByLabelText('Ciudad'), 'Medellín');
+  await user.type(screen.getByLabelText('Teléfono'), '300 123 4567');
 };
 export const accept = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(screen.getByRole('checkbox', { name: /terms and conditions/i }));
-  await user.click(screen.getByRole('checkbox', { name: /personal data/i }));
+  await user.click(screen.getByRole('checkbox', { name: /términos y condiciones/i }));
+  await user.click(screen.getByRole('checkbox', { name: /datos personales/i }));
 };
 export const submit = (user: ReturnType<typeof userEvent.setup>) =>
-  user.click(screen.getByRole('button', { name: 'Continue to summary' }));
-export const ready = () => screen.findByRole('link', { name: 'terms and conditions' });
+  user.click(screen.getByRole('button', { name: 'Continuar al resumen' }));
+export const ready = () => screen.findByRole('link', { name: 'términos y condiciones' });

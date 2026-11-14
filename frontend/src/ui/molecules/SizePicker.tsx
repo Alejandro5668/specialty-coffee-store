@@ -10,7 +10,7 @@ type Props = {
 };
 
 export const SizePicker = ({ name, variants, value, onChange }: Props) => (
-  <div role="radiogroup" aria-label="Size" className="sizes">
+  <div role="radiogroup" aria-label="Tamaño" className="sizes">
     {variants.map((v) => {
       const soldOut = v.stock <= 0;
       return (
@@ -29,7 +29,7 @@ export const SizePicker = ({ name, variants, value, onChange }: Props) => (
           />
           <span className="size__grams">{v.sizeGrams} g</span>
           <span className="size__price">{formatCop(v.priceInCents)}</span>
-          {soldOut && <span className="size__note">sold out</span>}
+          {soldOut && <span className="size__note">agotado</span>}
         </label>
       );
     })}

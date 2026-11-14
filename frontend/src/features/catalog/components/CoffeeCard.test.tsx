@@ -36,17 +36,19 @@ describe('CoffeeCard', () => {
     expect(screen.getByRole('heading', { name: 'Huila Washed' })).toBeInTheDocument();
     expect(screen.getByText('Caramel, red apple and a clean, sweet finish.')).toBeInTheDocument();
     expect(screen.getByTestId('coffee-total')).toHaveTextContent('$64.000');
-    expect(screen.getByText('20 in stock')).toBeInTheDocument();
+    expect(screen.getByText('20 disponibles')).toBeInTheDocument();
   });
 
   it('warns about fees before the summary so the total is never a surprise', () => {
     setup();
-    expect(screen.getByText('Fees and shipping are added in the summary.')).toBeInTheDocument();
+    expect(
+      screen.getByText('La tarifa base y el envío se suman en el resumen.'),
+    ).toBeInTheDocument();
   });
 
   it('shows the stock of the selected size', () => {
     setup({ variantId: 'huila-washed-500', quantity: 1 });
-    expect(screen.getByText('Only 3 left')).toBeInTheDocument();
+    expect(screen.getByText('Quedan 3')).toBeInTheDocument();
     expect(screen.getByTestId('coffee-total')).toHaveTextContent('$58.000');
   });
 
@@ -67,7 +69,7 @@ describe('CoffeeCard', () => {
 
   it('starts the payment with the pay button', async () => {
     const props = setup();
-    await userEvent.click(screen.getByRole('button', { name: 'Pay with credit card' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Pagar con tarjeta de crédito' }));
     expect(props.onPay).toHaveBeenCalledTimes(1);
   });
 
@@ -79,8 +81,8 @@ describe('CoffeeCard', () => {
       },
       maxQuantity: 0,
     });
-    expect(screen.getByRole('button', { name: 'Pay with credit card' })).toBeDisabled();
-    expect(screen.getByText('Sold out')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Pagar con tarjeta de crédito' })).toBeDisabled();
+    expect(screen.getByText('Agotado')).toBeInTheDocument();
   });
 
   it('shows hostile text as plain text', () => {
@@ -101,7 +103,7 @@ describe('CoffeeCard', () => {
     const props = setup();
     await userEvent.click(screen.getByRole('radio', { name: /500 g/ }));
     expect(props.onVariantChange).toHaveBeenCalledWith('huila-washed-500');
-    await userEvent.click(screen.getByRole('button', { name: 'Increase quantity' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Aumentar cantidad' }));
     expect(props.onQuantityChange).toHaveBeenCalledWith(3);
   });
 });

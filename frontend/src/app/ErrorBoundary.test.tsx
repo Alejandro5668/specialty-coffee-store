@@ -29,9 +29,9 @@ describe('ErrorBoundary', () => {
         <Broken />
       </ErrorBoundary>,
     );
-    expect(screen.getByRole('alert')).toHaveTextContent('Something went wrong');
+    expect(screen.getByRole('alert')).toHaveTextContent('Algo salió mal');
     expect(document.body.textContent).not.toContain('secret internals');
-    await userEvent.click(screen.getByRole('button', { name: 'Reload the page' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Recargar la página' }));
     expect(onReload).toHaveBeenCalledTimes(1);
   });
 });

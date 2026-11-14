@@ -75,11 +75,11 @@ describe('tokenize', () => {
   });
 
   it.each([
-    ['number', 'number', 'This card number is not accepted. Check it or use another card.'],
-    ['cvc', 'cvc', 'Check the 3 digits on the back of the card.'],
-    ['exp_month', 'expiry', 'Check the expiry date.'],
-    ['exp_year', 'expiry', 'Check the expiry date.'],
-    ['card_holder', 'holder', 'Check the name on the card.'],
+    ['number', 'number', 'Este número de tarjeta no es aceptado. Revísalo o usa otra tarjeta.'],
+    ['cvc', 'cvc', 'Revisa los 3 dígitos del reverso de la tarjeta.'],
+    ['exp_month', 'expiry', 'Revisa la fecha de vencimiento.'],
+    ['exp_year', 'expiry', 'Revisa la fecha de vencimiento.'],
+    ['card_holder', 'holder', 'Revisa el nombre que aparece en la tarjeta.'],
   ])(
     'points at the %s field with a plain message when the service refuses it',
     async (field, mapped, message) => {
@@ -97,7 +97,7 @@ describe('tokenize', () => {
     const { tokenizer } = tokenizerWith(() => validation({ other: ['x'] }));
     expect(await failure(tokenizer.tokenize(card))).toMatchObject({
       field: null,
-      message: 'We could not check the card. Review it or use another card.',
+      message: 'No pudimos verificar la tarjeta. Revísala o usa otra.',
     });
   });
 
@@ -105,7 +105,7 @@ describe('tokenize', () => {
     const { tokenizer } = tokenizerWith(() => html(status));
     expect(await failure(tokenizer.tokenize(card))).toMatchObject({
       field: null,
-      message: 'We could not check the card right now. Try again in a minute.',
+      message: 'No pudimos verificar la tarjeta en este momento. Inténtalo de nuevo en un minuto.',
     });
   });
 
@@ -113,7 +113,8 @@ describe('tokenize', () => {
     const { tokenizer } = tokenizerWith(() => Promise.reject(new TypeError('Failed to fetch')));
     expect(await failure(tokenizer.tokenize(card))).toMatchObject({
       field: null,
-      message: 'We could not reach the payment service. Check your connection and try again.',
+      message:
+        'No pudimos conectar con el servicio de pagos. Revisa tu conexión e inténtalo de nuevo.',
     });
   });
 
@@ -156,7 +157,7 @@ describe('unavailableTokenizer', () => {
     expect(error).toBeInstanceOf(TokenizeError);
     expect(error).toMatchObject({
       field: null,
-      message: 'Payments are not set up in this environment.',
+      message: 'Los pagos no están configurados en este entorno.',
     });
   });
 });

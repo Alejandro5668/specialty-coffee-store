@@ -18,7 +18,7 @@ export const OrderContainer = () => {
   const catalog = useAppSelector((state) => state.catalog);
   const order = useAppSelector((state) => state.order);
   const { exhausted, checkAgain } = useOrderPolling(id);
-  useDocumentTitle('Your order');
+  useDocumentTitle('Tu pedido');
 
   // The coffee's name comes from the catalog; the amounts always come from the order itself.
   useEffect(() => {

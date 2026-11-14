@@ -19,8 +19,8 @@ describe('DetailsContainer: getting here', () => {
 
   it('opens as a dialog with the three parts of the form', async () => {
     await setup();
-    expect(screen.getByRole('dialog', { name: 'Card and delivery' })).toBeInTheDocument();
-    for (const name of ['Card', 'Your details', 'Delivery']) {
+    expect(screen.getByRole('dialog', { name: 'Tarjeta y entrega' })).toBeInTheDocument();
+    for (const name of ['Tarjeta', 'Tus datos', 'Entrega']) {
       expect(screen.getByRole('group', { name })).toBeInTheDocument();
     }
   });
@@ -31,7 +31,7 @@ describe('DetailsContainer: getting here', () => {
     expect(terms).toHaveAttribute('href', 'https://example.test/terms.pdf');
     expect(terms).toHaveAttribute('target', '_blank');
     expect(terms).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(screen.getByRole('link', { name: 'personal data' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'datos personales' })).toHaveAttribute(
       'href',
       'https://example.test/data.pdf',
     );
@@ -40,11 +40,11 @@ describe('DetailsContainer: getting here', () => {
   it('waits for the terms before letting the shopper continue', async () => {
     let release: (o: CheckoutOptions) => void = () => undefined;
     await setup({ getCheckoutOptions: () => new Promise((resolve) => (release = resolve)) });
-    expect(screen.getByRole('button', { name: 'Continue to summary' })).toBeDisabled();
-    expect(screen.getByText('Loading the terms…')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continuar al resumen' })).toBeDisabled();
+    expect(screen.getByText('Cargando los términos…')).toBeInTheDocument();
     release(options);
     expect(await ready()).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Continue to summary' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Continuar al resumen' })).toBeEnabled();
   });
 
   it('says what happened when the terms cannot be loaded, and offers to try again', async () => {
@@ -63,9 +63,9 @@ describe('DetailsContainer: getting here', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'We cannot reach the payment service right now.',
     );
-    expect(screen.getByRole('button', { name: 'Continue to summary' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Continuar al resumen' })).toBeDisabled();
     fail = false;
-    await user.click(screen.getByRole('button', { name: 'Try again' }));
+    await user.click(screen.getByRole('button', { name: 'Intentar de nuevo' }));
     expect(await ready()).toBeInTheDocument();
   });
 });
@@ -73,7 +73,7 @@ describe('DetailsContainer: getting here', () => {
 describe('DetailsContainer: typing', () => {
   it('groups the card number, shows the brand and keeps only digits', async () => {
     const { user } = await setup();
-    const number = screen.getByLabelText('Card number');
+    const number = screen.getByLabelText('Número de tarjeta');
     await user.type(number, '4242a42424');
     expect(number).toHaveValue('4242 4242 4');
     expect(screen.getByRole('img', { name: 'Visa' })).toBeInTheDocument();
@@ -85,28 +85,31 @@ describe('DetailsContainer: typing', () => {
 
   it('writes the expiry as MM / YY and limits the security code to three digits', async () => {
     const { user } = await setup();
-    await user.type(screen.getByLabelText('Expiry date'), '1230');
-    await user.type(screen.getByLabelText('Security code'), '12a3456');
-    expect(screen.getByLabelText('Expiry date')).toHaveValue('12 / 30');
-    expect(screen.getByLabelText('Security code')).toHaveValue('123');
+    await user.type(screen.getByLabelText('Fecha de vencimiento'), '1230');
+    await user.type(screen.getByLabelText('Código de seguridad'), '12a3456');
+    expect(screen.getByLabelText('Fecha de vencimiento')).toHaveValue('12 / 30');
+    expect(screen.getByLabelText('Código de seguridad')).toHaveValue('123');
   });
 
   it('asks the phone keypad for digits and the right autofill for each field', async () => {
     await setup();
-    expect(screen.getByLabelText('Card number')).toHaveAttribute('autocomplete', 'cc-number');
-    expect(screen.getByLabelText('Card number')).toHaveAttribute('inputmode', 'numeric');
-    expect(screen.getByLabelText('Expiry date')).toHaveAttribute('autocomplete', 'cc-exp');
-    expect(screen.getByLabelText('Security code')).toHaveAttribute('autocomplete', 'cc-csc');
-    expect(screen.getByLabelText('Name on the card')).toHaveAttribute('autocomplete', 'cc-name');
-    expect(screen.getByLabelText('Email')).toHaveAttribute('type', 'email');
-    expect(screen.getByLabelText('Phone')).toHaveAttribute('type', 'tel');
+    expect(screen.getByLabelText('Número de tarjeta')).toHaveAttribute('autocomplete', 'cc-number');
+    expect(screen.getByLabelText('Número de tarjeta')).toHaveAttribute('inputmode', 'numeric');
+    expect(screen.getByLabelText('Fecha de vencimiento')).toHaveAttribute('autocomplete', 'cc-exp');
+    expect(screen.getByLabelText('Código de seguridad')).toHaveAttribute('autocomplete', 'cc-csc');
+    expect(screen.getByLabelText('Nombre en la tarjeta')).toHaveAttribute(
+      'autocomplete',
+      'cc-name',
+    );
+    expect(screen.getByLabelText('Correo electrónico')).toHaveAttribute('type', 'email');
+    expect(screen.getByLabelText('Teléfono')).toHaveAttribute('type', 'tel');
   });
 
   it('keeps what the shopper types about themselves in the saved draft, but never the card', async () => {
     const { user, store } = await setup();
-    await user.type(screen.getByLabelText('Full name'), 'Ana');
-    await user.type(screen.getByLabelText('City'), 'Cali');
-    await user.type(screen.getByLabelText('Card number'), NUMBER);
+    await user.type(screen.getByLabelText('Nombre completo'), 'Ana');
+    await user.type(screen.getByLabelText('Ciudad'), 'Cali');
+    await user.type(screen.getByLabelText('Número de tarjeta'), NUMBER);
     expect(store.getState().checkout.customer.name).toBe('Ana');
     expect(store.getState().checkout.delivery.city).toBe('Cali');
     expect(JSON.stringify(store.getState())).not.toContain('4242424242424242');

@@ -2,12 +2,12 @@ import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export const NotFoundPage = () => {
-  useDocumentTitle('Page not found');
+  useDocumentTitle('Página no encontrada');
   return (
     <div className="stack">
-      <h1 className="display">We could not find that page</h1>
-      <p>The address may be wrong, or the page may have moved.</p>
-      <Link to="/">See the coffees</Link>
+      <h1 className="display">No encontramos esa página</h1>
+      <p>Puede que la dirección esté mal escrita o que la página se haya movido.</p>
+      <Link to="/">Ver los cafés</Link>
     </div>
   );
 };

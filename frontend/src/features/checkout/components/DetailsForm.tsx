@@ -92,7 +92,7 @@ export const DetailsForm = ({
         <div role="alert" className="notice notice--error stack">
           <p>{terms.error}</p>
           <Button variant="quiet" onClick={terms.onRetry}>
-            Try again
+            Intentar de nuevo
           </Button>
         </div>
       )}
@@ -102,92 +102,98 @@ export const DetailsForm = ({
         </div>
       )}
 
-      <p className="field__hint details__notice">All fields are required unless marked optional.</p>
+      <p className="field__hint details__notice">
+        Todos los campos son obligatorios, salvo los marcados como opcionales.
+      </p>
 
       <fieldset className="details__group">
-        <legend>Card</legend>
+        <legend>Tarjeta</legend>
         {savedCard ? (
           <div className="details__saved">
             <CardBrandMark brand={savedCard.brand} />
             <p>
-              {brandName(savedCard.brand)} ending {savedCard.last4}
+              {brandName(savedCard.brand)} terminada en {savedCard.last4}
             </p>
             <Button variant="quiet" onClick={onUseAnotherCard}>
-              Use another card
+              Usar otra tarjeta
             </Button>
           </div>
         ) : (
           <>
-            {text('number', 'Card number', {
+            {text('number', 'Número de tarjeta', {
               inputMode: 'numeric',
               autoComplete: 'cc-number',
               maxLength: 23,
-              hint: 'We accept Visa and Mastercard.',
+              hint: 'Aceptamos Visa y Mastercard.',
               trailing: <CardBrandMark brand={brand} />,
             })}
             <div className="details__pair">
-              {text('expiry', 'Expiry date', {
+              {text('expiry', 'Fecha de vencimiento', {
                 inputMode: 'numeric',
                 autoComplete: 'cc-exp',
                 maxLength: 7,
-                hint: 'Like 12 / 30.',
+                hint: 'Por ejemplo, 12 / 30.',
               })}
-              {text('cvc', 'Security code', {
+              {text('cvc', 'Código de seguridad', {
                 inputMode: 'numeric',
                 autoComplete: 'cc-csc',
                 maxLength: 3,
-                hint: '3 digits on the back.',
+                hint: '3 dígitos en el reverso.',
               })}
             </div>
-            {text('holder', 'Name on the card', { autoComplete: 'cc-name' })}
+            {text('holder', 'Nombre en la tarjeta', { autoComplete: 'cc-name' })}
           </>
         )}
       </fieldset>
 
       <fieldset className="details__group">
-        <legend>Your details</legend>
-        {text('name', 'Full name', { autoComplete: 'name' })}
-        {text('email', 'Email', { type: 'email', inputMode: 'email', autoComplete: 'email' })}
+        <legend>Tus datos</legend>
+        {text('name', 'Nombre completo', { autoComplete: 'name' })}
+        {text('email', 'Correo electrónico', {
+          type: 'email',
+          inputMode: 'email',
+          autoComplete: 'email',
+        })}
       </fieldset>
 
       <fieldset className="details__group">
-        <legend>Delivery</legend>
-        {text('recipientName', 'Recipient name (optional)', {
+        <legend>Entrega</legend>
+        {text('recipientName', 'Nombre del destinatario (opcional)', {
           autoComplete: 'shipping name',
-          hint: 'Leave it empty and we use your name.',
+          hint: 'Si lo dejas vacío, usamos tu nombre.',
         })}
-        {text('address', 'Address', { autoComplete: 'shipping street-address' })}
-        {text('city', 'City', { autoComplete: 'shipping address-level2' })}
-        {text('phone', 'Phone', {
+        {text('address', 'Dirección', { autoComplete: 'shipping street-address' })}
+        {text('city', 'Ciudad', { autoComplete: 'shipping address-level2' })}
+        {text('phone', 'Teléfono', {
           type: 'tel',
           inputMode: 'tel',
           autoComplete: 'tel',
-          hint: 'Include the area code.',
+          hint: 'Incluye el indicativo.',
         })}
       </fieldset>
 
       <fieldset className="details__group">
-        <legend className="visually-hidden">Terms</legend>
+        <legend className="visually-hidden">Términos</legend>
         <Checkbox
           checked={accepted.terms}
           error={errors.terms ?? null}
           onChange={(checked) => onAccept('terms', checked)}
         >
-          I accept the {link(terms.links?.terms, 'terms and conditions')}.
+          Acepto los {link(terms.links?.terms, 'términos y condiciones')}.
         </Checkbox>
         <Checkbox
           checked={accepted.personalData}
           error={errors.personalData ?? null}
           onChange={(checked) => onAccept('personalData', checked)}
         >
-          I authorize the use of my {link(terms.links?.personalData, 'personal data')} to process
-          this order.
+          Autorizo el uso de mis {link(terms.links?.personalData, 'datos personales')} para procesar
+          este pedido.
         </Checkbox>
       </fieldset>
 
-      {terms.status === 'loading' && <p className="field__hint">Loading the terms…</p>}
+      {terms.status === 'loading' && <p className="field__hint">Cargando los términos…</p>}
       <Button block type="submit" disabled={busy || terms.status !== 'ready'}>
-        {busy ? 'Checking your card…' : 'Continue to summary'}
+        {busy ? 'Verificando tu tarjeta…' : 'Continuar al resumen'}
       </Button>
     </form>
   );

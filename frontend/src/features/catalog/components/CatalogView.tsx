@@ -17,7 +17,7 @@ export const CatalogView = ({ status, error, hasCoffees, onRetry, children }: Pr
   if (!hasCoffees && (status === 'idle' || status === 'loading')) {
     return (
       <div role="status" aria-live="polite">
-        <span className="visually-hidden">Loading coffees</span>
+        <span className="visually-hidden">Cargando cafés</span>
         <div className="catalog__grid" aria-hidden="true">
           {PLACEHOLDERS.map((n) => (
             <div key={n} className="catalog__placeholder">
@@ -35,20 +35,20 @@ export const CatalogView = ({ status, error, hasCoffees, onRetry, children }: Pr
     return (
       <div role="alert" className="notice notice--error stack">
         <p>{error}</p>
-        <Button onClick={onRetry}>Try again</Button>
+        <Button onClick={onRetry}>Intentar de nuevo</Button>
       </div>
     );
   }
 
-  if (!hasCoffees) return <p>No coffees are available right now. Check back soon.</p>;
+  if (!hasCoffees) return <p>No hay cafés disponibles en este momento. Vuelve pronto.</p>;
 
   return (
     <div className="stack">
       {status === 'failed' && (
         <div role="status" className="notice stack">
-          <p>We could not refresh the stock. The list below may be out of date.</p>
+          <p>No pudimos actualizar el stock. La lista de abajo puede estar desactualizada.</p>
           <Button variant="quiet" onClick={onRetry}>
-            Try again
+            Intentar de nuevo
           </Button>
         </div>
       )}

@@ -151,7 +151,7 @@ describe('placeOrder', () => {
     expect(calls).toHaveLength(0);
     expect(store.getState().checkout).toMatchObject({
       placing: 'failed',
-      placeError: 'Check your details and try again.',
+      placeError: 'Revisa tus datos e inténtalo de nuevo.',
     });
   });
 
@@ -199,7 +199,7 @@ describe('placeOrder', () => {
     });
     await store.dispatch(placeOrder());
     expect(store.getState().checkout.placeError).toBe(
-      'Something went wrong. Try again in a minute.',
+      'Algo salió mal. Inténtalo de nuevo en un minuto.',
     );
   });
 });

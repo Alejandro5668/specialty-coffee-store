@@ -94,9 +94,9 @@ export const DetailsContainer = () => {
     found.address = validateAddress(checkout.delivery.address) ?? undefined;
     found.city = validateCity(checkout.delivery.city) ?? undefined;
     found.phone = validatePhone(checkout.delivery.phone) ?? undefined;
-    if (!checkout.accepted.terms) found.terms = 'Accept the terms and conditions to continue.';
+    if (!checkout.accepted.terms) found.terms = 'Acepta los términos y condiciones para continuar.';
     if (!checkout.accepted.personalData)
-      found.personalData = 'Authorize the use of your personal data to continue.';
+      found.personalData = 'Autoriza el uso de tus datos personales para continuar.';
     return Object.fromEntries(Object.entries(found).filter(([, message]) => message)) as Errors;
   };
 
@@ -118,7 +118,7 @@ export const DetailsContainer = () => {
       // The saved token went stale while the form was open.
       dispatch(cardCleared());
       setUseSaved(false);
-      setFormError('Your saved card is no longer valid. Enter it again.');
+      setFormError('Tu tarjeta guardada ya no es válida. Ingrésala de nuevo.');
       return;
     }
 
@@ -160,7 +160,7 @@ export const DetailsContainer = () => {
     : null;
 
   return (
-    <Modal title="Card and delivery" onClose={() => navigate('/')}>
+    <Modal title="Tarjeta y entrega" onClose={() => navigate('/')}>
       <DetailsForm
         values={values}
         errors={errors}

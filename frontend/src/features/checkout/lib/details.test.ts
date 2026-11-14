@@ -24,16 +24,16 @@ describe('recipient name (optional)', () => {
   });
 
   it('still refuses markup and values that are too long', () => {
-    expect(validateRecipient('<b>x</b>')).toBe('Remove special characters such as < or >.');
-    expect(validateRecipient('a'.repeat(201))).toBe('Use 200 characters or fewer.');
+    expect(validateRecipient('<b>x</b>')).toBe('Quita los caracteres especiales, como < o >.');
+    expect(validateRecipient('a'.repeat(201))).toBe('Usa 200 caracteres o menos.');
   });
 });
 
 describe('text fields', () => {
   it.each([
-    [validateFullName, 'Ana Pérez', 'Enter your full name.'],
-    [validateAddress, 'Calle 10 # 5-20, Apto 301', 'Enter the delivery address.'],
-    [validateCity, 'Medellín', 'Enter the city.'],
+    [validateFullName, 'Ana Pérez', 'Ingresa tu nombre completo.'],
+    [validateAddress, 'Calle 10 # 5-20, Apto 301', 'Ingresa la dirección de entrega.'],
+    [validateCity, 'Medellín', 'Ingresa la ciudad.'],
   ])('%p accepts a normal value and asks for it when empty', (validate, good, required) => {
     expect(validate(good)).toBeNull();
     expect(validate('')).toBe(required);
@@ -42,15 +42,15 @@ describe('text fields', () => {
 
   it.each(hostile)('refuses markup and control characters: %p', (value) => {
     for (const validate of [validateFullName, validateRecipient, validateAddress, validateCity]) {
-      expect(validate(value)).toBe('Remove special characters such as < or >.');
+      expect(validate(value)).toBe('Quita los caracteres especiales, como < o >.');
     }
   });
 
   it('limits the length the same way the server does', () => {
     expect(validateFullName('x'.repeat(100))).toBeNull();
-    expect(validateFullName('x'.repeat(101))).toBe('Use 100 characters or fewer.');
+    expect(validateFullName('x'.repeat(101))).toBe('Usa 100 caracteres o menos.');
     expect(validateAddress('x'.repeat(200))).toBeNull();
-    expect(validateAddress('x'.repeat(201))).toBe('Use 200 characters or fewer.');
+    expect(validateAddress('x'.repeat(201))).toBe('Usa 200 caracteres o menos.');
   });
 });
 
@@ -69,7 +69,7 @@ describe('validateEmail', () => {
     '<a>@b.co',
     `${'a'.repeat(250)}@x.co`,
   ])('rejects %p', (e) =>
-    expect(validateEmail(e)).toBe('Enter a valid email, like ana@example.com.'),
+    expect(validateEmail(e)).toBe('Ingresa un correo válido, como ana@example.com.'),
   );
 });
 
@@ -85,6 +85,6 @@ describe('phone', () => {
 
   it.each(['', '123', 'call me', '1'.repeat(16), '+', '57+3001234567', '300 123 45a7'])(
     'rejects %p',
-    (p) => expect(validatePhone(p)).toBe('Enter a phone number with 7 to 15 digits.'),
+    (p) => expect(validatePhone(p)).toBe('Ingresa un teléfono de 7 a 15 dígitos.'),
   );
 });

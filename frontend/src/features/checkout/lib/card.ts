@@ -42,11 +42,11 @@ export const formatExpiry = (raw: string): string => {
 
 export const validateCardNumber = (raw: string): string | null => {
   const digits = digitsOnly(raw);
-  if (digits.length === 0) return 'Enter the card number.';
+  if (digits.length === 0) return 'Ingresa el número de tarjeta.';
   const brand = detectBrand(digits);
-  if (brand === 'unknown') return 'We accept Visa and Mastercard.';
+  if (brand === 'unknown') return 'Aceptamos Visa y Mastercard.';
   if (!LENGTHS[brand].includes(digits.length) || !luhnValid(digits)) {
-    return 'Check the card number: it does not look valid.';
+    return 'Revisa el número de tarjeta: no parece válido.';
   }
   return null;
 };
@@ -62,34 +62,34 @@ const MAX_YEARS_AHEAD = 20;
 /** The payment service does not check the expiry, so this form does. */
 export const validateExpiry = (raw: string, now: Date): string | null => {
   const digits = digitsOnly(raw);
-  const invalid = 'Enter the expiry date as MM / YY.';
+  const invalid = 'Ingresa la fecha de vencimiento como MM / AA.';
   if (digits.length !== 4) return invalid;
   const month = Number(digits.slice(0, 2));
   const year = 2000 + Number(digits.slice(2));
   if (month < 1 || month > 12) return invalid;
   if (year * 12 + month < now.getFullYear() * 12 + now.getMonth() + 1) {
-    return 'This card has expired. Use another card.';
+    return 'Esta tarjeta está vencida. Usa otra tarjeta.';
   }
-  if (year > now.getFullYear() + MAX_YEARS_AHEAD) return 'Check the expiry year.';
+  if (year > now.getFullYear() + MAX_YEARS_AHEAD) return 'Revisa el año de vencimiento.';
   return null;
 };
 
 export const validateCvc = (raw: string): string | null =>
-  /^\d{3}$/.test(raw) ? null : 'Enter the 3 digits on the back of the card.';
+  /^\d{3}$/.test(raw) ? null : 'Ingresa los 3 dígitos del reverso de la tarjeta.';
 
 /** The payment service needs at least five characters here. */
 export const validateHolder = (raw: string): string | null => {
   const name = raw.trim();
-  if (name.length < 5) return 'Enter the name as it appears on the card (at least 5 characters).';
-  if (name.length > 100) return 'Use 100 characters or fewer.';
-  if (!/^\p{L}[\p{L} .'-]*$/u.test(name)) return "Use only letters, spaces and . - ' in the name.";
+  if (name.length < 5) return 'Ingresa el nombre como aparece en la tarjeta (mínimo 5 caracteres).';
+  if (name.length > 100) return 'Usa 100 caracteres o menos.';
+  if (!/^\p{L}[\p{L} .'-]*$/u.test(name)) return "Usa solo letras, espacios y . - ' en el nombre.";
   return null;
 };
 
 const BRAND_NAMES: Record<CardBrand, string> = {
   visa: 'Visa',
   mastercard: 'Mastercard',
-  unknown: 'Card',
+  unknown: 'Tarjeta',
 };
 
 export const brandName = (brand: CardBrand): string => BRAND_NAMES[brand];

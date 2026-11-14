@@ -22,43 +22,43 @@ describe('the whole purchase', () => {
     // 1. choose a coffee and open the card dialog
     let ui = app.mount('/');
     await choose500gTwice(user);
-    expect(await screen.findByRole('dialog', { name: 'Card and delivery' })).toBeInTheDocument();
+    expect(await screen.findByRole('dialog', { name: 'Tarjeta y entrega' })).toBeInTheDocument();
 
     // 2. refresh in the middle of the form: the details stay, the card is asked for again
-    await user.type(screen.getByLabelText('Full name'), 'Ana Pérez');
-    await user.type(screen.getByLabelText('Card number'), PAN);
+    await user.type(screen.getByLabelText('Nombre completo'), 'Ana Pérez');
+    await user.type(screen.getByLabelText('Número de tarjeta'), PAN);
     ui.unmount();
     ui = app.mount('/checkout/details');
-    expect(await screen.findByLabelText('Full name')).toHaveValue('Ana Pérez');
-    expect(screen.getByLabelText('Card number')).toHaveValue('');
+    expect(await screen.findByLabelText('Nombre completo')).toHaveValue('Ana Pérez');
+    expect(screen.getByLabelText('Número de tarjeta')).toHaveValue('');
 
     // 3. finish the form and reach the summary
     await fillTheForm(user);
-    const summary = await screen.findByRole('dialog', { name: 'Order summary' });
+    const summary = await screen.findByRole('dialog', { name: 'Resumen del pedido' });
     expect(summary).toHaveTextContent('Huila Washed, 500 g × 2');
     expect(await screen.findByTestId('line-total')).toHaveTextContent('$127.000');
 
     // 4. refresh on the summary: the same summary comes back, with the saved card
     ui.unmount();
     ui = app.mount('/checkout/summary');
-    const again = await screen.findByRole('dialog', { name: 'Order summary' });
-    expect(within(again).getByText('Visa ending 4242')).toBeInTheDocument();
-    await user.click(await within(again).findByRole('button', { name: 'Pay $127.000' }));
+    const again = await screen.findByRole('dialog', { name: 'Resumen del pedido' });
+    expect(within(again).getByText('Visa terminada en 4242')).toBeInTheDocument();
+    await user.click(await within(again).findByRole('button', { name: 'Pagar $127.000' }));
 
     // 5. the payment is confirmed, and a refresh on that page still finds the result
-    expect(await screen.findByRole('heading', { name: 'Payment approved' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pago aprobado' })).toBeInTheDocument();
     ui.unmount();
     ui = app.mount('/order/order-1');
-    expect(await screen.findByRole('heading', { name: 'Payment approved' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pago aprobado' })).toBeInTheDocument();
     expect(screen.getByTestId('line-total')).toHaveTextContent('$127.000');
 
     // 6. back to the coffees: the stock shows what is left
-    await user.click(screen.getByRole('button', { name: 'Back to the coffees' }));
+    await user.click(screen.getByRole('button', { name: 'Volver a los cafés' }));
     const card = within(
       (await screen.findByRole('heading', { name: 'Huila Washed' })).closest('article')!,
     );
     await user.click(card.getByRole('radio', { name: /500 g/ }));
-    expect(card.getByText('Only 1 left')).toBeInTheDocument();
+    expect(card.getByText('Queda 1')).toBeInTheDocument();
     ui.unmount();
 
     // exactly one order, one tokenization, and the card never touched the saved draft
@@ -102,16 +102,16 @@ describe('paying', () => {
     withReadyDraft(app);
 
     let ui = app.mount('/checkout/summary');
-    await app.user.click(await screen.findByRole('button', { name: 'Pay $127.000' }));
-    expect(await screen.findByRole('button', { name: 'Paying…' })).toBeDisabled();
+    await app.user.click(await screen.findByRole('button', { name: 'Pagar $127.000' }));
+    expect(await screen.findByRole('button', { name: 'Pagando…' })).toBeDisabled();
     expect(shop.requests.map((r) => r.idempotencyKey)).toEqual(['key-journey-0001']);
 
     // the answer never arrives and the shopper refreshes
     ui.unmount();
     shop.hold = false;
     ui = app.mount('/checkout/summary');
-    await app.user.click(await screen.findByRole('button', { name: 'Pay $127.000' }));
-    expect(await screen.findByRole('heading', { name: 'Payment approved' })).toBeInTheDocument();
+    await app.user.click(await screen.findByRole('button', { name: 'Pagar $127.000' }));
+    expect(await screen.findByRole('heading', { name: 'Pago aprobado' })).toBeInTheDocument();
 
     expect(shop.requests.map((r) => r.idempotencyKey)).toEqual([
       'key-journey-0001',
@@ -136,11 +136,11 @@ describe('paying', () => {
     );
 
     app.mountWithHistory(['/', '/checkout/summary', '/order/order-1']);
-    expect(await screen.findByRole('heading', { name: 'Payment approved' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pago aprobado' })).toBeInTheDocument();
     await app.user.click(screen.getByRole('button', { name: 'Browser back' }));
-    expect(await screen.findByRole('heading', { name: 'Payment approved' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pago aprobado' })).toBeInTheDocument();
     expect(screen.getByTestId('path')).toHaveTextContent('/order/order-1');
-    expect(screen.queryByRole('dialog', { name: 'Order summary' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Resumen del pedido' })).not.toBeInTheDocument();
   });
 
   it('sends a shopper whose card went stale back to enter it again, with the details kept', async () => {
@@ -154,8 +154,8 @@ describe('paying', () => {
     app.storage.data.set(PERSIST_KEY, JSON.stringify({ v: 2, checkout: toPersistable(stale) }));
 
     app.mount('/checkout/summary');
-    expect(await screen.findByRole('dialog', { name: 'Card and delivery' })).toBeInTheDocument();
-    expect(await screen.findByLabelText('Card number')).toBeInTheDocument();
-    expect(screen.getByLabelText('Full name')).toHaveValue('Ana Pérez');
+    expect(await screen.findByRole('dialog', { name: 'Tarjeta y entrega' })).toBeInTheDocument();
+    expect(await screen.findByLabelText('Número de tarjeta')).toBeInTheDocument();
+    expect(screen.getByLabelText('Nombre completo')).toHaveValue('Ana Pérez');
   });
 });

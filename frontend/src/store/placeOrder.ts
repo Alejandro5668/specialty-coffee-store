@@ -7,7 +7,7 @@ import { messageOf } from './messages';
 
 export const keyAssigned = createAction<string>('checkout/keyAssigned');
 
-const CHECK_DETAILS = 'Check your details and try again.';
+const CHECK_DETAILS = 'Revisa tus datos e inténtalo de nuevo.';
 
 type Config = { state: { checkout: CheckoutState }; extra: ThunkExtra; rejectValue: string };
 
