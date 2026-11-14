@@ -5,7 +5,7 @@ import { CoffeeCard } from './CoffeeCard';
 
 export const product: ProductView = {
   id: 'huila-washed',
-  name: 'Huila Washed',
+  name: 'Huila Lavado',
   description: 'Caramel, red apple and a clean, sweet finish.',
   imageUrl: '/images/coffees/huila-washed.webp',
   variants: [
@@ -33,7 +33,7 @@ const setup = (over: Partial<Parameters<typeof CoffeeCard>[0]> = {}) => {
 describe('CoffeeCard', () => {
   it('shows the name, the tasting notes, the price for the chosen quantity and the stock', () => {
     setup();
-    expect(screen.getByRole('heading', { name: 'Huila Washed' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Huila Lavado' })).toBeInTheDocument();
     expect(screen.getByText('Caramel, red apple and a clean, sweet finish.')).toBeInTheDocument();
     expect(screen.getByTestId('coffee-total')).toHaveTextContent('$64.000');
     expect(screen.getByText('20 disponibles')).toBeInTheDocument();

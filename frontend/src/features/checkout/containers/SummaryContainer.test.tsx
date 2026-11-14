@@ -34,7 +34,7 @@ describe('SummaryContainer: the amounts', () => {
   it('shows the coffee, the base fee, the delivery fee and the total', async () => {
     await setupSummary();
     const dialog = await sheet();
-    expect(dialog).toHaveTextContent('Huila Washed, 250 g × 2');
+    expect(dialog).toHaveTextContent('Huila Lavado, 250 g × 2');
     expect(await screen.findByTestId('line-product')).toHaveTextContent('$64.000');
     expect(screen.getByTestId('line-base')).toHaveTextContent('$3.000');
     expect(screen.getByTestId('line-delivery')).toHaveTextContent('$8.000');

@@ -125,7 +125,7 @@ export const everythingEverStored = (storage: ReturnType<typeof memoryStorage>):
 
 export const choose500gTwice = async (user: ReturnType<typeof userEvent.setup>) => {
   const card = within(
-    (await screen.findByRole('heading', { name: 'Huila Washed' })).closest('article')!,
+    (await screen.findByRole('heading', { name: 'Huila Lavado' })).closest('article')!,
   );
   await user.click(card.getByRole('radio', { name: /500 g/ }));
   await user.click(card.getByRole('button', { name: 'Aumentar cantidad' }));

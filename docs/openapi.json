@@ -416,7 +416,7 @@
           },
           "name": {
             "type": "string",
-            "example": "Huila Washed"
+            "example": "Huila Lavado"
           },
           "description": {
             "type": "string"

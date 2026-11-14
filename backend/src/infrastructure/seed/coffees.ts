@@ -15,7 +15,7 @@ type Row = {
 const rows: Row[] = [
   {
     slug: 'huila-washed',
-    name: 'Huila Washed',
+    name: 'Huila Lavado',
     description: 'Caramelo, manzana roja y un final limpio y dulce.',
     cop250: 32_000,
     cop500: 58_000,
@@ -24,7 +24,7 @@ const rows: Row[] = [
   },
   {
     slug: 'narino-honey',
-    name: 'Nariño Honey',
+    name: 'Nariño Miel',
     description: 'Miel, azahar de naranja y acidez suave.',
     cop250: 34_000,
     cop500: 62_000,
@@ -51,7 +51,7 @@ const rows: Row[] = [
   },
   {
     slug: 'tolima-anaerobic',
-    name: 'Tolima Anaerobic',
+    name: 'Tolima Anaeróbico',
     description: 'Fruta tropical, panela y un retrogusto largo.',
     cop250: 39_000,
     cop500: 69_000,
@@ -60,7 +60,7 @@ const rows: Row[] = [
   },
   {
     slug: 'antioquia-decaf',
-    name: 'Antioquia Decaf',
+    name: 'Antioquia Descafeinado',
     description: 'Avellana tostada, azúcar morena y una taza suave.',
     cop250: 33_000,
     cop500: 59_000,

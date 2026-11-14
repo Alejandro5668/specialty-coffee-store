@@ -12,7 +12,7 @@ describe('OrderContainer: the result', () => {
       api: { getTransaction: async () => orderView('APPROVED') },
     });
     expect(await screen.findByRole('heading', { name: 'Pago aprobado' })).toBeInTheDocument();
-    expect(screen.getByText('Huila Washed, 250 g × 2')).toBeInTheDocument();
+    expect(screen.getByText('Huila Lavado, 250 g × 2')).toBeInTheDocument();
     expect(await screen.findByTestId('line-product')).toHaveTextContent('$64.000');
     expect(screen.getByTestId('line-base')).toHaveTextContent('$3.000');
     expect(screen.getByTestId('line-delivery')).toHaveTextContent('$8.000');
@@ -28,7 +28,7 @@ describe('OrderContainer: the result', () => {
         listProducts: async () => [
           {
             id: 'huila-washed',
-            name: 'Huila Washed',
+            name: 'Huila Lavado',
             description: '',
             imageUrl: '/i.webp',
             variants: [

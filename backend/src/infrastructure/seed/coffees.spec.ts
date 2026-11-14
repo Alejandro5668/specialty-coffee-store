@@ -30,6 +30,17 @@ describe('coffee seed', () => {
     expect(seedVariants.every((v) => v.stock >= 1)).toBe(true);
   });
 
+  it('names every coffee in Spanish, keeping its slug, so ids and images do not move', () => {
+    expect(seedProducts.map((p) => [p.id, p.name])).toEqual([
+      ['huila-washed', 'Huila Lavado'],
+      ['narino-honey', 'Nariño Miel'],
+      ['cauca-natural', 'Cauca Natural'],
+      ['sierra-nevada', 'Sierra Nevada'],
+      ['tolima-anaerobic', 'Tolima Anaeróbico'],
+      ['antioquia-decaf', 'Antioquia Descafeinado'],
+    ]);
+  });
+
   it('describes every coffee in Spanish', () => {
     for (const p of seedProducts) {
       expect(p.description).not.toMatch(/\b(and|the|with|of)\b/i);
