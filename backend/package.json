@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "start:dev": "ts-node src/main.ts",
+    "seed": "ts-node src/infrastructure/seed/seed.cli.ts",
     "test": "jest",
     "test:cov": "jest --coverage"
   },
