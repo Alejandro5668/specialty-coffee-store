@@ -28,7 +28,7 @@ Acceptance criteria live in [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md).
 1. **Scaffold and CI**: monorepo, lint, tests and coverage on every PR.
 2. **Domain and seed**: entities, 6 coffees with 2 sizes each.
 3. **Use cases**: checkout as a chain of steps that returns success or error.
-4. **Provider integration**: sandbox only, signed webhook.
+4. **Provider integration**: sandbox only, signed webhook. Flow in [PAYMENTS.md](PAYMENTS.md).
 5. **API**: four endpoints with Swagger or Postman.
 6. **Frontend**: five screens, state recovered after a refresh.
 7. **Tests**: coverage above 80 %, plus adversarial cases.
