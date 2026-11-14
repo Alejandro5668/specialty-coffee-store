@@ -123,7 +123,7 @@ describe('Checkout', () => {
     expect(gateway.charges).toHaveLength(0);
   });
 
-  it('gives the stock back if something fails after reserving it', async () => {
+  it('leaves the stock and the orders untouched when saving the customer fails', async () => {
     const { catalog, transactions, customers } = setup();
     customers.save = async () => {
       throw new Error('db down');
@@ -139,5 +139,6 @@ describe('Checkout', () => {
     );
     await expect(checkout.execute(input())).rejects.toThrow('db down');
     expect(catalog.stockOf(VARIANT_ID)).toBe(5);
+    expect(transactions.all()).toHaveLength(0);
   });
 });
