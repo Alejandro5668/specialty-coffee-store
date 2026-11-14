@@ -73,6 +73,13 @@ describe('settle', () => {
     expect(result).toMatchObject({ ok: true, value: { status, providerRef: 'provider-1' } });
   });
 
+  it('settles without a provider reference when the provider never answered', () => {
+    expect(settle(pending(), 'ERROR', null)).toMatchObject({
+      ok: true,
+      value: { status: 'ERROR', providerRef: null },
+    });
+  });
+
   it('refuses to settle with PENDING', () => {
     expect(settle(pending(), 'PENDING' as 'APPROVED', 'p')).toEqual(err('INVALID_STATUS'));
   });

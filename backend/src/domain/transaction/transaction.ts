@@ -46,7 +46,7 @@ export const createTransaction = (input: NewTransaction): Result<Transaction, Tr
 export const settle = (
   transaction: Transaction,
   status: FinalStatus,
-  providerRef: string,
+  providerRef: string | null,
 ): Result<Transaction, TransactionError> => {
   if (!FINAL.includes(status)) return err('INVALID_STATUS');
   if (transaction.status !== 'PENDING') return err('ALREADY_FINAL');
