@@ -8,16 +8,17 @@ Node 22 (`.nvmrc`), npm 10.
 
 ## Commands
 
-| Command                                 | Action                                           |
-| --------------------------------------- | ------------------------------------------------ |
-| `npm ci`                                | Install all workspaces                           |
-| `npm run lint` / `npm run format:check` | ESLint / Prettier                                |
-| `npm run test:cov`                      | Jest with an 80 % coverage minimum               |
-| `npm run build`                         | Build backend and frontend                       |
-| `npm run start:dev -w backend`          | API on `:3000`, Swagger at `/docs`               |
-| `npm run dev -w frontend`               | SPA on `:5173`                                   |
-| `npm run seed -w backend`               | Load the 6 coffees into DynamoDB (safe to rerun) |
-| `npm run openapi -w backend`            | Regenerate `docs/openapi.json`                   |
+| Command                                              | Action                                           |
+| ---------------------------------------------------- | ------------------------------------------------ |
+| `npm ci`                                             | Install all workspaces                           |
+| `npm run lint` / `npm run format:check`              | ESLint / Prettier                                |
+| `npm run test:cov`                                   | Jest with an 80 % coverage minimum               |
+| `npm run build`                                      | Build backend and frontend                       |
+| `npm run start:dev -w backend`                       | API on `:3000`, Swagger at `/docs`               |
+| `npm run dev -w frontend`                            | SPA on `:5173`                                   |
+| `npm run seed -w backend`                            | Load the 6 coffees into DynamoDB (safe to rerun) |
+| `npm run openapi -w backend`                         | Regenerate `docs/openapi.json`                   |
+| `python3 frontend/scripts/generate-coffee-images.py` | Redraw the coffee images (needs Pillow)          |
 
 Copy `.env.example` to `.env`, fill it locally and export it before `start:dev`. Never commit it. DynamoDB needs AWS credentials.
 
