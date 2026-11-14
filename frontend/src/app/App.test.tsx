@@ -1,13 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { createStore } from './store';
 import { App } from './App';
 
 const renderAt = (path: string) =>
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <App />
-    </MemoryRouter>,
+    <Provider store={createStore({ api: { listProducts: async () => [] }, storage: null })}>
+      <MemoryRouter initialEntries={[path]}>
+        <App />
+      </MemoryRouter>
+    </Provider>,
   );
 
 describe('App shell', () => {

@@ -1,0 +1,43 @@
+.coffee {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-milk);
+  border-radius: var(--radius-field);
+}
+
+.coffee__image {
+  inline-size: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--color-leaf);
+}
+
+.coffee__body {
+  padding: var(--space-4) var(--space-4) var(--space-5);
+}
+
+.coffee__name {
+  font-size: var(--text-2xl);
+}
+
+.coffee__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.coffee__price {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.coffee__stock {
+  font-weight: 600;
+}
+
+.coffee__note {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}

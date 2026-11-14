@@ -1,0 +1,47 @@
+.sizes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.size {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-block-size: var(--touch);
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.size__grams {
+  font-weight: 700;
+}
+
+.size__price,
+.size__note {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.size--on {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-milk);
+}
+
+.size--on .size__price {
+  color: var(--color-leaf);
+}
+
+.size--off {
+  border-style: dashed;
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+
+.size:has(input:focus-visible) {
+  outline: 3px solid var(--color-cherry);
+  outline-offset: 2px;
+}
