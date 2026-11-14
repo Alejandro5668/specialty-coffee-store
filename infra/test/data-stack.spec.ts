@@ -7,6 +7,7 @@ describe('DataStack', () => {
     ['products', 'id'],
     ['variants', 'id'],
     ['transactions', 'id'],
+    ['deliveries', 'id'],
     ['customers', 'email'],
   ])('creates coffee-store-%s keyed by %s', (name, key) => {
     data.hasResourceProperties('AWS::DynamoDB::Table', {
@@ -15,8 +16,8 @@ describe('DataStack', () => {
     });
   });
 
-  it('creates exactly four tables, on demand, so an idle store costs nothing', () => {
-    data.resourceCountIs('AWS::DynamoDB::Table', 4);
+  it('creates exactly five tables, on demand, so an idle store costs nothing', () => {
+    data.resourceCountIs('AWS::DynamoDB::Table', 5);
     for (const table of Object.values(data.findResources('AWS::DynamoDB::Table'))) {
       expect(table.Properties.BillingMode).toBe('PAY_PER_REQUEST');
     }
@@ -25,6 +26,13 @@ describe('DataStack', () => {
   it('keeps point-in-time recovery on the orders, the data that cannot be rebuilt', () => {
     data.hasResourceProperties('AWS::DynamoDB::Table', {
       TableName: 'coffee-store-transactions',
+      PointInTimeRecoverySpecification: { PointInTimeRecoveryEnabled: true },
+    });
+  });
+
+  it('keeps point-in-time recovery on the deliveries too: they say what to ship and to whom', () => {
+    data.hasResourceProperties('AWS::DynamoDB::Table', {
+      TableName: 'coffee-store-deliveries',
       PointInTimeRecoverySpecification: { PointInTimeRecoveryEnabled: true },
     });
   });

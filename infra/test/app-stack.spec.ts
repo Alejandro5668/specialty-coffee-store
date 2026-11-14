@@ -65,6 +65,20 @@ describe('AppStack: the API', () => {
     expect(text).not.toContain('dynamodb:DeleteTable');
   });
 
+  it('can store and read deliveries, and nothing else on that table', () => {
+    const statements = Object.values(api.findResources('AWS::IAM::Policy')).flatMap(
+      (p) => p.Properties.PolicyDocument.Statement,
+    );
+    const onDeliveries = JSON.stringify(
+      statements.filter((s: { Resource: unknown }) =>
+        JSON.stringify(s.Resource).includes('deliveries'),
+      ),
+    );
+    expect(onDeliveries).toContain('dynamodb:PutItem');
+    expect(onDeliveries).toContain('dynamodb:GetItem');
+    expect(onDeliveries).not.toContain('dynamodb:DeleteItem');
+  });
+
   it('reads the catalog without being able to change it', () => {
     const products = JSON.stringify(
       Object.values(api.findResources('AWS::IAM::Policy')).flatMap((p) =>

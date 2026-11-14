@@ -5,7 +5,13 @@ import { Construct } from 'constructs';
 export const TABLE_PREFIX = 'coffee-store';
 export const PROJECT = 'coffee-store';
 
-export type Tables = { products: Table; variants: Table; customers: Table; transactions: Table };
+export type Tables = {
+  products: Table;
+  variants: Table;
+  customers: Table;
+  transactions: Table;
+  deliveries: Table;
+};
 
 /** The four tables the API reads and writes. Names match `TABLE_PREFIX` in the backend. */
 export class DataStack extends Stack {
@@ -27,6 +33,7 @@ export class DataStack extends Stack {
       variants: table('variants', 'id'),
       customers: table('customers', 'email'),
       transactions: table('transactions', 'id', true),
+      deliveries: table('deliveries', 'id', true),
     };
   }
 }
