@@ -1,13 +1,5 @@
 import { ChargeRequest } from '../../application/ports/payment.gateway';
-import { HttpPaymentGateway } from './http-payment.gateway';
-
-const config = {
-  baseUrl: 'https://sandbox.example.test/v1',
-  privateKey: 'prv_test_secret',
-  integritySecret: 'prod_integrity_Z5mMke9x0k8gpErbDqwrJXMqsI6SFli6',
-  eventsSecret: 'test_events_x',
-  timeoutMs: 5_000,
-};
+import { gatewayWith, reply } from '../../../test/fakes/http-gateway-kit';
 
 const request: ChargeRequest = {
   reference: 'sk8-438k4-xmxm392-sn2m',
@@ -16,19 +8,6 @@ const request: ChargeRequest = {
   cardToken: 'tok_test_123',
   acceptanceToken: 'acc_123',
   personalAuthToken: 'per_123',
-};
-
-type Call = { url: string; init: RequestInit };
-const reply = (status: number, body: unknown) =>
-  new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
-
-const gatewayWith = (respond: () => Response | Promise<Response>) => {
-  const calls: Call[] = [];
-  const fetchFn = (async (url: string, init: RequestInit) => {
-    calls.push({ url, init });
-    return respond();
-  }) as unknown as typeof fetch;
-  return { gateway: new HttpPaymentGateway(config, fetchFn), calls };
 };
 
 describe('HttpPaymentGateway.charge', () => {

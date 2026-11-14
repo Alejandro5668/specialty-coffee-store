@@ -10,6 +10,7 @@ import { buildOpenApi } from './swagger';
  */
 const PLACEHOLDERS = {
   PAYMENT_API_URL: 'https://placeholder.invalid/v1',
+  PAYMENT_PUBLIC_KEY: 'placeholder',
   PAYMENT_PRIVATE_KEY: 'placeholder',
   PAYMENT_INTEGRITY_SECRET: 'placeholder',
   PAYMENT_EVENTS_SECRET: 'placeholder',

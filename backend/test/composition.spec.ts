@@ -8,6 +8,7 @@ import { ProcessPaymentEvent } from '../src/application/use-cases/process-paymen
 
 const ENV = {
   PAYMENT_API_URL: 'https://sandbox.example.test/v1',
+  PAYMENT_PUBLIC_KEY: 'pub_test_x',
   PAYMENT_PRIVATE_KEY: 'prv_test_x',
   PAYMENT_INTEGRITY_SECRET: 'test_integrity_x',
   PAYMENT_EVENTS_SECRET: 'test_events_x',

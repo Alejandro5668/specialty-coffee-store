@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
 import { err, ok, Result } from '../../domain/shared/result';
 import {
+  Acceptance,
   ChargeRequest,
+  Contract,
   GatewayCharge,
   GatewayError,
   PaymentGateway,
@@ -36,11 +38,38 @@ const toCharge = (data: unknown): GatewayCharge | null => {
     : null;
 };
 
+const toContract = (value: unknown): Contract | null => {
+  const c = value as Json | null;
+  if (!c || typeof c.acceptance_token !== 'string' || c.acceptance_token === '') return null;
+  if (typeof c.permalink !== 'string') return null;
+  // The link is shown to the shopper, so anything but a plain https URL is refused.
+  try {
+    if (new URL(c.permalink).protocol !== 'https:') return null;
+  } catch {
+    return null;
+  }
+  return { token: c.acceptance_token, permalink: c.permalink };
+};
+
 export class HttpPaymentGateway implements PaymentGateway {
   constructor(
     private readonly config: PaymentConfig,
     private readonly fetchFn: typeof fetch = fetch,
   ) {}
+
+  /** Public key only. The browser cannot call this itself: the provider sends no CORS headers for it. */
+  async getAcceptance(): Promise<Result<Acceptance, 'GATEWAY_UNAVAILABLE'>> {
+    const response = await this.send('/merchants/info', 'GET', undefined, {
+      'x-merchant-public-key': this.config.publicKey,
+    });
+    if (!response?.ok) return UNAVAILABLE;
+
+    const data = (await this.json(response)) as Json | null;
+    const merchant = data?.data as Json | undefined;
+    const acceptance = toContract(merchant?.presigned_acceptance);
+    const personalData = toContract(merchant?.presigned_personal_data_auth);
+    return acceptance && personalData ? ok({ acceptance, personalData }) : UNAVAILABLE;
+  }
 
   async charge(request: ChargeRequest): Promise<Result<GatewayCharge, GatewayError>> {
     const response = await this.send('/transactions', 'POST', {
@@ -87,12 +116,17 @@ export class HttpPaymentGateway implements PaymentGateway {
   }
 
   /** Returns null on any transport failure, so callers see one "unknown outcome" case. */
-  private async send(path: string, method: 'GET' | 'POST', body?: Json): Promise<Response | null> {
+  private async send(
+    path: string,
+    method: 'GET' | 'POST',
+    body?: Json,
+    credentials: Record<string, string> = { Authorization: `Bearer ${this.config.privateKey}` },
+  ): Promise<Response | null> {
     try {
       return await this.fetchFn(`${this.config.baseUrl}${path}`, {
         method,
         headers: {
-          Authorization: `Bearer ${this.config.privateKey}`,
+          ...credentials,
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },

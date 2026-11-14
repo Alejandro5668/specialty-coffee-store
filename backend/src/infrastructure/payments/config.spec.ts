@@ -2,6 +2,7 @@ import { loadPaymentConfig } from './config';
 
 const env = {
   PAYMENT_API_URL: 'https://sandbox.example.test/v1/',
+  PAYMENT_PUBLIC_KEY: 'pub_test_x',
   PAYMENT_PRIVATE_KEY: 'prv_test_x',
   PAYMENT_INTEGRITY_SECRET: 'test_integrity_x',
   PAYMENT_EVENTS_SECRET: 'test_events_x',
@@ -11,6 +12,7 @@ describe('loadPaymentConfig', () => {
   it('reads the settings and trims the trailing slash of the base URL', () => {
     expect(loadPaymentConfig(env)).toEqual({
       baseUrl: 'https://sandbox.example.test/v1',
+      publicKey: 'pub_test_x',
       privateKey: 'prv_test_x',
       integritySecret: 'test_integrity_x',
       eventsSecret: 'test_events_x',
@@ -20,6 +22,7 @@ describe('loadPaymentConfig', () => {
 
   it.each([
     'PAYMENT_API_URL',
+    'PAYMENT_PUBLIC_KEY',
     'PAYMENT_PRIVATE_KEY',
     'PAYMENT_INTEGRITY_SECRET',
     'PAYMENT_EVENTS_SECRET',
