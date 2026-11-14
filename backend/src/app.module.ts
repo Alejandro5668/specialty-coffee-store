@@ -9,6 +9,7 @@ import { PaymentGateway } from './application/ports/payment.gateway';
 import { Clock, IdGenerator } from './application/ports/system.ports';
 import { TransactionRepository } from './application/ports/transaction.repository';
 import { Checkout } from './application/use-cases/checkout';
+import { GetCheckoutOptions } from './application/use-cases/get-checkout-options';
 import { GetTransaction } from './application/use-cases/get-transaction';
 import { ListProducts } from './application/use-cases/list-products';
 import { ProcessPaymentEvent } from './application/use-cases/process-payment-event';
@@ -81,6 +82,11 @@ const useCases: Provider[] = [
       ids: IdGenerator,
       clock: Clock,
     ) => new Checkout(catalog, transactions, orders, customers, gateway, ids, clock),
+  },
+  {
+    provide: GetCheckoutOptions,
+    inject: [TOKENS.gateway],
+    useFactory: (gateway: PaymentGateway) => new GetCheckoutOptions(gateway),
   },
   {
     provide: GetTransaction,

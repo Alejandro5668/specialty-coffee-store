@@ -1,16 +1,47 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiCreatedResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Checkout } from '../../application/use-cases/checkout';
+import {
+  CheckoutOptions,
+  GetCheckoutOptions,
+} from '../../application/use-cases/get-checkout-options';
 import { parseCheckoutBody } from './checkout.body';
-import { CheckoutRequestDto, ErrorDto, TransactionDto } from './docs/api.dto';
+import { CheckoutOptionsDto, CheckoutRequestDto, ErrorDto, TransactionDto } from './docs/api.dto';
 import { unwrap } from './errors';
 import { toTransactionView, TransactionView } from './transaction.view';
 
 @ApiTags('Checkout')
 @Controller('checkout')
 export class CheckoutController {
-  constructor(private readonly checkout: Checkout) {}
+  constructor(
+    private readonly checkout: Checkout,
+    private readonly checkoutOptions: GetCheckoutOptions,
+  ) {}
+
+  /** Each call reaches the payment provider, so it has its own tighter limit. */
+  @Get('options')
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @ApiOperation({
+    summary: 'Get the terms to accept (single-use tokens) and the fees shown in the summary',
+  })
+  @ApiOkResponse({ type: CheckoutOptionsDto })
+  @ApiResponse({ status: 429, description: 'Too many requests (20 per minute)', type: ErrorDto })
+  @ApiResponse({
+    status: 503,
+    description: 'The payment service cannot be reached',
+    type: ErrorDto,
+  })
+  async options(): Promise<CheckoutOptions> {
+    return unwrap(await this.checkoutOptions.execute());
+  }
 
   /** Stricter than the global limit: each call can reserve stock and charge a card. */
   @Throttle({ default: { limit: 10, ttl: 60_000 } })

@@ -76,6 +76,31 @@ export class CheckoutRequestDto {
   personalAuthToken!: string;
 }
 
+export class ContractDto {
+  @ApiProperty({ description: 'Single-use token to send with POST /checkout.' }) token!: string;
+  @ApiProperty({
+    example: 'https://example.com/terms.pdf',
+    description: 'Document the shopper must read.',
+  })
+  permalink!: string;
+}
+
+export class FeesDto {
+  @ApiProperty({ enum: ['COP'] }) currency!: string;
+  @ApiProperty({ example: 300_000 }) baseFeeInCents!: number;
+  @ApiProperty({ example: 800_000 }) deliveryFeeInCents!: number;
+}
+
+export class CheckoutOptionsDto {
+  @ApiProperty({ type: ContractDto, description: 'Terms and conditions.' })
+  acceptance!: ContractDto;
+  @ApiProperty({ type: ContractDto, description: 'Personal data processing.' })
+  personalData!: ContractDto;
+  @ApiProperty({ type: FeesDto, description: 'The same fees the server adds to every order.' })
+  fees!: FeesDto;
+  @ApiProperty({ example: 10, description: 'Most units per order.' }) maxQuantity!: number;
+}
+
 export class ErrorDto {
   @ApiProperty({ example: 409 }) statusCode!: number;
   @ApiProperty({ example: 'OUT_OF_STOCK', description: 'Stable code for the frontend.' })

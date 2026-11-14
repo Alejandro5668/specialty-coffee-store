@@ -21,6 +21,10 @@ export const API_ERRORS = {
   },
   INVALID_SIGNATURE: { status: 401, message: 'The event signature is not valid.' },
   MALFORMED_EVENT: { status: 400, message: 'The event is not valid.' },
+  GATEWAY_UNAVAILABLE: {
+    status: 503,
+    message: 'We cannot reach the payment service right now. Try again in a minute.',
+  },
 } as const;
 
 export type ApiErrorCode = keyof typeof API_ERRORS;

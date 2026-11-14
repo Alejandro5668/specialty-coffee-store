@@ -25,6 +25,7 @@ describe('unwrap', () => {
     ['OUT_OF_STOCK', 409],
     ['INVALID_SIGNATURE', 401],
     ['MALFORMED_EVENT', 400],
+    ['GATEWAY_UNAVAILABLE', 503],
   ] as const)('maps %s to HTTP %i', (code, status) => {
     const error = thrown(code);
     expect(error.getStatus()).toBe(status);

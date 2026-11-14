@@ -25,12 +25,13 @@ describe('API documentation', () => {
     expect(res.headers['x-content-type-options']).toBe('nosniff');
   });
 
-  it('documents exactly the four public endpoints, and not the health check', async () => {
+  it('documents exactly the five public endpoints, and not the health check', async () => {
     const { paths } = await fetchDoc();
     const operations = Object.entries(paths).flatMap(([path, methods]) =>
       Object.keys(methods).map((method) => `${method.toUpperCase()} ${path}`),
     );
     expect(operations.sort()).toEqual([
+      'GET /checkout/options',
       'GET /products',
       'GET /transactions/{id}',
       'POST /checkout',
@@ -45,6 +46,9 @@ describe('API documentation', () => {
     }
     expect(Object.keys(paths['/checkout'].post.responses)).toEqual(
       expect.arrayContaining(['201', '400', '404', '409', '413', '422', '429']),
+    );
+    expect(Object.keys(paths['/checkout/options'].get.responses)).toEqual(
+      expect.arrayContaining(['200', '429', '503']),
     );
     expect(Object.keys(paths['/transactions/{id}'].get.responses)).toEqual(
       expect.arrayContaining(['200', '404', '429']),
