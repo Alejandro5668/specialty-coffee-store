@@ -46,7 +46,8 @@ html:has(dialog[open]) {
 }
 
 .modal--sheet {
-  block-size: auto;
+  /* fit-content, not auto: a fixed box with auto height would stretch to fill the screen. */
+  block-size: fit-content;
   max-block-size: 92dvh;
   margin-block-start: auto;
   border-start-start-radius: var(--radius-field);
@@ -56,7 +57,7 @@ html:has(dialog[open]) {
 @media (min-width: 40rem) {
   .modal {
     inline-size: min(100% - 2rem, 36rem);
-    block-size: auto;
+    block-size: fit-content;
     max-block-size: min(100dvh - 2rem, 54rem);
     margin: auto;
     border-radius: var(--radius-field);

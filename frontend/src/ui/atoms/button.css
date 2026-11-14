@@ -12,6 +12,10 @@
   transition: background-color 120ms ease;
 }
 
+.button--block {
+  inline-size: 100%;
+}
+
 .button--primary {
   background: var(--color-cherry);
   color: var(--color-on-cherry);

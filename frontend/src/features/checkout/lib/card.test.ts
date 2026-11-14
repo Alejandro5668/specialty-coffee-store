@@ -1,4 +1,5 @@
 import {
+  brandName,
   detectBrand,
   digitsOnly,
   formatCardNumber,
@@ -155,4 +156,12 @@ describe('splitExpiry', () => {
     ['1/30', null],
     ['', null],
   ])('reads %p', (raw, parts) => expect(splitExpiry(raw)).toEqual(parts));
+});
+
+describe('brandName', () => {
+  it.each([
+    ['visa', 'Visa'],
+    ['mastercard', 'Mastercard'],
+    ['unknown', 'Card'],
+  ] as const)('writes %s as %s', (brand, name) => expect(brandName(brand)).toBe(name));
 });

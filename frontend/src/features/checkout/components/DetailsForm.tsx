@@ -4,6 +4,7 @@ import { Button } from '../../../ui/atoms/Button';
 import { CardBrandMark } from '../../../ui/atoms/CardBrandMark';
 import { Checkbox } from '../../../ui/atoms/Checkbox';
 import { TextField } from '../../../ui/atoms/TextField';
+import { brandName } from '../lib/card';
 import { Errors, Field, Values } from './detailsTypes';
 import './details-form.css';
 
@@ -29,12 +30,6 @@ type Props = {
   onAccept: (key: 'terms' | 'personalData', checked: boolean) => void;
   onUseAnotherCard: () => void;
   onSubmit: () => void;
-};
-
-const BRAND_NAME: Record<CardBrand, string> = {
-  visa: 'Visa',
-  mastercard: 'Mastercard',
-  unknown: 'Card',
 };
 
 const link = (href: string | undefined, text: string) =>
@@ -113,7 +108,7 @@ export const DetailsForm = ({
           <div className="details__saved">
             <CardBrandMark brand={savedCard.brand} />
             <p>
-              {BRAND_NAME[savedCard.brand]} ending {savedCard.last4}
+              {brandName(savedCard.brand)} ending {savedCard.last4}
             </p>
             <Button variant="quiet" onClick={onUseAnotherCard}>
               Use another card
@@ -186,7 +181,7 @@ export const DetailsForm = ({
       </fieldset>
 
       {terms.status === 'loading' && <p className="field__hint">Loading the terms…</p>}
-      <Button type="submit" disabled={busy || terms.status !== 'ready'}>
+      <Button block type="submit" disabled={busy || terms.status !== 'ready'}>
         {busy ? 'Checking your card…' : 'Continue to summary'}
       </Button>
     </form>

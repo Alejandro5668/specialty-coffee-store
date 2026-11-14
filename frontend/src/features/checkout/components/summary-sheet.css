@@ -1,0 +1,37 @@
+.summary__lines {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.summary__lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.summary__lines dt {
+  min-inline-size: 0;
+}
+
+.summary__lines dd {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.summary__total {
+  padding-block-start: var(--space-3);
+  border-block-start: 2px solid var(--color-ink);
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+
+.summary__block h3 {
+  font-size: var(--text-base);
+  font-weight: 800;
+}
+
+.summary__block p {
+  color: var(--color-muted);
+}

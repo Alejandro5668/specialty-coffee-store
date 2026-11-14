@@ -1,10 +1,35 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
+import { Button } from './atoms/Button';
 import { CardBrandMark } from './atoms/CardBrandMark';
 import { Checkbox } from './atoms/Checkbox';
 import { TextField } from './atoms/TextField';
 import { Modal } from './organisms/Modal';
+
+describe('Button', () => {
+  it('is a plain button by default, and fills the width when asked', () => {
+    render(
+      <>
+        <Button>Plain</Button>
+        <Button block variant="quiet">
+          Wide
+        </Button>
+      </>,
+    );
+    expect(screen.getByRole('button', { name: 'Plain' })).toHaveAttribute('type', 'button');
+    expect(screen.getByRole('button', { name: 'Plain' })).not.toHaveClass('button--block');
+    expect(screen.getByRole('button', { name: 'Wide' })).toHaveClass(
+      'button--block',
+      'button--quiet',
+    );
+  });
+
+  it('can submit a form', () => {
+    render(<Button type="submit">Send</Button>);
+    expect(screen.getByRole('button', { name: 'Send' })).toHaveAttribute('type', 'submit');
+  });
+});
 
 describe('TextField', () => {
   it('connects the label, the hint and the error to the input', () => {

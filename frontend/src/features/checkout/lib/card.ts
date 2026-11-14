@@ -85,3 +85,11 @@ export const validateHolder = (raw: string): string | null => {
   if (!/^\p{L}[\p{L} .'-]*$/u.test(name)) return "Use only letters, spaces and . - ' in the name.";
   return null;
 };
+
+const BRAND_NAMES: Record<CardBrand, string> = {
+  visa: 'Visa',
+  mastercard: 'Mastercard',
+  unknown: 'Card',
+};
+
+export const brandName = (brand: CardBrand): string => BRAND_NAMES[brand];

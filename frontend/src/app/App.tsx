@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { DetailsContainer } from '../features/checkout/containers/DetailsContainer';
+import { SummaryContainer } from '../features/checkout/containers/SummaryContainer';
 import { CatalogPage } from '../pages/CatalogPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { AppShell } from './AppShell';
@@ -11,6 +12,7 @@ export const App = () => (
       <Routes>
         <Route path="/" element={<CatalogPage />}>
           <Route path="checkout/details" element={<DetailsContainer />} />
+          <Route path="checkout/summary" element={<SummaryContainer />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
