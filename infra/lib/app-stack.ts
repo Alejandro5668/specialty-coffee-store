@@ -72,7 +72,7 @@ export class AppStack extends Stack {
         PAYMENT_PUBLIC_KEY: props.paymentPublicKey,
         // The browser only calls the site's own origin, so no other origin is allowed.
         CORS_ORIGIN: 'https://same-origin.invalid',
-        TRUST_PROXY_HOPS: String(props.trustProxyHops ?? 1),
+        TRUST_PROXY_HOPS: String(props.trustProxyHops ?? 2),
         PAYMENT_PRIVATE_KEY_SSM: SECRET_PARAMETERS.PAYMENT_PRIVATE_KEY,
         PAYMENT_INTEGRITY_SECRET_SSM: SECRET_PARAMETERS.PAYMENT_INTEGRITY_SECRET,
         PAYMENT_EVENTS_SECRET_SSM: SECRET_PARAMETERS.PAYMENT_EVENTS_SECRET,
