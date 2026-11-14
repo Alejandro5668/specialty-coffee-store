@@ -44,7 +44,7 @@ describe('GET /deliveries/:id', () => {
     expect(res.body).toEqual({
       statusCode: 404,
       code: 'DELIVERY_NOT_FOUND',
-      message: 'There is no delivery for that order.',
+      message: 'No hay una entrega para ese pedido.',
     });
   });
 

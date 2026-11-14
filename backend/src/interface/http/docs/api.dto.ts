@@ -112,7 +112,7 @@ export class ErrorDto {
   @ApiProperty({ example: 409 }) statusCode!: number;
   @ApiProperty({ example: 'OUT_OF_STOCK', description: 'Stable code for the frontend.' })
   code!: string;
-  @ApiProperty({ example: 'There is not enough stock for that quantity. Choose fewer units.' })
+  @ApiProperty({ example: 'No hay stock suficiente para esa cantidad. Elige menos unidades.' })
   message!: string;
   @ApiPropertyOptional({
     type: [String],

@@ -53,7 +53,7 @@ describe('GET /transactions/:id', () => {
     expect(res.body).toEqual({
       statusCode: 404,
       code: 'TRANSACTION_NOT_FOUND',
-      message: 'We could not find that order.',
+      message: 'No encontramos ese pedido.',
     });
   });
 

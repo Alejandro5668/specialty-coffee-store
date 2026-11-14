@@ -16,7 +16,7 @@ const rows: Row[] = [
   {
     slug: 'huila-washed',
     name: 'Huila Washed',
-    description: 'Caramel, red apple and a clean, sweet finish.',
+    description: 'Caramelo, manzana roja y un final limpio y dulce.',
     cop250: 32_000,
     cop500: 58_000,
     stock250: 20,
@@ -25,7 +25,7 @@ const rows: Row[] = [
   {
     slug: 'narino-honey',
     name: 'Nariño Honey',
-    description: 'Honey, orange blossom and soft acidity.',
+    description: 'Miel, azahar de naranja y acidez suave.',
     cop250: 34_000,
     cop500: 62_000,
     stock250: 15,
@@ -34,7 +34,7 @@ const rows: Row[] = [
   {
     slug: 'cauca-natural',
     name: 'Cauca Natural',
-    description: 'Ripe berries, cocoa and a juicy body.',
+    description: 'Frutos rojos maduros, cacao y cuerpo jugoso.',
     cop250: 36_000,
     cop500: 65_000,
     stock250: 12,
@@ -43,7 +43,7 @@ const rows: Row[] = [
   {
     slug: 'sierra-nevada',
     name: 'Sierra Nevada',
-    description: 'Milk chocolate, almond and balanced sweetness.',
+    description: 'Chocolate con leche, almendra y dulzor equilibrado.',
     cop250: 31_000,
     cop500: 56_000,
     stock250: 25,
@@ -52,7 +52,7 @@ const rows: Row[] = [
   {
     slug: 'tolima-anaerobic',
     name: 'Tolima Anaerobic',
-    description: 'Tropical fruit, panela and a long aftertaste.',
+    description: 'Fruta tropical, panela y un retrogusto largo.',
     cop250: 39_000,
     cop500: 69_000,
     stock250: 8,
@@ -61,7 +61,7 @@ const rows: Row[] = [
   {
     slug: 'antioquia-decaf',
     name: 'Antioquia Decaf',
-    description: 'Toasted hazelnut, brown sugar and a smooth cup.',
+    description: 'Avellana tostada, azúcar morena y una taza suave.',
     cop250: 33_000,
     cop500: 59_000,
     stock250: 18,

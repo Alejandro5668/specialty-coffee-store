@@ -21,10 +21,19 @@ describe('loadSeed', () => {
     expect(puts().filter((p) => p.TableName === config.tables.variants)).toHaveLength(12);
   });
 
-  it('never overwrites an existing item, so a second run keeps the live stock', async () => {
+  it('never overwrites an existing variant, so a second run keeps the live stock', async () => {
     ddb.on(PutCommand).resolves({});
     await loadSeed(client, config);
-    expect(puts().every((p) => p.ConditionExpression === 'attribute_not_exists(id)')).toBe(true);
+    const variants = puts().filter((p) => p.TableName === config.tables.variants);
+    expect(variants.every((p) => p.ConditionExpression === 'attribute_not_exists(id)')).toBe(true);
+  });
+
+  it('rewrites the products, which hold only catalog text, so an edit reaches a live store', async () => {
+    ddb.on(PutCommand).resolves({});
+    await loadSeed(client, config);
+    const products = puts().filter((p) => p.TableName === config.tables.products);
+    expect(products).toHaveLength(6);
+    expect(products.every((p) => p.ConditionExpression === undefined)).toBe(true);
   });
 
   it('stores variants with the price in cents and the stock', async () => {
@@ -37,13 +46,13 @@ describe('loadSeed', () => {
     });
   });
 
-  it('counts the items that already existed as skipped', async () => {
+  it('counts the variants that already existed as skipped, and the products as written', async () => {
     ddb
       .on(PutCommand)
       .resolves({})
-      .on(PutCommand, { TableName: config.tables.products })
+      .on(PutCommand, { TableName: config.tables.variants })
       .rejects(new ConditionalCheckFailedException({ message: 'exists', $metadata: {} }));
-    expect(await loadSeed(client, config)).toEqual({ written: 12, skipped: 6 });
+    expect(await loadSeed(client, config)).toEqual({ written: 6, skipped: 12 });
   });
 
   it('fails on any other error instead of reporting a partial load as done', async () => {

@@ -36,7 +36,7 @@ export class ClientThrottlerGuard extends ThrottlerGuard {
       {
         statusCode: 429,
         code: 'TOO_MANY_REQUESTS',
-        message: 'Too many requests. Wait a minute and try again.',
+        message: 'Demasiadas peticiones. Espera un minuto e inténtalo de nuevo.',
       },
       429,
     );
