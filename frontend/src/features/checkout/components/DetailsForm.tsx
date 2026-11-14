@@ -102,7 +102,7 @@ export const DetailsForm = ({
         </div>
       )}
 
-      <p className="field__hint">All fields are required unless marked optional.</p>
+      <p className="field__hint details__notice">All fields are required unless marked optional.</p>
 
       <fieldset className="details__group">
         <legend>Card</legend>
