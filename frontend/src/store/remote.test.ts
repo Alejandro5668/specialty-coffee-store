@@ -79,6 +79,7 @@ describe('order', () => {
       forId: 'o1',
       view: view('o1', 'APPROVED'),
       error: null,
+      errorStatus: null,
     });
   });
 
@@ -117,6 +118,7 @@ describe('order', () => {
     expect(store.getState().order).toMatchObject({
       status: 'failed',
       error: 'We could not find that order.',
+      errorStatus: 404,
       view: null,
     });
     store.dispatch(clearOrder());
@@ -125,6 +127,7 @@ describe('order', () => {
       forId: null,
       view: null,
       error: null,
+      errorStatus: null,
     });
   });
 });

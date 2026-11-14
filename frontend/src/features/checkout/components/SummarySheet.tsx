@@ -1,5 +1,6 @@
 import { formatCop } from '../../../lib/money';
 import { Button } from '../../../ui/atoms/Button';
+import { AmountLines } from '../../../ui/molecules/AmountLines';
 import { Totals } from '../lib/amounts';
 import './summary-sheet.css';
 
@@ -61,26 +62,13 @@ export const SummarySheet = (props: Props) => {
         </div>
       )}
 
-      <dl className="summary__lines">
-        <div>
-          <dt>
-            {props.coffee}, {props.sizeGrams} g × {props.quantity}
-          </dt>
-          <dd data-testid="line-product">{formatCop(totals.productInCents)}</dd>
-        </div>
-        <div>
-          <dt>Base fee</dt>
-          <dd data-testid="line-base">{formatCop(totals.baseFeeInCents)}</dd>
-        </div>
-        <div>
-          <dt>Delivery</dt>
-          <dd data-testid="line-delivery">{formatCop(totals.deliveryFeeInCents)}</dd>
-        </div>
-        <div className="summary__total">
-          <dt>Total</dt>
-          <dd data-testid="line-total">{formatCop(totals.totalInCents)}</dd>
-        </div>
-      </dl>
+      <AmountLines
+        label={`${props.coffee}, ${props.sizeGrams} g × ${props.quantity}`}
+        productInCents={totals.productInCents}
+        baseFeeInCents={totals.baseFeeInCents}
+        deliveryFeeInCents={totals.deliveryFeeInCents}
+        totalInCents={totals.totalInCents}
+      />
 
       <section className="summary__block">
         <h3>Payment</h3>

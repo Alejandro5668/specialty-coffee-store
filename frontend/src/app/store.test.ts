@@ -17,7 +17,7 @@ describe('createStore', () => {
     expect(make(memoryStorage()).getState()).toEqual({
       catalog: { status: 'idle', products: [], error: null },
       options: { status: 'idle', data: null, error: null },
-      order: { status: 'idle', forId: null, view: null, error: null },
+      order: { status: 'idle', forId: null, view: null, error: null, errorStatus: null },
       checkout: initialCheckout,
     });
   });
