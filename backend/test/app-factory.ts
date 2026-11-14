@@ -13,7 +13,7 @@ import { InMemoryOrders } from './fakes/in-memory-orders';
 import { InMemoryTransactions } from './fakes/in-memory-transactions';
 
 /** The real Nest module with every port replaced by an in-memory fake: no network, no AWS. */
-export const buildTestApp = async (stock = 5) => {
+export const buildTestApp = async (stock = 5, config: { trustProxyHops?: number } = {}) => {
   const catalog = catalogWithStock(VARIANT_ID, stock);
   const transactions = new InMemoryTransactions();
   const orders = new InMemoryOrders(catalog, transactions);
@@ -40,7 +40,13 @@ export const buildTestApp = async (stock = 5) => {
     .compile();
 
   const app = moduleRef.createNestApplication<NestExpressApplication>();
-  configureApp(app, loadHttpConfig({ CORS_ORIGIN: 'http://localhost:5173' }));
+  configureApp(
+    app,
+    loadHttpConfig({
+      CORS_ORIGIN: 'http://localhost:5173',
+      TRUST_PROXY_HOPS: String(config.trustProxyHops ?? 0),
+    }),
+  );
   setupSwagger(app);
   await app.init();
   return { app, catalog, transactions, orders, customers, gateway };

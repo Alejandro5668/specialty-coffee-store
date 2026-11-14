@@ -1,6 +1,6 @@
 import { Module, Provider } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { CatalogRepository } from './application/ports/catalog.repository';
 import { CustomerRepository } from './application/ports/customer.repository';
 import { EventVerifier } from './application/ports/event.verifier';
@@ -23,6 +23,7 @@ import { ChecksumEventVerifier } from './infrastructure/payments/checksum-event.
 import { HttpPaymentGateway } from './infrastructure/payments/http-payment.gateway';
 import { SystemClock, UuidIdGenerator } from './infrastructure/system/system';
 import { CheckoutController } from './interface/http/checkout.controller';
+import { ClientThrottlerGuard } from './interface/http/client-throttler.guard';
 import { HealthController } from './interface/http/health.controller';
 import { ProductsController } from './interface/http/products.controller';
 import { TransactionsController } from './interface/http/transactions.controller';
@@ -118,6 +119,6 @@ const useCases: Provider[] = [
     WebhooksController,
   ],
   imports: [ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }])],
-  providers: [...adapters, ...useCases, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [...adapters, ...useCases, { provide: APP_GUARD, useClass: ClientThrottlerGuard }],
 })
 export class AppModule {}

@@ -15,6 +15,7 @@
     "@types/aws-lambda": "^8.10.164",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.6",
+    "@types/proxy-addr": "^2.0.3",
     "@types/supertest": "^7.2.1",
     "aws-sdk-client-mock": "^4.1.0",
     "jest": "^30.5.2",
@@ -33,6 +34,7 @@
     "@nestjs/swagger": "^11.4.8",
     "@nestjs/throttler": "^6.7.1",
     "helmet": "^8.3.0",
+    "proxy-addr": "^2.0.8",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   }
