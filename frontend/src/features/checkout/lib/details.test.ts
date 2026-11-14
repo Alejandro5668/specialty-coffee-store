@@ -16,10 +16,22 @@ const hostile = [
   'tab\there',
 ];
 
+describe('recipient name (optional)', () => {
+  it('accepts a name and also an empty value, because the order then goes to the buyer', () => {
+    expect(validateRecipient('Ana Pérez')).toBeNull();
+    expect(validateRecipient('')).toBeNull();
+    expect(validateRecipient('   ')).toBeNull();
+  });
+
+  it('still refuses markup and values that are too long', () => {
+    expect(validateRecipient('<b>x</b>')).toBe('Remove special characters such as < or >.');
+    expect(validateRecipient('a'.repeat(201))).toBe('Use 200 characters or fewer.');
+  });
+});
+
 describe('text fields', () => {
   it.each([
     [validateFullName, 'Ana Pérez', 'Enter your full name.'],
-    [validateRecipient, 'Ana Pérez', 'Enter the name of the person who will receive the order.'],
     [validateAddress, 'Calle 10 # 5-20, Apto 301', 'Enter the delivery address.'],
     [validateCity, 'Medellín', 'Enter the city.'],
   ])('%p accepts a normal value and asks for it when empty', (validate, good, required) => {

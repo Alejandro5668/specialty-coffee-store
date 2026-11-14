@@ -102,6 +102,8 @@ export const DetailsForm = ({
         </div>
       )}
 
+      <p className="field__hint">All fields are required unless marked optional.</p>
+
       <fieldset className="details__group">
         <legend>Card</legend>
         {savedCard ? (
@@ -150,7 +152,10 @@ export const DetailsForm = ({
 
       <fieldset className="details__group">
         <legend>Delivery</legend>
-        {text('recipientName', 'Recipient name', { autoComplete: 'shipping name' })}
+        {text('recipientName', 'Recipient name (optional)', {
+          autoComplete: 'shipping name',
+          hint: 'Leave it empty and we use your name.',
+        })}
         {text('address', 'Address', { autoComplete: 'shipping street-address' })}
         {text('city', 'City', { autoComplete: 'shipping address-level2' })}
         {text('phone', 'Phone', {

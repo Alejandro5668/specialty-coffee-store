@@ -25,14 +25,21 @@ describe('isDetailsComplete', () => {
     expect(isDetailsComplete(draft())).toBe(true);
   });
 
+  it('is true without a recipient name, which is optional', () => {
+    const state = draft({
+      delivery: { recipientName: '', address: 'Calle 1', city: 'Cali', phone: '3001234567' },
+    });
+    expect(isDetailsComplete(state)).toBe(true);
+  });
+
   it.each([
     ['no coffee', draft({ variantId: null })],
     ['no name', draft({ customer: { name: '', email: 'ana@example.com' } })],
     ['a bad email', draft({ customer: { name: 'Ana', email: 'ana' } })],
     [
-      'no recipient',
+      'no address',
       draft({
-        delivery: { recipientName: '', address: 'Calle 1', city: 'Cali', phone: '3001234567' },
+        delivery: { recipientName: 'Ana', address: '', city: 'Cali', phone: '3001234567' },
       }),
     ],
     [

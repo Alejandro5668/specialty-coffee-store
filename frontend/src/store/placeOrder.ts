@@ -42,7 +42,7 @@ export const placeOrder = createAsyncThunk<TransactionView, void, Config>(
         quantity: s.quantity,
         customer: { name: s.customer.name.trim(), email: s.customer.email.trim() },
         delivery: {
-          recipientName: s.delivery.recipientName.trim(),
+          recipientName: s.delivery.recipientName.trim() || s.customer.name.trim(),
           address: s.delivery.address.trim(),
           city: s.delivery.city.trim(),
           phone: normalizePhone(s.delivery.phone),
