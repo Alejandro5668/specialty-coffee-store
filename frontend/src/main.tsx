@@ -8,11 +8,12 @@ import { BrowserRouter } from 'react-router-dom';
 import { createCoffeeApi } from './api/client';
 import { createCardTokenizer, unavailableTokenizer } from './api/tokenizer';
 import { App } from './app/App';
+import { browserStorage } from './app/browserStorage';
 import { ServicesProvider } from './app/services';
 import { createStore } from './app/store';
 
 const api = createCoffeeApi(import.meta.env.VITE_API_URL ?? '/api', window.fetch.bind(window));
-const store = createStore({ api, storage: window.localStorage });
+const store = createStore({ api, storage: browserStorage(window) });
 
 // The card goes from the browser straight to the payment service, so it needs its own address and
 // public key. Without them the form says so instead of failing in a strange way.

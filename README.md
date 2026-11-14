@@ -35,3 +35,16 @@ Swagger UI at `/docs` on the running API; spec in [docs/openapi.json](docs/opena
 | `POST /webhooks/payments` | Signed payment event (idempotent)            | 400, 401, 404, 413, 422      |
 
 Limits: 16 KB bodies, 60 requests per minute per client (10 for checkout), CORS only for `CORS_ORIGIN`. Payment flow: [docs/PAYMENTS.md](docs/PAYMENTS.md).
+
+## Frontend
+
+Routes: `/` coffees, `/checkout/details` card and delivery (dialog), `/checkout/summary` summary (sheet), `/order/:id` result. Build-time variables (see `.env.example`): `VITE_API_URL`, `VITE_PAYMENT_API_URL`, `VITE_PAYMENT_PUBLIC_KEY`.
+
+| Decision                                                  | Why                                                                                        |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| The card goes from the browser to the payment service     | The number and the code never reach our servers, Redux, an action or any storage           |
+| The draft lives in `sessionStorage`, not `localStorage`   | It survives a refresh but is gone when the tab closes; it holds a name, address and phone  |
+| Only the selection and details are saved; never an amount | Prices come from the API every time, so editing the storage cannot show a wrong amount     |
+| The `idempotencyKey` is saved before the payment is sent  | A refresh in the middle sends the same key, so the order is never created or charged twice |
+| The card token is kept 30 minutes at most                 | After that the card is asked again                                                         |
+| After a result the page returns to the coffees in 8 s     | Cancelable. Declined or failed keeps the details; approved forgets everything              |

@@ -16,16 +16,18 @@ Verified against the provider docs and the sandbox on 2026-11-14, except the web
 
 ## Rules found in the sandbox
 
-| Rule                                                                                                               | Consequence                                                              |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| The browser cannot call `GET /merchants/info`: its preflight has no CORS headers. `POST /tokens/cards` is allowed. | The backend fetches the acceptance tokens (`GET /checkout/options`).     |
-| The acceptance token is single use (422 on reuse).                                                                 | Fetch a fresh one for every payment attempt.                             |
-| `reference` must be unique (422 on reuse).                                                                         | Send our transaction id; the provider's own id is kept as `providerRef`. |
-| `amount_in_cents` is an integer; currency is only `COP`.                                                           | Matches our Money type.                                                  |
-| Minimum amount is 1,500 COP.                                                                                       | Never applies: the two fees alone are 11,000 COP.                        |
-| A new transaction is always `PENDING`, then `APPROVED`/`DECLINED`/`ERROR`/`VOIDED`.                                | Stock is reserved before the call.                                       |
-| A card token expires after about 2 days; the docs say to use it at most twice.                                     | Tokenize per attempt and use each token once.                            |
-| `accept_personal_auth` was optional in the sandbox; the docs disagree.                                             | Always send it.                                                          |
+| Rule                                                                                                               | Consequence                                                                           |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| The browser cannot call `GET /merchants/info`: its preflight has no CORS headers. `POST /tokens/cards` is allowed. | The backend fetches the acceptance tokens (`GET /checkout/options`).                  |
+| The acceptance token is single use (422 on reuse).                                                                 | Fetch a fresh one for every payment attempt.                                          |
+| `reference` must be unique (422 on reuse).                                                                         | Send our transaction id; the provider's own id is kept as `providerRef`.              |
+| `amount_in_cents` is an integer; currency is only `COP`.                                                           | Matches our Money type.                                                               |
+| Minimum amount is 1,500 COP.                                                                                       | Never applies: the two fees alone are 11,000 COP.                                     |
+| A new transaction is always `PENDING`, then `APPROVED`/`DECLINED`/`ERROR`/`VOIDED`.                                | Stock is reserved before the call.                                                    |
+| The provider does not check the expiry date, and requires a card holder name of 5 or more characters.              | The form validates the expiry itself and asks for 5 or more characters.               |
+| In the sandbox only `4242 4242 4242 4242` and `4111 1111 1111 1111` tokenize; test Mastercards are refused (422).  | The form shows the Mastercard logo when it detects one; the sandbox refuses it.       |
+| A card token expires after about 2 days; the docs say to use it at most twice.                                     | Tokenize per attempt, use each token once, and keep it 30 minutes at most in the tab. |
+| `accept_personal_auth` was optional in the sandbox; the docs disagree.                                             | Always send it.                                                                       |
 
 ## Integrity signature
 
