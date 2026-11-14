@@ -69,6 +69,11 @@ a {
   padding-inline: var(--gutter);
 }
 
+/* Vertical rhythm between siblings, so components never set their own outer margins. */
+.stack > * + * {
+  margin-block-start: var(--space-4);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
