@@ -1,0 +1,37 @@
+import { build } from './stacks';
+
+const { data } = build();
+
+describe('DataStack', () => {
+  it.each([
+    ['products', 'id'],
+    ['variants', 'id'],
+    ['transactions', 'id'],
+    ['customers', 'email'],
+  ])('creates coffee-store-%s keyed by %s', (name, key) => {
+    data.hasResourceProperties('AWS::DynamoDB::Table', {
+      TableName: `coffee-store-${name}`,
+      KeySchema: [{ AttributeName: key, KeyType: 'HASH' }],
+    });
+  });
+
+  it('creates exactly four tables, on demand, so an idle store costs nothing', () => {
+    data.resourceCountIs('AWS::DynamoDB::Table', 4);
+    for (const table of Object.values(data.findResources('AWS::DynamoDB::Table'))) {
+      expect(table.Properties.BillingMode).toBe('PAY_PER_REQUEST');
+    }
+  });
+
+  it('keeps point-in-time recovery on the orders, the data that cannot be rebuilt', () => {
+    data.hasResourceProperties('AWS::DynamoDB::Table', {
+      TableName: 'coffee-store-transactions',
+      PointInTimeRecoverySpecification: { PointInTimeRecoveryEnabled: true },
+    });
+  });
+
+  it('can be destroyed with the stack, so the cleanup leaves nothing billing', () => {
+    for (const table of Object.values(data.findResources('AWS::DynamoDB::Table'))) {
+      expect(table.DeletionPolicy).toBe('Delete');
+    }
+  });
+});
