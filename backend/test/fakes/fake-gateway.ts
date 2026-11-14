@@ -13,6 +13,7 @@ export class FakeGateway implements PaymentGateway {
   next: Script = ok({ providerRef: 'prov-1', status: 'PENDING' });
   known = new Map<string, GatewayCharge>();
   lookupFails = false;
+  lookups = 0;
 
   async charge(request: ChargeRequest): Promise<Script> {
     this.charges.push(request);
@@ -22,6 +23,7 @@ export class FakeGateway implements PaymentGateway {
   async findByReference(
     reference: string,
   ): Promise<Result<GatewayCharge | null, 'GATEWAY_UNAVAILABLE'>> {
+    this.lookups++;
     if (this.lookupFails) return err('GATEWAY_UNAVAILABLE');
     return ok(this.known.get(reference) ?? null);
   }
