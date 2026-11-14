@@ -24,7 +24,17 @@
 .details__pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
+  /* Label, input and hint share rows across both fields, so a label that wraps to two lines
+     does not push its input out of line with the other one. */
+  grid-template-rows: auto auto auto;
+  column-gap: var(--space-3);
+  row-gap: 0;
+}
+
+.details__pair > .field {
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  row-gap: var(--space-1);
 }
 
 .details__saved {
