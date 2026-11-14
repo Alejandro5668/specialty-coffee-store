@@ -4,15 +4,15 @@ Verified against the provider docs and the sandbox on 2026-11-13, except the web
 
 ## Flow
 
-| #   | Who      | Call                               | Key              | Notes                                                                    |
-| --- | -------- | ---------------------------------- | ---------------- | ------------------------------------------------------------------------ |
-| 1   | Backend  | `GET /merchants/info`              | public (header)  | Header `x-merchant-public-key`. Returns both contracts and their tokens. |
-| 2   | Frontend | show `permalink` of both contracts | -                | The user must accept each one.                                           |
-| 3   | Frontend | `POST /tokens/cards`               | public (Bearer)  | The card goes browser → provider, never through our API.                 |
-| 4   | Frontend | `POST /checkout` (ours)            | -                | Sends token, quantity, variant, delivery. Never amounts.                 |
-| 5   | Backend  | `POST /transactions`               | private (Bearer) | Returns 201 with `PENDING`.                                              |
-| 6   | Provider | `POST /webhooks/payments` (ours)   | events secret    | Final status. Must answer 200.                                           |
-| 7   | Backend  | `GET /transactions/:id`            | private (Bearer) | Fallback when the webhook is late or lost.                               |
+| #   | Who      | Call                               | Key              | Notes                                                                                                                       |
+| --- | -------- | ---------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Frontend | `GET /merchants/info`              | public (header)  | Header `x-merchant-public-key`. Returns both contracts and their tokens. Single use: fetch again for every attempt.         |
+| 2   | Frontend | show `permalink` of both contracts | -                | The user must accept each one.                                                                                              |
+| 3   | Frontend | `POST /tokens/cards`               | public (Bearer)  | The card goes browser → provider, never through our API.                                                                    |
+| 4   | Frontend | `POST /checkout` (ours)            | -                | Sends card token, both acceptance tokens, `idempotencyKey`, variant, quantity, customer, delivery. Never amounts.           |
+| 5   | Backend  | `POST /transactions`               | private (Bearer) | Returns 201 with `PENDING`. A 4xx marks the transaction `ERROR`; a timeout or 5xx keeps it `PENDING`.                       |
+| 6   | Provider | `POST /webhooks/payments` (ours)   | events secret    | Final status. Must answer 200.                                                                                              |
+| 7   | Backend  | `GET /transactions/:id`            | private (Bearer) | Fallback when the webhook is late or lost. A `PENDING` transaction unknown to the provider becomes `ERROR` after 5 minutes. |
 
 ## Rules found in the sandbox
 
