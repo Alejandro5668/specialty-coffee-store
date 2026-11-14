@@ -12,12 +12,16 @@ type Summary = {
 };
 
 type Common = { onBack: () => void };
+/** Seconds left before the page returns to the coffees by itself, and how to stay. */
+type Leaving = { returnIn: number | null; onStay: () => void };
 type Props =
   | { kind: 'checking' }
   | ({ kind: 'problem'; message: string; canRetry: boolean; onRetry: () => void } & Common)
   | ({ kind: 'slow'; summary: Summary; onCheckAgain: () => void } & Common)
-  | ({ kind: 'confirming' | 'approved'; summary: Summary } & Common)
-  | ({ kind: 'declined' | 'error'; summary: Summary; onTryAnotherCard: () => void } & Common);
+  | ({ kind: 'confirming'; summary: Summary } & Common)
+  | ({ kind: 'approved'; summary: Summary } & Common & Leaving)
+  | ({ kind: 'declined' | 'error'; summary: Summary; onTryAnotherCard: () => void } & Common &
+      Leaving);
 
 const WORDS = {
   confirming: [
@@ -98,6 +102,18 @@ export const OrderStatusView = (props: Props) => {
         <Button block onClick={props.onTryAnotherCard}>
           Try another card
         </Button>
+      )}
+      {'returnIn' in props && props.returnIn !== null && (
+        <div className="order__return stack">
+          {/* A timer is not announced every second; the result above already was. */}
+          <p role="timer">
+            Returning to the coffees in {props.returnIn}{' '}
+            {props.returnIn === 1 ? 'second' : 'seconds'}.
+          </p>
+          <Button block variant="quiet" onClick={props.onStay}>
+            Stay on this page
+          </Button>
+        </div>
       )}
       {props.kind !== 'confirming' && props.kind !== 'slow' && (
         <Button
