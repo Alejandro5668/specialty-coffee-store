@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "package:lambda": "node scripts/package-lambda.mjs",
     "start:dev": "ts-node src/main.ts",
     "seed": "ts-node src/infrastructure/seed/seed.cli.ts",
     "openapi": "ts-node src/interface/http/openapi.cli.ts",

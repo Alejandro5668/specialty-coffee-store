@@ -4,7 +4,9 @@ import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**', '**/cdk.out/**'] },
+  {
+    ignores: ['**/dist/**', '**/build/**', '**/coverage/**', '**/node_modules/**', '**/cdk.out/**'],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettier,
