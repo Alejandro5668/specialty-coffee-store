@@ -25,7 +25,7 @@ describe('AllExceptionsFilter', () => {
     [404, 'NOT_FOUND', 'No encontramos lo que buscas.'],
     [413, 'PAYLOAD_TOO_LARGE', 'La petición es demasiado grande.'],
   ])('rewrites a framework %i with a stable code and a plain message', (status, code, message) => {
-    expect(run(Object.assign(new Error('Cannot GET /x'), { status }))).toEqual({
+    expect(run(Object.assign(new Error('Cannot GET /x'), { status, expose: true }))).toEqual({
       status,
       body: { statusCode: status, code, message },
     });
@@ -34,7 +34,9 @@ describe('AllExceptionsFilter', () => {
   it.each([401, 403, 405, 415, 422])(
     'shows any other client error (%i) as a bad request',
     (status) => {
-      expect(run(Object.assign(new Error('parser detail'), { statusCode: status }))).toEqual({
+      expect(
+        run(Object.assign(new Error('parser detail'), { statusCode: status, expose: true })),
+      ).toEqual({
         status: 400,
         body: { statusCode: 400, code: 'BAD_REQUEST', message: 'La petición no es válida.' },
       });
@@ -62,9 +64,45 @@ describe('AllExceptionsFilter', () => {
     expect(sent.body).toMatchObject({ code: 'INTERNAL_ERROR' });
   });
 
+  it('does not take a server-side fault for a client error, even if it carries a 4xx status', () => {
+    const log = jest.spyOn(Logger.prototype, 'error');
+    const upstream = Object.assign(new Error('upstream answered 403'), { status: 403 });
+    expect(run(upstream)).toEqual({
+      status: 500,
+      body: {
+        statusCode: 500,
+        code: 'INTERNAL_ERROR',
+        message: 'Algo salió mal de nuestro lado. Inténtalo de nuevo en un minuto.',
+      },
+    });
+    expect(log).toHaveBeenCalledTimes(1);
+  });
+
+  it('answers 500, not the status it carries, to a 5xx Nest exception without a code', () => {
+    expect(run(new HttpException('Bad gateway', 503))).toMatchObject({
+      status: 500,
+      body: { code: 'INTERNAL_ERROR' },
+    });
+  });
+
+  it('logs what the cause was, even when it is not an Error', () => {
+    const log = jest.spyOn(Logger.prototype, 'error');
+    run({ reason: 'dynamo timeout', requestId: 'abc-123' });
+    expect(String(log.mock.calls[0][0])).toContain('dynamo timeout');
+    expect(String(log.mock.calls[0][0])).toContain('abc-123');
+  });
+
+  it('does nothing when the response was already sent', () => {
+    const json = jest.fn();
+    const reply = { headersSent: true, status: () => ({ json }) };
+    const host = { switchToHttp: () => ({ getResponse: () => reply }) } as unknown as ArgumentsHost;
+    expect(() => new AllExceptionsFilter().catch(new Error('late'), host)).not.toThrow();
+    expect(json).not.toHaveBeenCalled();
+  });
+
   it('logs the stack of a server error, and nothing for a client error', () => {
     const log = jest.spyOn(Logger.prototype, 'error');
-    run(Object.assign(new Error('x'), { status: 404 }));
+    run(Object.assign(new Error('x'), { status: 404, expose: true }));
     expect(log).not.toHaveBeenCalled();
     run(new Error('boom'));
     expect(log).toHaveBeenCalledTimes(1);

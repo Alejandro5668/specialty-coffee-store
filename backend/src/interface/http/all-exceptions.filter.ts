@@ -1,6 +1,7 @@
+import { inspect } from 'node:util';
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 
-type Reply = { status(code: number): { json(body: unknown): void } };
+type Reply = { headersSent?: boolean; status(code: number): { json(body: unknown): void } };
 
 /** What a shopper reads when the framework itself rejects a request. */
 const FRAMEWORK_ERRORS: Record<number, { code: string; message: string }> = {
@@ -13,11 +14,16 @@ const INTERNAL = {
   message: 'Algo salió mal de nuestro lado. Inténtalo de nuevo en un minuto.',
 };
 
+/**
+ * Only errors that say they are meant for the client count as client errors: Nest exceptions and
+ * the parser's http-errors (`expose: true`). A fault from an adapter that happens to carry a 4xx
+ * `status` (an upstream 403, say) is a server fault and is answered and logged as one.
+ */
 const statusOf = (error: unknown): number => {
   if (error instanceof HttpException) return error.getStatus();
-  const { status, statusCode } = (error ?? {}) as { status?: unknown; statusCode?: unknown };
+  const { status, statusCode, expose } = (error ?? {}) as Record<string, unknown>;
   const code = typeof status === 'number' ? status : statusCode;
-  return typeof code === 'number' && code >= 400 && code < 600 ? code : 500;
+  return expose === true && typeof code === 'number' && code >= 400 && code < 500 ? code : 500;
 };
 
 /**
@@ -31,6 +37,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   catch(error: unknown, host: ArgumentsHost): void {
     const reply = host.switchToHttp().getResponse<Reply>();
+    if (reply.headersSent) return;
     if (error instanceof HttpException) {
       const body = error.getResponse();
       if (typeof body === 'object' && body !== null && 'code' in body) {
@@ -40,7 +47,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
     const status = statusOf(error);
     if (status >= 500) {
-      this.logger.error(error instanceof Error ? error.stack : String(error));
+      this.logger.error(error instanceof Error ? error.stack : inspect(error, { depth: 3 }));
       reply.status(500).json({ statusCode: 500, ...INTERNAL });
       return;
     }

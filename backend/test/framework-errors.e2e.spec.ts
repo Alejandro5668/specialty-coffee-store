@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import request from 'supertest';
 import { buildTestApp } from './app-factory';
 
@@ -6,7 +7,10 @@ let built: Built;
 beforeEach(async () => {
   built = await buildTestApp(5);
 });
-afterEach(async () => built.app.close());
+afterEach(async () => {
+  jest.restoreAllMocks();
+  await built.app.close();
+});
 
 const server = () => built.app.getHttpServer();
 
@@ -49,7 +53,7 @@ describe('errors raised by the framework', () => {
 
   it('answers an unexpected failure with a plain message and nothing from the cause', async () => {
     jest.spyOn(built.catalog, 'listCatalog').mockRejectedValueOnce(new Error('password=hunter2'));
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     const res = await request(server()).get('/products');
     expect(res.status).toBe(500);
     expect(res.body).toEqual({

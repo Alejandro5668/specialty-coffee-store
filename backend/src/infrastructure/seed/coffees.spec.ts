@@ -32,7 +32,7 @@ describe('coffee seed', () => {
 
   it('describes every coffee in Spanish', () => {
     for (const p of seedProducts) {
-      expect(p.description).not.toMatch(/\b(and|the|with|of|a)\b/i);
+      expect(p.description).not.toMatch(/\b(and|the|with|of)\b/i);
       expect(p.description).toMatch(/[áéíóúñ]|\b(y|con|de|un|una)\b/i);
     }
   });
