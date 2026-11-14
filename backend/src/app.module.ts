@@ -20,6 +20,7 @@ import { ChecksumEventVerifier } from './infrastructure/payments/checksum-event.
 import { HttpPaymentGateway } from './infrastructure/payments/http-payment.gateway';
 import { SystemClock, UuidIdGenerator } from './infrastructure/system/system';
 import { HealthController } from './interface/http/health.controller';
+import { ProductsController } from './interface/http/products.controller';
 
 const adapters: Provider[] = [
   {
@@ -97,5 +98,8 @@ const useCases: Provider[] = [
   },
 ];
 
-@Module({ controllers: [HealthController], providers: [...adapters, ...useCases] })
+@Module({
+  controllers: [HealthController, ProductsController],
+  providers: [...adapters, ...useCases],
+})
 export class AppModule {}
