@@ -2,6 +2,16 @@
 
 Checkout flow for a specialty coffee shop. Plan: [docs/PLAN.md](docs/PLAN.md). Criteria: [docs/ACCEPTANCE_CRITERIA.md](docs/ACCEPTANCE_CRITERIA.md).
 
+## Live
+
+| What          | Where                                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| App           | https://d2eds6bsugsp7t.cloudfront.net                                                                         |
+| API docs      | https://d2eds6bsugsp7t.cloudfront.net/api/docs (Swagger UI), `/api/docs/openapi.json` (raw)                   |
+| Test purchase | Card `4242 4242 4242 4242`, any future expiry, 3-digit code, a name of 5+ characters: the payment is approved |
+
+Payments run in the provider's sandbox: no real money moves. The card `4111 1111 1111 1111` is declined.
+
 ## Requirements
 
 Node 22 (`.nvmrc`), npm 10.
@@ -73,6 +83,35 @@ AWS CDK in `infra/`, region `us-east-2`. One CloudFront URL serves the SPA and `
 | 6    | `npx cdk destroy --all -w infra` removes everything, tables and bucket included |
 
 Limits: the default CloudFront certificate fixes the minimum TLS version; a custom domain is needed to raise it. `aws-cdk-lib` bundles a `minimatch` flagged by `npm audit`; it only runs on the developer machine at synth time.
+
+## Tests
+
+Jest in all three workspaces, run by CI on every pull request with an 80 % minimum (`coverageThreshold`).
+
+| Workspace  | Tests | Statements | Branches | Functions | Lines   |
+| ---------- | ----- | ---------- | -------- | --------- | ------- |
+| `frontend` | 466   | 98.24 %    | 94.39 %  | 98.66 %   | 99.06 % |
+| `backend`  | 510   | 98.92 %    | 94.25 %  | 99.42 %   | 99.73 % |
+| `infra`    | 36    | 100 %      | 100 %    | 100 %     | 100 %   |
+
+Backend tests use in-memory fakes of every port, so they need no network or AWS. Adversarial cases (forged amounts, floods, replayed webhooks, hostile ids, parallel purchases on the last unit) are automated.
+
+## Backend decisions
+
+| Decision                                                     | Why                                                                                         | Trade-off                                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Hexagonal: `domain` imports no framework, DB or provider     | Business rules are tested without Nest, AWS or the network                                  | More files than a plain controller-to-DB service                  |
+| Use cases return a `Result` (railway style)                  | Every failure is a value with a stable code; no scattered `try/catch`                       | Callers must unwrap; the HTTP layer does it in one place          |
+| DynamoDB, one table per entity, on demand                    | No servers, nothing billed when idle, atomic conditional writes for stock                   | No joins: each entity is read by its key                          |
+| Stock is reserved when the `PENDING` order is created        | Two buyers of the last unit cannot both succeed; a failed payment gives the unit back       | A stuck `PENDING` order holds stock until it is settled           |
+| Settling is one atomic write                                 | Approved: close the order and assign the delivery. Otherwise: close it and return the stock | A DynamoDB transaction instead of a single update                 |
+| Amounts are computed on the server only                      | A forged price or total in the request is ignored                                           | The client shows a total it cannot trust until the server answers |
+| An idempotency key per purchase                              | A double click or a refresh never creates or charges twice                                  | One extra marker item per order                                   |
+| Webhook: signature check, idempotent, plus a lookup fallback | A late or lost event still settles the order when the shopper polls                         | An extra provider call for orders left `PENDING`                  |
+| `GET /deliveries/:id` hides recipient, address and phone     | An order id alone must not expose personal data                                             | Fulfilment data is read from the table, not from the API          |
+| One CloudFront URL for the site and `/api/*`                 | Same origin: CORS stays closed and the browser never calls another host                     | CloudFront also sits in front of the API (2 trusted proxies)      |
+| Lambda is compiled with `tsc`, not bundled                   | Nest needs the decorator metadata that esbuild drops                                        | A larger package (72 MB)                                          |
+| Secrets live in SSM Parameter Store                          | Nothing sensitive in the code, the template or the environment of the repository            | One extra call when the Lambda starts                             |
 
 ## Frontend
 
