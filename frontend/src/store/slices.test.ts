@@ -3,7 +3,6 @@ import { ApiError, CoffeeApi } from '../api/client';
 import { fakeApi } from '../test/fakeApi';
 import { ProductView } from '../api/types';
 import { catalogReducer, loadCatalog } from './catalogSlice';
-import { checkoutReducer, clearCheckout, selectCoffee } from './checkoutSlice';
 
 const coffee: ProductView = {
   id: 'a',
@@ -16,7 +15,12 @@ const coffee: ProductView = {
 const storeWith = (listProducts: CoffeeApi['listProducts']) =>
   configureStore({
     reducer: { catalog: catalogReducer },
-    middleware: (gdm) => gdm({ thunk: { extraArgument: { api: fakeApi({ listProducts }) } } }),
+    middleware: (gdm) =>
+      gdm({
+        thunk: {
+          extraArgument: { api: fakeApi({ listProducts }), newId: () => 'x', now: () => 0 },
+        },
+      }),
   });
 
 describe('catalog', () => {
@@ -80,17 +84,5 @@ describe('catalog', () => {
     fail = false;
     await store.dispatch(loadCatalog());
     expect(store.getState().catalog).toEqual({ status: 'ready', products: [coffee], error: null });
-  });
-});
-
-describe('checkout draft', () => {
-  it('starts with nothing selected', () => {
-    expect(checkoutReducer(undefined, { type: 'x' })).toEqual({ variantId: null, quantity: 1 });
-  });
-
-  it('remembers the selected coffee and quantity, and forgets them', () => {
-    const chosen = checkoutReducer(undefined, selectCoffee({ variantId: 'a-250', quantity: 3 }));
-    expect(chosen).toEqual({ variantId: 'a-250', quantity: 3 });
-    expect(checkoutReducer(chosen, clearCheckout())).toEqual({ variantId: null, quantity: 1 });
   });
 });

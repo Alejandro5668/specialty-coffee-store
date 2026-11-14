@@ -1,55 +1,59 @@
 import { fakeApi } from '../test/fakeApi';
-import { PERSIST_KEY } from '../store/persistence';
-import { selectCoffee } from '../store/checkoutSlice';
+import { memoryStorage } from '../test/storage';
+import { draft, NOW } from '../test/state';
 import { loadCatalog } from '../store/catalogSlice';
+import { initialCheckout } from '../store/checkoutState';
+import { selectCoffee, updateCustomer } from '../store/checkoutSlice';
+import { PERSIST_KEY, toPersistable } from '../store/persistence';
 import { createStore } from './store';
 
 const api = fakeApi({ listProducts: async () => [] });
-const memory = (initial?: string) => {
-  const data = new Map<string, string>();
-  if (initial !== undefined) data.set(PERSIST_KEY, initial);
-  const setItem = jest.fn((k: string, v: string) => void data.set(k, v));
-  return { data, getItem: (k: string) => data.get(k) ?? null, setItem };
-};
+const make = (storage: Parameters<typeof createStore>[0]['storage']) =>
+  createStore({ api, storage, now: () => NOW, newId: () => 'key-new-0001' });
+const savedDraft = (state = draft()) => JSON.stringify({ v: 2, checkout: toPersistable(state) });
 
 describe('createStore', () => {
   it('starts empty when nothing was saved', () => {
-    const store = createStore({ api, storage: memory() });
-    expect(store.getState()).toEqual({
+    expect(make(memoryStorage()).getState()).toEqual({
       catalog: { status: 'idle', products: [], error: null },
-      checkout: { variantId: null, quantity: 1 },
+      options: { status: 'idle', data: null, error: null },
+      order: { status: 'idle', forId: null, view: null, error: null },
+      checkout: initialCheckout,
     });
   });
 
-  it('recovers the selection after a refresh', () => {
-    const saved = JSON.stringify({
-      v: 1,
-      checkout: { variantId: 'huila-washed-250', quantity: 2 },
+  it('recovers the whole draft after a refresh', () => {
+    expect(make(memoryStorage(savedDraft())).getState().checkout).toEqual(draft());
+  });
+
+  it('drops a card token that has gone stale while the page was closed', () => {
+    const stale = draft({
+      card: { token: 'tok_test_123456', brand: 'visa', last4: '4242', at: NOW - 3_600_000 },
     });
-    const store = createStore({ api, storage: memory(saved) });
-    expect(store.getState().checkout).toEqual({ variantId: 'huila-washed-250', quantity: 2 });
+    expect(make(memoryStorage(savedDraft(stale))).getState().checkout.card).toBeNull();
   });
 
   it('ignores an edited storage', () => {
-    const edited = JSON.stringify({ v: 1, checkout: { variantId: '<b>x</b>', quantity: 999 } });
-    expect(createStore({ api, storage: memory(edited) }).getState().checkout).toEqual({
-      variantId: null,
-      quantity: 1,
-    });
+    const edited = JSON.stringify({ v: 2, checkout: { variantId: '<b>x</b>', quantity: 999 } });
+    expect(make(memoryStorage(edited)).getState().checkout).toEqual(initialCheckout);
   });
 
-  it('saves the selection when it changes, and only then', async () => {
-    const storage = memory();
-    const store = createStore({ api, storage });
+  it('saves the draft when it changes, and only then', async () => {
+    const storage = memoryStorage();
+    const store = make(storage);
     await store.dispatch(loadCatalog());
     expect(storage.setItem).not.toHaveBeenCalled();
     store.dispatch(selectCoffee({ variantId: 'huila-washed-250', quantity: 3 }));
-    expect(storage.setItem).toHaveBeenCalledTimes(1);
-    expect(storage.data.get(PERSIST_KEY)).toContain('"quantity":3');
+    store.dispatch(updateCustomer({ name: 'Ana' }));
+    expect(storage.setItem).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(storage.data.get(PERSIST_KEY)!).checkout).toMatchObject({
+      quantity: 3,
+      customer: { name: 'Ana' },
+    });
   });
 
   it('works without storage and when storage refuses to write', () => {
-    const noStorage = createStore({ api, storage: null });
+    const noStorage = make(null);
     expect(() => noStorage.dispatch(selectCoffee({ variantId: 'a', quantity: 1 }))).not.toThrow();
     const full = {
       getItem: () => null,
@@ -57,7 +61,7 @@ describe('createStore', () => {
         throw new Error('QuotaExceededError');
       },
     };
-    const store = createStore({ api, storage: full });
+    const store = make(full);
     expect(() => store.dispatch(selectCoffee({ variantId: 'a', quantity: 1 }))).not.toThrow();
     expect(store.getState().checkout.variantId).toBe('a');
   });

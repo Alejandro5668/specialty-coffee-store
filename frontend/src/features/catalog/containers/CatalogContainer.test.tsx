@@ -7,7 +7,8 @@ import { ProductView } from '../../../api/types';
 import { createStore } from '../../../app/store';
 import { fakeApi } from '../../../test/fakeApi';
 import { loadCatalog } from '../../../store/catalogSlice';
-import { PERSIST_KEY } from '../../../store/persistence';
+import { initialCheckout } from '../../../store/checkoutState';
+import { PERSIST_KEY, toPersistable } from '../../../store/persistence';
 import { CatalogContainer } from './CatalogContainer';
 
 const coffee = (id: string, name: string, stocks: [number, number]): ProductView => ({
@@ -24,6 +25,12 @@ const catalog = [
   coffee('huila', 'Huila Washed', [20, 3]),
   coffee('narino', 'Nariño Honey', [0, 0]),
 ];
+
+/** What the app saves in the browser for a shopper who chose a coffee. */
+const v2 = (over: Record<string, unknown>) => ({
+  v: 2,
+  checkout: toPersistable({ ...initialCheckout, ...over }),
+});
 
 const memory = (saved?: unknown) => {
   const data = new Map<string, string>();
@@ -124,12 +131,12 @@ describe('CatalogContainer', () => {
     await userEvent.click(huila.getByRole('button', { name: 'Increase quantity' }));
     await userEvent.click(huila.getByRole('button', { name: 'Pay with credit card' }));
     expect(await screen.findByText('Details step')).toBeInTheDocument();
-    expect(store.getState().checkout).toEqual({ variantId: 'huila-250', quantity: 2 });
+    expect(store.getState().checkout).toMatchObject({ variantId: 'huila-250', quantity: 2 });
     expect(storage.data.get(PERSIST_KEY)).toContain('"variantId":"huila-250"');
   });
 
   it('recovers the selection after a refresh', async () => {
-    setup(async () => catalog, memory({ v: 1, checkout: { variantId: 'huila-500', quantity: 2 } }));
+    setup(async () => catalog, memory(v2({ variantId: 'huila-500', quantity: 2 })));
     await screen.findByRole('heading', { name: 'Huila Washed' });
     const huila = card('Huila Washed');
     expect(huila.getByRole('radio', { name: /500 g/ })).toBeChecked();
@@ -138,14 +145,14 @@ describe('CatalogContainer', () => {
   });
 
   it('never trusts an amount from storage: the price always comes from the catalog', async () => {
-    const edited = { v: 1, checkout: { variantId: 'huila-250', quantity: 1 }, price: 1, total: 1 };
+    const edited = { ...v2({ variantId: 'huila-250', quantity: 1 }), price: 1, total: 1 };
     setup(async () => catalog, memory(edited));
     await screen.findByRole('heading', { name: 'Huila Washed' });
     expect(card('Huila Washed').getByTestId('coffee-total')).toHaveTextContent('$32.000');
   });
 
   it('ignores a saved selection for a size that no longer exists', async () => {
-    setup(async () => catalog, memory({ v: 1, checkout: { variantId: 'gone-250', quantity: 4 } }));
+    setup(async () => catalog, memory(v2({ variantId: 'gone-250', quantity: 4 })));
     await screen.findByRole('heading', { name: 'Huila Washed' });
     const huila = card('Huila Washed');
     expect(huila.getByRole('radio', { name: /250 g/ })).toBeChecked();
