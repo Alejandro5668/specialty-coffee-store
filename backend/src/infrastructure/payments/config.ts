@@ -1,5 +1,6 @@
 export type PaymentConfig = {
   baseUrl: string;
+  publicKey: string;
   privateKey: string;
   integritySecret: string;
   eventsSecret: string;
@@ -23,6 +24,7 @@ const httpsUrl = (value: string): string => {
 
 export const loadPaymentConfig = (env: Record<string, string | undefined>): PaymentConfig => ({
   baseUrl: httpsUrl(required(env, 'PAYMENT_API_URL')),
+  publicKey: required(env, 'PAYMENT_PUBLIC_KEY'),
   privateKey: required(env, 'PAYMENT_PRIVATE_KEY'),
   integritySecret: required(env, 'PAYMENT_INTEGRITY_SECRET'),
   eventsSecret: required(env, 'PAYMENT_EVENTS_SECRET'),

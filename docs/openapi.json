@@ -36,6 +36,48 @@
         ]
       }
     },
+    "/checkout/options": {
+      "get": {
+        "operationId": "CheckoutController_options",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutOptionsDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests (20 per minute)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The payment service cannot be reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the terms to accept (single-use tokens) and the fees shown in the summary",
+        "tags": [
+          "Checkout"
+        ]
+      }
+    },
     "/checkout": {
       "post": {
         "operationId": "CheckoutController_create",
@@ -375,6 +417,88 @@
           "statusCode",
           "code",
           "message"
+        ]
+      },
+      "ContractDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Single-use token to send with POST /checkout."
+          },
+          "permalink": {
+            "type": "string",
+            "example": "https://example.com/terms.pdf",
+            "description": "Document the shopper must read."
+          }
+        },
+        "required": [
+          "token",
+          "permalink"
+        ]
+      },
+      "FeesDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "enum": [
+              "COP"
+            ]
+          },
+          "baseFeeInCents": {
+            "type": "number",
+            "example": 300000
+          },
+          "deliveryFeeInCents": {
+            "type": "number",
+            "example": 800000
+          }
+        },
+        "required": [
+          "currency",
+          "baseFeeInCents",
+          "deliveryFeeInCents"
+        ]
+      },
+      "CheckoutOptionsDto": {
+        "type": "object",
+        "properties": {
+          "acceptance": {
+            "description": "Terms and conditions.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractDto"
+              }
+            ]
+          },
+          "personalData": {
+            "description": "Personal data processing.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractDto"
+              }
+            ]
+          },
+          "fees": {
+            "description": "The same fees the server adds to every order.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeesDto"
+              }
+            ]
+          },
+          "maxQuantity": {
+            "type": "number",
+            "example": 10,
+            "description": "Most units per order."
+          }
+        },
+        "required": [
+          "acceptance",
+          "personalData",
+          "fees",
+          "maxQuantity"
         ]
       },
       "CustomerDto": {

@@ -1,5 +1,6 @@
 import { err, ok, Result } from '../../src/domain/shared/result';
 import {
+  Acceptance,
   ChargeRequest,
   GatewayCharge,
   GatewayError,
@@ -14,6 +15,16 @@ export class FakeGateway implements PaymentGateway {
   known = new Map<string, GatewayCharge>();
   lookupFails = false;
   lookups = 0;
+  acceptance: Result<Acceptance, 'GATEWAY_UNAVAILABLE'> = ok({
+    acceptance: { token: 'acc_123', permalink: 'https://example.test/terms.pdf' },
+    personalData: { token: 'per_123', permalink: 'https://example.test/data.pdf' },
+  });
+  acceptanceCalls = 0;
+
+  async getAcceptance(): Promise<Result<Acceptance, 'GATEWAY_UNAVAILABLE'>> {
+    this.acceptanceCalls++;
+    return this.acceptance;
+  }
 
   async charge(request: ChargeRequest): Promise<Script> {
     this.charges.push(request);
