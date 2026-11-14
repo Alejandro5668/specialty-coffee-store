@@ -74,4 +74,19 @@ describe('Checkout charging', () => {
     expect(gateway.charges).toHaveLength(1);
     expect(catalog.stockOf(VARIANT_ID)).toBe(3);
   });
+
+  it('keeps PENDING and the stock reserved when the gateway throws, and never charges twice on retry', async () => {
+    const { checkout, catalog, transactions, gateway } = setup();
+    gateway.charge = async (request) => {
+      gateway.charges.push(request);
+      throw new Error('socket hang up');
+    };
+    const first = await checkout.execute(input());
+    const retry = await checkout.execute(input());
+    expect(first).toMatchObject({ ok: true, value: { status: 'PENDING' } });
+    expect(retry).toMatchObject({ ok: true, value: { status: 'PENDING' } });
+    expect(transactions.all()).toHaveLength(1);
+    expect(gateway.charges).toHaveLength(1);
+    expect(catalog.stockOf(VARIANT_ID)).toBe(3);
+  });
 });
