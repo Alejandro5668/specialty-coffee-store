@@ -16,6 +16,7 @@ import { HttpOrigin, S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { CfnGroup } from 'aws-cdk-lib/aws-resourcegroups';
 import { Architecture, Code, Function as LambdaFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
@@ -59,7 +60,14 @@ export class AppStack extends Stack {
     super(scope, id, props);
     Tags.of(this).add('Project', PROJECT);
 
+    // Logs expire: a log group made by Lambda on its own keeps everything for ever and keeps billing.
+    const logs = new LogGroup(this, 'ApiLogs', {
+      retention: RetentionDays.ONE_MONTH,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
     const handler = new LambdaFunction(this, 'Api', {
+      logGroup: logs,
       runtime: Runtime.NODEJS_22_X,
       architecture: Architecture.ARM_64,
       handler: 'lambda.handler',

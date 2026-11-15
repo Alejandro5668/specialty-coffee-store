@@ -19,6 +19,17 @@ describe('AppStack: the API', () => {
     expect(fn.Properties.Timeout).toBeLessThanOrEqual(29);
   });
 
+  it('keeps the logs of the API for 30 days instead of forever, and removes them with the stack', () => {
+    api.hasResource('AWS::Logs::LogGroup', {
+      Properties: { RetentionInDays: 30 },
+      DeletionPolicy: 'Delete',
+    });
+    const fn = Object.values(api.findResources('AWS::Lambda::Function')).find(
+      (f) => f.Properties.Handler === 'lambda.handler',
+    )!;
+    expect(fn.Properties.LoggingConfig.LogGroup).toBeDefined();
+  });
+
   it('gets its settings from the environment and its secrets by SSM name, never by value', () => {
     const fn = Object.values(api.findResources('AWS::Lambda::Function')).find(
       (f) => f.Properties.Handler === 'lambda.handler',
