@@ -96,7 +96,7 @@ Jest en los tres workspaces. CI las ejecuta en cada pull request y exige un mín
 | `backend`  | 510   | 98,92 %    | 94,25 % | 99,42 %   | 99,73 % |
 | `infra`    | 36    | 100 %      | 100 %   | 100 %     | 100 %   |
 
-**Extremo a extremo.** 47 casos con Playwright en un Chrome móvil de 375 px y los mismos en Firefox (94 en total) y 5 sobre el sitio desplegado, que no compran ni guardan datos. Cubren la compra completa, los avisos y textos, la recuperación tras recargar y los casos adversarios. Detalle en [e2e/README.md](e2e/README.md).
+**Extremo a extremo.** Más de 40 casos con Playwright en un Chrome móvil de 375 px y los mismos en Firefox y unos pocos sobre el sitio desplegado, que no compran ni guardan datos. Cubren la compra completa, los avisos y textos, la recuperación tras recargar y los casos adversarios. Detalle en [e2e/README.md](e2e/README.md).
 
 Los tests del backend usan implementaciones en memoria de cada puerto, por lo que no necesitan red ni AWS. Los casos adversarios están automatizados: importes alterados, ráfagas de peticiones, webhooks reenviados, identificadores maliciosos y compras en paralelo de la última unidad.
 

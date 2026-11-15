@@ -12,7 +12,7 @@ Playwright maneja un Chrome móvil y un Firefox con el tamaño de un iPhone SE (
 | `E2E_BASE_URL=https://… npm run test:live -w e2e` | Lo mismo contra otro despliegue                                    |
 | `npm run report -w e2e`                           | Abre el informe HTML de la última ejecución                        |
 
-Requisitos: Chrome instalado y `npm ci` en la raíz. Para Firefox, una sola vez: `npx playwright install firefox` (descarga unos 320 MB con FFmpeg en `~/.cache/ms-playwright`).
+Requisitos: Chrome instalado y `npm ci` en la raíz. CI instala Firefox del servidor oficial de Playwright, con la versión fijada en `package-lock.json`. Para Firefox, una sola vez: `npx playwright install firefox` (descarga unos 320 MB con FFmpeg en `~/.cache/ms-playwright`).
 
 ## Qué cubre
 
