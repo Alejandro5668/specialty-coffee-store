@@ -23,10 +23,12 @@ export const SummaryContainer = () => {
 
   // The form already loaded the fees and tokens while the shopper typed, so the summary opens at
   // once. They are fetched here only when missing, used up by an earlier attempt, or too old.
+  // Not while paying or once the order exists: the tokens were just used and would be wasted.
+  const busy = checkout.placing === 'placing' || checkout.orderId !== null;
   useEffect(() => {
     const stale = options.status === 'ready' && !isOptionsFresh(options, now());
-    if (options.status === 'idle' || stale) void dispatch(loadOptions());
-  }, [dispatch, options, now]);
+    if (!busy && (options.status === 'idle' || stale)) void dispatch(loadOptions());
+  }, [dispatch, options, now, busy]);
 
   // Once an order exists the shopper belongs on its page, which also stops a second payment.
   if (checkout.orderId) return <Navigate to={`/order/${checkout.orderId}`} replace />;

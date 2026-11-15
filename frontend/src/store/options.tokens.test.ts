@@ -24,16 +24,17 @@ const make = (api: Parameters<typeof fakeApi>[0]) =>
   });
 
 describe('options: single-use tokens', () => {
-  it('forgets the tokens once they are used, so they can never be sent twice', async () => {
+  it('marks the tokens as used, so they can never be sent twice, and keeps the fees on screen', async () => {
     const store = make({ getCheckoutOptions: async () => options });
     await store.dispatch(loadOptions());
     store.dispatch(optionsUsed());
     expect(store.getState().options).toEqual({
-      status: 'idle',
-      data: null,
+      status: 'ready',
+      data: options,
       error: null,
       loadedAt: null,
     });
+    expect(isOptionsFresh(store.getState().options, 0)).toBe(false);
   });
 
   it('keeps showing the loaded fees while the tokens are refreshed', async () => {

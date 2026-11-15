@@ -92,7 +92,7 @@ Jest en los tres workspaces. CI las ejecuta en cada pull request y exige un mín
 
 | Workspace  | Tests | Sentencias | Ramas   | Funciones | Líneas  |
 | ---------- | ----- | ---------- | ------- | --------- | ------- |
-| `frontend` | 477   | 98,64 %    | 94,61 % | 98,66 %   | 99,53 % |
+| `frontend` | 491   | 98,66 %    | 94,77 % | 98,67 %   | 99,54 % |
 | `backend`  | 591   | 98,95 %    | 95,12 % | 98,98 %   | 99,65 % |
 | `infra`    | 42    | 100 %      | 100 %   | 100 %     | 100 %   |
 

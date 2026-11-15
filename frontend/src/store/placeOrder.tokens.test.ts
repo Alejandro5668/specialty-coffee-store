@@ -4,7 +4,7 @@ import { CheckoutOptions, OrderRequest, TransactionView } from '../api/types';
 import { fakeApi } from '../test/fakeApi';
 import { draft, NOW } from '../test/state';
 import { checkoutReducer } from './checkoutSlice';
-import { OPTIONS_TTL_MS, optionsReducer, OptionsState } from './optionsSlice';
+import { isOptionsFresh, OPTIONS_TTL_MS, optionsReducer, OptionsState } from './optionsSlice';
 import { placeOrder } from './placeOrder';
 
 const options: CheckoutOptions = {
@@ -97,7 +97,7 @@ describe('placeOrder: tokens loaded earlier', () => {
       loaded(NOW),
     );
     await store.dispatch(placeOrder());
-    expect(store.getState().options.status).toBe('idle');
+    expect(isOptionsFresh(store.getState().options, NOW)).toBe(false);
   });
 
   it('asks for new ones when the loaded tokens are about to expire', async () => {

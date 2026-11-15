@@ -39,8 +39,13 @@ const optionsSlice = createSlice({
   name: 'options',
   initialState,
   reducers: {
-    /** The tokens are single use: once a payment takes them they must never be sent again. */
-    optionsUsed: () => initialState,
+    /**
+     * The tokens are single use: once a payment takes them they must never be sent again. The fees
+     * stay, so the summary keeps showing the amounts while the payment runs.
+     */
+    optionsUsed: (state) => {
+      state.loadedAt = null;
+    },
   },
   extraReducers: (builder) => {
     builder

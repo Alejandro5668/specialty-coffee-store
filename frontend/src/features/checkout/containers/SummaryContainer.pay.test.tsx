@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import { ApiError } from '../../../api/client';
 import { OrderRequest, TransactionView } from '../../../api/types';
-import { placed, setupSummary } from '../../../test/summaryHarness';
+import { options, placed, setupSummary } from '../../../test/summaryHarness';
 
 const pay = () => screen.findByRole('button', { name: 'Pagar $75.000' });
 
@@ -108,5 +108,50 @@ describe('SummaryContainer: leaving', () => {
     await user.click(await screen.findByRole('button', { name: 'Cerrar' }));
     expect(await screen.findByText('Catalog page')).toBeInTheDocument();
     expect(store.getState().checkout.card).not.toBeNull();
+  });
+});
+
+describe('SummaryContainer: tokens loaded earlier while paying', () => {
+  const counting = () => {
+    const state = { requests: 0 };
+    return {
+      state,
+      getCheckoutOptions: async () => {
+        state.requests += 1;
+        return options;
+      },
+    };
+  };
+
+  it('does not ask the provider for new tokens while the payment is in flight, and keeps the sheet', async () => {
+    const { state, getCheckoutOptions } = counting();
+    let release: (v: TransactionView) => void = () => undefined;
+    const { user } = await setupSummary({
+      optionsLoaded: true,
+      api: { getCheckoutOptions, createOrder: () => new Promise((r) => (release = r)) },
+    });
+    await user.click(await pay());
+    expect(await screen.findByRole('button', { name: 'Pagando…' })).toBeDisabled();
+    expect(state.requests).toBe(1);
+    release(placed());
+    expect(await screen.findByText('Order page')).toBeInTheDocument();
+    expect(state.requests).toBe(1);
+  });
+
+  it('gets new tokens right after a failed attempt, so pressing Pagar again is quick', async () => {
+    const { state, getCheckoutOptions } = counting();
+    const { user } = await setupSummary({
+      optionsLoaded: true,
+      api: {
+        getCheckoutOptions,
+        createOrder: async () => {
+          throw new ApiError(502, 'GATEWAY_UNAVAILABLE', 'Try again in a minute.');
+        },
+      },
+    });
+    await user.click(await pay());
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    await screen.findByRole('button', { name: 'Pagar $75.000' });
+    expect(state.requests).toBe(2);
   });
 });
