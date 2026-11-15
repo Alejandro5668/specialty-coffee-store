@@ -8,6 +8,7 @@ import { ServicesProvider } from '../app/services';
 import { createStore } from '../app/store';
 import { SummaryContainer } from '../features/checkout/containers/SummaryContainer';
 import { loadCatalog } from '../store/catalogSlice';
+import { loadOptions } from '../store/optionsSlice';
 import { CheckoutState } from '../store/checkoutState';
 import { fakeApi } from './fakeApi';
 import { draft, NOW } from './state';
@@ -62,12 +63,15 @@ type Setup = {
   state?: CheckoutState;
   catalog?: ProductView[] | 'pending';
   api?: Partial<CoffeeApi>;
+  /** The fees were already loaded while the shopper filled the form. */
+  optionsLoaded?: boolean;
 };
 
 export const setupSummary = async ({
   state = draft(),
   catalog = [coffee()],
   api = {},
+  optionsLoaded = false,
 }: Setup = {}) => {
   const storage = memoryStorage(JSON.stringify({ v: 2, checkout: state }));
   const store = createStore({
@@ -82,6 +86,7 @@ export const setupSummary = async ({
     newId: () => 'key-new-0001',
   });
   const user = userEvent.setup();
+  if (optionsLoaded) await store.dispatch(loadOptions());
   render(
     <Provider store={store}>
       <ServicesProvider value={{ tokenizer: { tokenize: jest.fn() }, now: () => NOW }}>

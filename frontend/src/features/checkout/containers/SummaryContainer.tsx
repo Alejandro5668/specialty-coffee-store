@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { useServices } from '../../../app/services';
 import { loadCatalog } from '../../../store/catalogSlice';
 import { isCardFresh } from '../../../store/checkoutState';
-import { loadOptions } from '../../../store/optionsSlice';
+import { isOptionsFresh, loadOptions } from '../../../store/optionsSlice';
 import { placeOrder } from '../../../store/placeOrder';
 import { Modal } from '../../../ui/organisms/Modal';
 import { SummarySheet } from '../components/SummarySheet';
@@ -21,10 +21,12 @@ export const SummaryContainer = () => {
   const catalog = useAppSelector((state) => state.catalog);
   const options = useAppSelector((state) => state.options);
 
-  // Fees are fetched fresh every time the summary opens.
+  // The form already loaded the fees and tokens while the shopper typed, so the summary opens at
+  // once. They are fetched here only when missing, used up by an earlier attempt, or too old.
   useEffect(() => {
-    void dispatch(loadOptions());
-  }, [dispatch]);
+    const stale = options.status === 'ready' && !isOptionsFresh(options, now());
+    if (options.status === 'idle' || stale) void dispatch(loadOptions());
+  }, [dispatch, options, now]);
 
   // Once an order exists the shopper belongs on its page, which also stops a second payment.
   if (checkout.orderId) return <Navigate to={`/order/${checkout.orderId}`} replace />;

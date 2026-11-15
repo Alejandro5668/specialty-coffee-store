@@ -5,6 +5,7 @@ import { draft, NOW } from '../test/state';
 import { fakeApi } from '../test/fakeApi';
 import { checkoutReducer } from './checkoutSlice';
 import { CARD_TTL_MS, CheckoutState } from './checkoutState';
+import { optionsReducer } from './optionsSlice';
 import { placeOrder } from './placeOrder';
 
 const options: CheckoutOptions = {
@@ -32,8 +33,11 @@ const setup = (state: CheckoutState, api: Partial<CoffeeApi> = {}, now = NOW) =>
   const calls: OrderRequest[] = [];
   const keys: Array<string | null> = [];
   const store = configureStore({
-    reducer: { checkout: checkoutReducer },
-    preloadedState: { checkout: state },
+    reducer: { checkout: checkoutReducer, options: optionsReducer },
+    preloadedState: {
+      checkout: state,
+      options: { status: 'idle' as const, data: null, error: null, loadedAt: null },
+    },
     middleware: (gdm) =>
       gdm({
         thunk: {
