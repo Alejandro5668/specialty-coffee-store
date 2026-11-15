@@ -17,6 +17,24 @@ test.describe('time', () => {
     await expect(page.locator('article').first()).toContainText('19 disponibles');
   });
 
+  test('after a declined card the page waits longer, so there is time to read what to do', async ({
+    page,
+    backend,
+  }) => {
+    await page.clock.install();
+    await reachSummary(page, CARDS.declined);
+    await pay(page);
+    await expect(page.getByRole('heading', { name: 'Tu tarjeta fue rechazada' })).toBeVisible();
+    await expect(page.getByRole('timer')).toContainText('Volviendo a los cafés en 20 segundos.');
+    // Past the 8 seconds of an approved payment, the shopper is still on the result.
+    await page.clock.runFor(9_000);
+    await expect(page.getByRole('heading', { name: 'Tu tarjeta fue rechazada' })).toBeVisible();
+    await page.clock.runFor(12_000);
+    await expect(page.getByRole('heading', { name: 'Cafés' })).toBeVisible();
+    // The details are kept for another try, and the stock went back.
+    expect(backend.stockOf('huila-washed-250')).toBe(20);
+  });
+
   test('the shopper can stay on the result page and the countdown stops', async ({
     page,
     backend,

@@ -34,6 +34,8 @@ type Setup = {
   state?: CheckoutState;
   poll?: { intervalMs: number; maxChecks: number };
   autoReturnMs?: number;
+  /** Leaves both return times to the app's own defaults. */
+  useDefaultReturn?: boolean;
   fakeTimers?: boolean;
 };
 
@@ -43,6 +45,7 @@ export const setupOrder = ({
   state = draft({ orderId: 'order-1', card: null }),
   poll = { intervalMs: 5, maxChecks: 5 },
   autoReturnMs,
+  useDefaultReturn = false,
   fakeTimers = false,
 }: Setup = {}) => {
   const storage = memoryStorage(JSON.stringify({ v: 2, checkout: state }));
@@ -58,7 +61,13 @@ export const setupOrder = ({
   const utils = render(
     <Provider store={store}>
       <ServicesProvider
-        value={{ tokenizer: { tokenize: jest.fn() }, now: () => NOW, poll, autoReturnMs }}
+        value={{
+          tokenizer: { tokenize: jest.fn() },
+          now: () => NOW,
+          poll,
+          // A test that sets one time means it for every result, unless it asks for the defaults.
+          ...(useDefaultReturn ? {} : { autoReturnMs, failedReturnMs: autoReturnMs }),
+        }}
       >
         <MemoryRouter initialEntries={[path]}>
           <Routes>

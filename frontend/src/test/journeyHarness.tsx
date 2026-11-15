@@ -85,6 +85,7 @@ export const makeApp = (api = makeShop().api) => {
     now: () => NOW,
     poll: { intervalMs: 5, maxChecks: 40 },
     autoReturnMs: 0,
+    failedReturnMs: 0,
   };
 
   const mount = (path: string) => {

@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { DEFAULT_AUTO_RETURN_MS, useServices } from '../../../app/services';
+import {
+  DEFAULT_AUTO_RETURN_MS,
+  DEFAULT_FAILED_RETURN_MS,
+  useServices,
+} from '../../../app/services';
 import { useDocumentTitle } from '../../../hooks/useDocumentTitle';
 import { loadCatalog } from '../../../store/catalogSlice';
 import { orderFinished, retryPayment } from '../../../store/checkoutSlice';
@@ -14,7 +18,8 @@ export const OrderContainer = () => {
   const { id = '' } = useParams();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { autoReturnMs = DEFAULT_AUTO_RETURN_MS } = useServices();
+  const { autoReturnMs = DEFAULT_AUTO_RETURN_MS, failedReturnMs = DEFAULT_FAILED_RETURN_MS } =
+    useServices();
   const catalog = useAppSelector((state) => state.catalog);
   const order = useAppSelector((state) => state.order);
   const { exhausted, checkAgain } = useOrderPolling(id);
@@ -45,7 +50,8 @@ export const OrderContainer = () => {
   const settled = view !== null && view.status !== 'PENDING';
   // Approved: the purchase is over. Declined or failed: the shopper may well try again, so the
   // details are kept when the page returns to the coffees by itself.
-  const leaving = useAutoReturn(settled, autoReturnMs, () => {
+  const returnMs = view?.status === 'APPROVED' ? autoReturnMs : failedReturnMs;
+  const leaving = useAutoReturn(settled, returnMs, () => {
     if (view?.status === 'APPROVED') {
       backToCoffees();
     } else {

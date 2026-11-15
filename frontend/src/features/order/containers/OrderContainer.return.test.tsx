@@ -104,3 +104,31 @@ describe('OrderContainer: going back to the coffees by itself', () => {
     expect(screen.getAllByText('Catalog page')).toHaveLength(1);
   });
 });
+
+describe('OrderContainer: how long the shopper has before the page returns by itself', () => {
+  const openWithDefaults = (status: TransactionStatus) =>
+    setupOrder({
+      state: stateWithOrder(),
+      useDefaultReturn: true,
+      fakeTimers: true,
+      api: { getTransaction: async () => orderView(status) },
+    });
+
+  it('gives 8 seconds after an approved payment, which needs no decision', async () => {
+    openWithDefaults('APPROVED');
+    await final('Pago aprobado');
+    expect(screen.getByRole('timer')).toHaveTextContent('Volviendo a los cafés en 8 segundos.');
+  });
+
+  it.each([
+    ['DECLINED', 'Tu tarjeta fue rechazada'],
+    ['ERROR', 'No pudimos completar el pago'],
+  ] as const)(
+    'gives 20 seconds after a %s payment, so there is time to read what to do',
+    async (status, title) => {
+      openWithDefaults(status);
+      await final(title);
+      expect(screen.getByRole('timer')).toHaveTextContent('Volviendo a los cafés en 20 segundos.');
+    },
+  );
+});
