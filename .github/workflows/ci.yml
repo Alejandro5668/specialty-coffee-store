@@ -23,3 +23,16 @@ jobs:
       - run: npm run format:check
       - run: npm run test:cov
       - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      # The runner already has Chrome, so no browser is downloaded. Fail with a clear message if not.
+      - run: google-chrome --version
+      - run: npm test -w e2e
