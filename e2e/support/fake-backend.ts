@@ -21,7 +21,10 @@ const CORS = {
   'access-control-allow-methods': 'GET,POST,OPTIONS',
 };
 const json = (route: Route, status: number, body: unknown, headers: Record<string, string> = {}) =>
-  route.fulfill({ status, contentType: 'application/json', headers, body: JSON.stringify(body) });
+  route
+    .fulfill({ status, contentType: 'application/json', headers, body: JSON.stringify(body) })
+    // The page may have been reloaded meanwhile: nobody is waiting for this answer any more.
+    .catch(() => undefined);
 const problem = (route: Route, status: number, code: string, message: string) =>
   json(route, status, { statusCode: status, code, message });
 
@@ -42,6 +45,8 @@ export class FakeBackend {
   stuckPending = false;
   /** Forces an `ERROR` result whatever the card (the provider failed, not the card). */
   forceError = false;
+  /** Delays the answer of POST /checkout after the order was created, to refresh mid-payment. */
+  responseDelayMs = 0;
   failProducts = false;
   tooManyRequests = false;
   private byKey = new Map<string, string>();
@@ -197,6 +202,7 @@ export class FakeBackend {
     };
     this.orders.set(order.id, order);
     this.byKey.set(b.idempotencyKey, order.id);
+    if (this.responseDelayMs) await new Promise((r) => setTimeout(r, this.responseDelayMs));
     return void json(route, 201, this.view(order));
   }
 
