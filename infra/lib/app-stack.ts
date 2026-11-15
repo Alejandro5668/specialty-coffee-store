@@ -1,4 +1,4 @@
-import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps, Tags } from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { HttpApi, HttpStage, HttpMethod } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import {
@@ -20,7 +20,8 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { BlockPublicAccess, Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
-import { PROJECT, TABLE_PREFIX, Tables } from './data-stack';
+import { TABLE_PREFIX, Tables } from './data-stack';
+import { PROJECT, tagStack } from './tags';
 import { securityHeaders } from './security-headers';
 
 export const SECRET_PARAMETERS = {
@@ -58,7 +59,7 @@ const SPA_FALLBACK = `function handler(event) {
 export class AppStack extends Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
-    Tags.of(this).add('Project', PROJECT);
+    tagStack(this);
 
     // Logs expire: a log group made by Lambda on its own keeps everything for ever and keeps billing.
     const logs = new LogGroup(this, 'ApiLogs', {

@@ -94,7 +94,7 @@ Jest en los tres workspaces. CI las ejecuta en cada pull request y exige un mín
 | ---------- | ----- | ---------- | ------- | --------- | ------- |
 | `frontend` | 477   | 98,64 %    | 94,61 % | 98,66 %   | 99,53 % |
 | `backend`  | 591   | 98,95 %    | 95,12 % | 98,98 %   | 99,65 % |
-| `infra`    | 40    | 100 %      | 100 %   | 100 %     | 100 %   |
+| `infra`    | 42    | 100 %      | 100 %   | 100 %     | 100 %   |
 
 **Extremo a extremo.** Más de 40 casos con Playwright en un Chrome móvil de 375 px y los mismos en Firefox y unos pocos sobre el sitio desplegado, que no compran ni guardan datos. Cubren la compra completa, los avisos y textos, la recuperación tras recargar y los casos adversarios. Detalle en [e2e/README.md](e2e/README.md).
 
