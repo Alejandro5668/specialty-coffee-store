@@ -8,6 +8,7 @@ import {
   GatewayError,
   PaymentGateway,
 } from '../../application/ports/payment.gateway';
+import { EventLogger, silentLogger } from '../../application/ports/event-logger';
 import { PaymentConfig } from './config';
 
 type Json = Record<string, unknown>;
@@ -55,6 +56,8 @@ export class HttpPaymentGateway implements PaymentGateway {
   constructor(
     private readonly config: PaymentConfig,
     private readonly fetchFn: typeof fetch = fetch,
+    private readonly logger: EventLogger = silentLogger,
+    private readonly clock: () => number = Date.now,
   ) {}
 
   /** Public key only. The browser cannot call this itself: the provider sends no CORS headers for it. */
@@ -115,15 +118,21 @@ export class HttpPaymentGateway implements PaymentGateway {
       .digest('hex');
   }
 
-  /** Returns null on any transport failure, so callers see one "unknown outcome" case. */
+  /**
+   * Returns null on any transport failure, so callers see one "unknown outcome" case. Every call
+   * is timed and logged by its route (never its query, which carries the order reference), because
+   * a slow or failing provider is the first thing to look at when a payment does not go through.
+   */
   private async send(
     path: string,
     method: 'GET' | 'POST',
     body?: Json,
     credentials: Record<string, string> = { Authorization: `Bearer ${this.config.privateKey}` },
   ): Promise<Response | null> {
+    const operation = `${method} ${path.split('?')[0]}`;
+    const started = this.clock();
     try {
-      return await this.fetchFn(`${this.config.baseUrl}${path}`, {
+      const response = await this.fetchFn(`${this.config.baseUrl}${path}`, {
         method,
         headers: {
           ...credentials,
@@ -133,7 +142,18 @@ export class HttpPaymentGateway implements PaymentGateway {
         body: body ? JSON.stringify(body) : undefined,
         signal: AbortSignal.timeout(this.config.timeoutMs),
       });
-    } catch {
+      this.logger[response.status >= 500 ? 'warn' : 'info']('provider.call', {
+        operation,
+        status: response.status,
+        durationMs: this.clock() - started,
+      });
+      return response;
+    } catch (error) {
+      this.logger.warn('provider.call', {
+        operation,
+        outcome: error instanceof Error ? error.name : 'Error',
+        durationMs: this.clock() - started,
+      });
       return null;
     }
   }

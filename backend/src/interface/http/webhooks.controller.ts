@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Logger, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { ProcessPaymentEvent } from '../../application/use-cases/process-payment-event';
@@ -10,8 +10,6 @@ import { unwrap } from './errors';
 @ApiTags('Webhooks')
 @Controller('webhooks')
 export class WebhooksController {
-  private readonly logger = new Logger('Webhooks');
-
   constructor(private readonly processEvent: ProcessPaymentEvent) {}
 
   /** The provider retries on anything but 200, so a handled event (even a replay) always answers 200. */
@@ -28,14 +26,7 @@ export class WebhooksController {
   @ApiResponse({ status: 422, description: 'Amount does not match the order', type: ErrorDto })
   @HttpCode(200)
   async payments(@Body() payload: unknown): Promise<{ received: true }> {
-    const result = await this.processEvent.execute(payload);
-    // Only the reason and the order id: never the body, the signature or a secret.
-    if (result.ok) {
-      this.logger.log(`Webhook accepted: order ${result.value.id} is ${result.value.status}`);
-    } else {
-      this.logger.warn(`Webhook rejected: ${result.error}`);
-    }
-    unwrap(result);
+    unwrap(await this.processEvent.execute(payload));
     return { received: true };
   }
 }

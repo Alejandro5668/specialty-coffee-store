@@ -1,5 +1,8 @@
 import { inspect } from 'node:util';
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Inject } from '@nestjs/common';
+
+import { EventLogger, silentLogger } from '../../application/ports/event-logger';
+import { TOKENS } from '../../composition/tokens';
 
 type Reply = { headersSent?: boolean; status(code: number): { json(body: unknown): void } };
 
@@ -33,7 +36,7 @@ const statusOf = (error: unknown): number => {
  */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger('Exceptions');
+  constructor(@Inject(TOKENS.logger) private readonly logger: EventLogger = silentLogger) {}
 
   catch(error: unknown, host: ArgumentsHost): void {
     const reply = host.switchToHttp().getResponse<Reply>();
@@ -47,7 +50,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
     const status = statusOf(error);
     if (status >= 500) {
-      this.logger.error(error instanceof Error ? error.stack : inspect(error, { depth: 3 }));
+      // What went wrong, for whoever is paged: the type, the message and the top of the stack.
+      this.logger.error('http.unhandled', {
+        errorType: error instanceof Error ? error.name : typeof error,
+        detail: error instanceof Error ? error.message : inspect(error, { depth: 2 }),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       reply.status(500).json({ statusCode: 500, ...INTERNAL });
       return;
     }
