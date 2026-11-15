@@ -35,15 +35,20 @@ test.describe('time', () => {
     backend,
   }) => {
     void backend;
+    // The request is held until the test lets it go, so nothing depends on a timer.
+    let release: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => (release = resolve));
     await page.route(
       (url) => url.pathname === '/api/products',
       async (route) => {
-        await new Promise((r) => setTimeout(r, 1_200));
+        await held;
         await route.fallback();
       },
     );
     await page.goto('/');
     await expect(page.getByText('Cargando cafés')).toBeVisible();
+    await expect(page.locator('article')).toHaveCount(0);
+    release();
     await expect(page.locator('article')).toHaveCount(2);
   });
 });

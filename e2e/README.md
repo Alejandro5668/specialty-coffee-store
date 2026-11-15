@@ -31,7 +31,7 @@ Requisitos: Chrome instalado (no se descarga ningún navegador) y `npm ci` en la
 ## Cómo funciona
 
 - `support/fake-backend.ts` simula nuestra API y el servicio de pagos con el mismo contrato que `docs/openapi.json`: el servidor calcula los importes, una clave de idempotencia repetida devuelve el mismo pedido, el stock se reserva al pagar y se devuelve si falla. La tarjeta decide el resultado como en el sandbox: `4242…` aprueba y `4111…` rechaza.
-- `live.spec.ts` verifica ese mismo contrato sobre el sitio real, para detectar si el simulador se desvía.
+- `live.spec.ts` verifica ese mismo contrato sobre el sitio real, para detectar si el simulador se desvía. No compra ni escribe datos, pero envía peticiones que el servidor debe rechazar (cuerpo inválido, cuerpo grande y evento sin firma válida) y cuenta contra el límite de peticiones. Se ejecuta a mano después de cada despliegue y supone el catálogo inicial de 6 cafés.
 - No se guardan trazas, vídeos ni capturas: los formularios contienen datos de tarjeta de prueba. Los números usados son los publicados para el sandbox; no son tarjetas reales.
 
 ## Límites

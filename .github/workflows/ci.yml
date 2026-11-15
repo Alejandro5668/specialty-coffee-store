@@ -33,5 +33,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts
-      # The runner already has Chrome, so no browser is downloaded.
+      # The runner already has Chrome, so no browser is downloaded. Fail with a clear message if not.
+      - run: google-chrome --version
       - run: npm test -w e2e

@@ -1,3 +1,4 @@
+import { checkouts } from '../support/calls';
 import { CARDS, PERSON } from '../support/data';
 import {
   acceptTerms,
@@ -122,15 +123,25 @@ test.describe('a storage edited by hand never shows a wrong amount', () => {
     await page.goto('/checkout/summary');
   };
 
-  test('a forged price and total are ignored: the amounts come from the server', async ({
+  test('a forged price and total are ignored: the amount to pay comes from the server', async ({
     page,
     backend,
   }) => {
-    void backend;
-    await open(page, draft({ priceInCents: 1, totalInCents: 1, amounts: { totalInCents: 1 } }));
-    // No card is saved, so the summary cannot be paid; whatever it shows, it is never the forged $0.
-    await expect(page.locator('body')).not.toContainText('$0,01');
-    await expect(page.locator('body')).not.toContainText('Pagar $0');
+    const card = { token: 'tok_test_APPROVED_9', brand: 'visa', last4: '4242', at: Date.now() };
+    await open(
+      page,
+      draft({ card, priceInCents: 1, totalInCents: 1, amounts: { totalInCents: 1 } }),
+    );
+    const summary = page.getByRole('dialog', { name: 'Resumen del pedido' });
+    // Two units at $32.000, plus the base fee and the delivery: the server's number, not the forged one.
+    await expect(summary.getByRole('button', { name: 'Pagar $75.000' })).toBeVisible();
+    await expect(summary).not.toContainText('$0');
+    await pay(page);
+    await expect(page.getByRole('heading', { name: 'Pago aprobado' })).toBeVisible();
+    expect(checkouts(backend.calls)).toHaveLength(1);
+    expect(JSON.stringify(checkouts(backend.calls)[0])).not.toMatch(
+      /priceInCents|totalInCents|amounts/,
+    );
   });
 
   const hostile: Array<[string, Record<string, unknown>]> = [
@@ -157,14 +168,15 @@ test.describe('a storage edited by hand never shows a wrong amount', () => {
     });
   }
 
-  test('a storage that is not JSON starts clean instead of breaking the page', async ({
+  test('a storage that is not JSON starts clean, on the coffees, without breaking the page', async ({
     page,
     backend,
   }) => {
     void backend;
     await open(page, '{ this is not json');
-    await expect(page).toHaveURL(/\/$|\/checkout\/summary/);
-    await expect(page.locator('body')).not.toContainText('Unexpected token');
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('heading', { name: 'Cafés' })).toBeVisible();
+    await expect(page.locator('body')).not.toContainText(/Unexpected token|undefined|NaN/);
   });
 
   test('the stored draft never holds the card number or the security code', async ({

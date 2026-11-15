@@ -13,6 +13,8 @@ export default defineConfig({
   testIgnore: /live\.spec\.ts/,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
+  // A result arrives after the page polls the order, which takes longer on a loaded machine.
+  expect: { timeout: 10_000 },
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
