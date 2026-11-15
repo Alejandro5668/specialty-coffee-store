@@ -18,18 +18,19 @@ Node 22 (`.nvmrc`) y npm 10.
 
 ## Comandos
 
-| Comando                                              | Acción                                                              |
-| ---------------------------------------------------- | ------------------------------------------------------------------- |
-| `npm ci`                                             | Instala las dependencias de todos los workspaces                    |
-| `npm run lint` / `npm run format:check`              | ESLint / Prettier                                                   |
-| `npm run test:cov`                                   | Jest con cobertura mínima del 80 %                                  |
-| `npm run build`                                      | Compila backend y frontend                                          |
-| `npm run start:dev -w backend`                       | API en `:3000`, Swagger en `/docs`                                  |
-| `npm run dev -w frontend`                            | Aplicación web en `:5173`                                           |
-| `npm run seed -w backend`                            | Carga los 6 cafés en DynamoDB (se puede repetir sin duplicar)       |
-| `npm run openapi -w backend`                         | Regenera `docs/openapi.json`                                        |
-| `npm run package:lambda -w backend`                  | Genera `backend/build/lambda` (código y dependencias de producción) |
-| `python3 frontend/scripts/generate-coffee-images.py` | Regenera las imágenes de los cafés (requiere Pillow)                |
+| Comando                                              | Acción                                                                     |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| `npm ci`                                             | Instala las dependencias de todos los workspaces                           |
+| `npm run lint` / `npm run format:check`              | ESLint / Prettier                                                          |
+| `npm run test:cov`                                   | Jest con cobertura mínima del 80 %                                         |
+| `npm run build`                                      | Compila backend y frontend                                                 |
+| `npm run start:dev -w backend`                       | API en `:3000`, Swagger en `/docs`                                         |
+| `npm run dev -w frontend`                            | Aplicación web en `:5173`                                                  |
+| `npm run seed -w backend`                            | Carga los 6 cafés en DynamoDB (se puede repetir sin duplicar)              |
+| `npm run openapi -w backend`                         | Regenera `docs/openapi.json`                                               |
+| `npm run package:lambda -w backend`                  | Genera `backend/build/lambda` (código y dependencias de producción)        |
+| `npm test -w e2e`                                    | Pruebas de extremo a extremo en móvil (ver [e2e/README.md](e2e/README.md)) |
+| `python3 frontend/scripts/generate-coffee-images.py` | Regenera las imágenes de los cafés (requiere Pillow)                       |
 
 Copia `.env.example` a `.env`, complétalo en local y expórtalo antes de ejecutar `start:dev`. No lo subas al repositorio. DynamoDB requiere credenciales de AWS.
 
@@ -94,6 +95,8 @@ Jest en los tres workspaces. CI las ejecuta en cada pull request y exige un mín
 | `frontend` | 466   | 98,24 %    | 94,39 % | 98,66 %   | 99,06 % |
 | `backend`  | 510   | 98,92 %    | 94,25 % | 99,42 %   | 99,73 % |
 | `infra`    | 36    | 100 %      | 100 %   | 100 %     | 100 %   |
+
+**Extremo a extremo.** 46 casos con Playwright en un Chrome móvil de 375 px (92 con escritorio) y 5 de solo lectura sobre el sitio desplegado. Cubren la compra completa, los avisos y textos, la recuperación tras recargar y los casos adversarios. Detalle en [e2e/README.md](e2e/README.md).
 
 Los tests del backend usan implementaciones en memoria de cada puerto, por lo que no necesitan red ni AWS. Los casos adversarios están automatizados: importes alterados, ráfagas de peticiones, webhooks reenviados, identificadores maliciosos y compras en paralelo de la última unidad.
 
