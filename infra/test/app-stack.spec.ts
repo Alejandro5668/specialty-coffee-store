@@ -21,7 +21,7 @@ describe('AppStack: the API', () => {
 
   it('keeps the logs of the API for 30 days instead of forever, and removes them with the stack', () => {
     api.hasResource('AWS::Logs::LogGroup', {
-      Properties: { RetentionInDays: 30 },
+      Properties: { RetentionInDays: 30, LogGroupName: '/coffee-store/api' },
       DeletionPolicy: 'Delete',
     });
     const fn = Object.values(api.findResources('AWS::Lambda::Function')).find(

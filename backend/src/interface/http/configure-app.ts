@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
-import { EventLogger, silentLogger } from '../../application/ports/event-logger';
+import { EventLogger } from '../../application/ports/event-logger';
 import { TOKENS } from '../../composition/tokens';
 import { requestContext } from '../../infrastructure/logging/json-logger';
 import { HttpConfig } from './http-config';
@@ -44,7 +44,7 @@ const requestLog = (logger: EventLogger) => (req: Req, res: Res, next: () => voi
 /** Everything that protects the HTTP surface. Used by the server and by the tests, so they cannot drift apart. */
 export const configureApp = (app: NestExpressApplication, config: HttpConfig): void => {
   app.set('trust proxy', config.trustProxyHops);
-  app.use(requestLog(app.get<EventLogger>(TOKENS.logger, { strict: false }) ?? silentLogger));
+  app.use(requestLog(app.get<EventLogger>(TOKENS.logger)));
   app.use(helmet());
   app.use(
     (_req: unknown, res: { setHeader(name: string, value: string): void }, next: () => void) => {

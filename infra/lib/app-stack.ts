@@ -62,6 +62,7 @@ export class AppStack extends Stack {
 
     // Logs expire: a log group made by Lambda on its own keeps everything for ever and keeps billing.
     const logs = new LogGroup(this, 'ApiLogs', {
+      logGroupName: '/coffee-store/api',
       retention: RetentionDays.ONE_MONTH,
       removalPolicy: RemovalPolicy.DESTROY,
     });

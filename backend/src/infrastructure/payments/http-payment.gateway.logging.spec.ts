@@ -65,6 +65,23 @@ describe('HttpPaymentGateway logging', () => {
     expect(lost.logger.lines[0]).not.toHaveProperty('status');
   });
 
+  it('keeps the provider answer even if the logger itself throws', async () => {
+    const throwing = {
+      info: () => {
+        throw new Error('logger down');
+      },
+      warn: () => undefined,
+      error: () => undefined,
+    };
+    const fetchFn = (async () =>
+      reply(201, { data: { id: 'prov-1', status: 'APPROVED' } })) as unknown as typeof fetch;
+    const gateway = new HttpPaymentGateway(config, fetchFn, throwing);
+    expect(await gateway.charge(charge)).toEqual({
+      ok: true,
+      value: { providerRef: 'prov-1', status: 'APPROVED' },
+    });
+  });
+
   it('never writes a key, a token, the email or the signature', async () => {
     const { gateway, logger } = build(() =>
       reply(201, { data: { id: 'prov-1', status: 'APPROVED' } }),

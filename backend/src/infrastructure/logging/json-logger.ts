@@ -7,15 +7,17 @@ export const requestContext = new AsyncLocalStorage<{ requestId: string }>();
 const RESERVED = new Set(['level', 'event', 'time', 'requestId']);
 const KEY = /^[A-Za-z][A-Za-z0-9_]{0,40}$/;
 const MAX_TEXT = 500;
+/** A stack trace is how a failure is located, so it gets room for its frames. */
+const MAX_BY_FIELD: Record<string, number> = { stack: 4_000 };
 
 type Level = 'info' | 'warn' | 'error';
 type Sink = (line: string) => void;
 
-const plain = (value: unknown): string | number | boolean | null | undefined => {
+const plain = (value: unknown, max: number): string | number | boolean | null | undefined => {
   if (value === null || typeof value === 'boolean') return value;
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value === 'string') {
-    return value.length > MAX_TEXT ? `${value.slice(0, MAX_TEXT)}…` : value;
+    return value.length > max ? `${value.slice(0, max)}…` : value;
   }
   return undefined;
 };
@@ -46,7 +48,7 @@ export class JsonLogger implements EventLogger {
       const requestId = requestContext.getStore()?.requestId;
       if (requestId) entry.requestId = requestId;
       for (const [key, raw] of Object.entries(fields)) {
-        const value = plain(raw);
+        const value = plain(raw, MAX_BY_FIELD[key] ?? MAX_TEXT);
         if (value !== undefined && KEY.test(key) && !RESERVED.has(key)) entry[key] = value;
       }
       this.write(JSON.stringify(entry));

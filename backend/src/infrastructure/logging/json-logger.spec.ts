@@ -65,6 +65,15 @@ describe('JsonLogger', () => {
     expect(last()).toMatchObject({ nan: null, inf: null });
   });
 
+  it('keeps a stack trace long enough to show where the failure was, but still bounded', () => {
+    const { logger, last } = make();
+    const stack = `Error: ${'m'.repeat(900)}\n${'    at frame (file.ts:1:1)\n'.repeat(60)}`;
+    logger.error('http.unhandled', { stack, detail: 'd'.repeat(900) });
+    expect((last().stack as string).length).toBeGreaterThan(1_500);
+    expect((last().stack as string).length).toBeLessThanOrEqual(4_001);
+    expect((last().detail as string).length).toBeLessThanOrEqual(501);
+  });
+
   it('never lets a field replace the level, the event, the time or the request id', () => {
     const { logger, last } = make();
     requestContext.run({ requestId: 'real' }, () =>

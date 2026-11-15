@@ -131,8 +131,9 @@ export class HttpPaymentGateway implements PaymentGateway {
   ): Promise<Response | null> {
     const operation = `${method} ${path.split('?')[0]}`;
     const started = this.clock();
+    let response: Response;
     try {
-      const response = await this.fetchFn(`${this.config.baseUrl}${path}`, {
+      response = await this.fetchFn(`${this.config.baseUrl}${path}`, {
         method,
         headers: {
           ...credentials,
@@ -142,19 +143,28 @@ export class HttpPaymentGateway implements PaymentGateway {
         body: body ? JSON.stringify(body) : undefined,
         signal: AbortSignal.timeout(this.config.timeoutMs),
       });
-      this.logger[response.status >= 500 ? 'warn' : 'info']('provider.call', {
-        operation,
-        status: response.status,
-        durationMs: this.clock() - started,
-      });
-      return response;
     } catch (error) {
-      this.logger.warn('provider.call', {
+      this.note('warn', {
         operation,
         outcome: error instanceof Error ? error.name : 'Error',
         durationMs: this.clock() - started,
       });
       return null;
+    }
+    // Outside the try: a logger that fails must not turn an answer we received into "unknown".
+    this.note(response.status >= 500 ? 'warn' : 'info', {
+      operation,
+      status: response.status,
+      durationMs: this.clock() - started,
+    });
+    return response;
+  }
+
+  private note(level: 'info' | 'warn', fields: Record<string, string | number>): void {
+    try {
+      this.logger[level]('provider.call', fields);
+    } catch {
+      // Logging is a side effect: whatever goes wrong here must not change a payment.
     }
   }
 

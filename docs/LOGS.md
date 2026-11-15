@@ -1,6 +1,6 @@
 # Logs
 
-El backend escribe una línea JSON por evento en la salida estándar; Lambda la envía a CloudWatch Logs, donde cada campo se puede filtrar y contar. Se conservan 30 días.
+El backend escribe una línea JSON por evento en la salida estándar; Lambda la envía al grupo `/coffee-store/api` de CloudWatch Logs, donde cada campo se puede filtrar y contar. Se conservan 30 días.
 
 ## Campos comunes
 
@@ -38,7 +38,7 @@ Nombre, correo, dirección, teléfono, token o número de tarjeta, claves, cuerp
 
 ## Consultas (CloudWatch Logs Insights)
 
-Se seleccionan los grupos `/aws/lambda/CoffeeStoreApp-Api…`.
+Se selecciona el grupo `/coffee-store/api` (el de la Lambda de la API; los despliegues anteriores a los logs estructurados usaban `/aws/lambda/CoffeeStoreApp-Api…`).
 
 | Para saber…                         | Consulta                                                                                         |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
