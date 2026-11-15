@@ -35,4 +35,5 @@ jobs:
       - run: npm ci --ignore-scripts
       # The runner already has Chrome, so no browser is downloaded. Fail with a clear message if not.
       - run: google-chrome --version
-      - run: npm test -w e2e
+      - run: npx playwright install --with-deps firefox
+      - run: npm run test:browsers -w e2e

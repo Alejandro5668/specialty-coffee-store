@@ -1,6 +1,6 @@
 # Pruebas de extremo a extremo
 
-Playwright maneja un Chrome real con el tamaño de un iPhone SE (375 × 667 px) y recorre la compra completa. Ejecutan el frontend real; el backend y el servicio de pagos se simulan.
+Playwright maneja un Chrome móvil y un Firefox con el tamaño de un iPhone SE (375 × 667 px) y recorre la compra completa. Ejecutan el frontend real; el backend y el servicio de pagos se simulan.
 
 ## Comandos
 
@@ -12,7 +12,7 @@ Playwright maneja un Chrome real con el tamaño de un iPhone SE (375 × 667 px) 
 | `E2E_BASE_URL=https://… npm run test:live -w e2e` | Lo mismo contra otro despliegue                                    |
 | `npm run report -w e2e`                           | Abre el informe HTML de la última ejecución                        |
 
-Requisitos: Chrome instalado (no se descarga ningún navegador) y `npm ci` en la raíz.
+Requisitos: Chrome instalado y `npm ci` en la raíz. Para Firefox, una sola vez: `npx playwright install firefox` (descarga unos 320 MB con FFmpeg en `~/.cache/ms-playwright`).
 
 ## Qué cubre
 
@@ -37,4 +37,4 @@ Requisitos: Chrome instalado (no se descarga ningún navegador) y `npm ci` en la
 ## Límites
 
 - La compra real sobre la URL pública se hace a mano con una tarjeta de prueba: no se escriben datos de tarjeta en un sitio desplegado desde estas pruebas.
-- Solo Chrome (escritorio y móvil emulado). Firefox y Safari requieren descargar sus navegadores.
+- Chrome (móvil emulado y escritorio) y Firefox. Firefox no puede emular un teléfono: se prueba con el mismo tamaño de pantalla (375 × 667 px) y entrada táctil, no en un dispositivo real. Safari no está cubierto: Playwright usa WebKit, que habría que descargar aparte.
