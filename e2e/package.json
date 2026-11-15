@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "playwright test --project=mobile",
+    "test:browsers": "playwright test --project=mobile --project=firefox",
     "test:all": "playwright test",
     "test:live": "playwright test --config=playwright.live.config.ts",
     "report": "playwright show-report"
