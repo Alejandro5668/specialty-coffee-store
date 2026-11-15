@@ -20,7 +20,7 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile',
-      use: { ...devices['iPhone SE'], browserName: 'chromium', channel: 'chrome' },
+      use: { ...devices['iPhone SE (3rd gen)'], browserName: 'chromium', channel: 'chrome' },
     },
   ],
 });
