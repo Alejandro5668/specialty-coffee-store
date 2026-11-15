@@ -36,9 +36,19 @@ const make = (api: Parameters<typeof fakeApi>[0]) =>
 describe('options', () => {
   it('loads the terms and the fees', async () => {
     const store = make({ getCheckoutOptions: async () => options });
-    expect(store.getState().options).toEqual({ status: 'idle', data: null, error: null });
+    expect(store.getState().options).toEqual({
+      status: 'idle',
+      data: null,
+      error: null,
+      loadedAt: null,
+    });
     await store.dispatch(loadOptions());
-    expect(store.getState().options).toEqual({ status: 'ready', data: options, error: null });
+    expect(store.getState().options).toEqual({
+      status: 'ready',
+      data: options,
+      error: null,
+      loadedAt: 0,
+    });
   });
 
   it('keeps the plain message of an error and can retry', async () => {

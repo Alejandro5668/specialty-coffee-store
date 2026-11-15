@@ -138,3 +138,34 @@ describe('SummaryContainer: when it cannot be paid', () => {
     expect(await screen.findByRole('button', { name: 'Pagar $75.000' })).toBeEnabled();
   });
 });
+
+describe('SummaryContainer: fees loaded while the shopper filled the form', () => {
+  it('shows the summary at once, without a loading step or a second request', async () => {
+    let requests = 0;
+    await setupSummary({
+      optionsLoaded: true,
+      api: {
+        getCheckoutOptions: async () => {
+          requests += 1;
+          return options;
+        },
+      },
+    });
+    expect(await screen.findByRole('button', { name: 'Pagar $75.000' })).toBeEnabled();
+    expect(requests).toBe(1);
+  });
+
+  it('asks again when nothing was loaded, for example after a refresh on this step', async () => {
+    let requests = 0;
+    await setupSummary({
+      api: {
+        getCheckoutOptions: async () => {
+          requests += 1;
+          return options;
+        },
+      },
+    });
+    expect(await screen.findByRole('button', { name: 'Pagar $75.000' })).toBeEnabled();
+    expect(requests).toBe(1);
+  });
+});

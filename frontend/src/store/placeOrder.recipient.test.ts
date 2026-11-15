@@ -3,14 +3,18 @@ import { OrderRequest, TransactionView } from '../api/types';
 import { fakeApi } from '../test/fakeApi';
 import { draft, NOW } from '../test/state';
 import { checkoutReducer } from './checkoutSlice';
+import { optionsReducer } from './optionsSlice';
 import { placeOrder } from './placeOrder';
 
 const sent = async (recipientName: string): Promise<OrderRequest> => {
   const requests: OrderRequest[] = [];
   const base = draft();
   const store = configureStore({
-    reducer: { checkout: checkoutReducer },
-    preloadedState: { checkout: { ...base, delivery: { ...base.delivery, recipientName } } },
+    reducer: { checkout: checkoutReducer, options: optionsReducer },
+    preloadedState: {
+      checkout: { ...base, delivery: { ...base.delivery, recipientName } },
+      options: { status: 'idle' as const, data: null, error: null, loadedAt: null },
+    },
     middleware: (gdm) =>
       gdm({
         thunk: {

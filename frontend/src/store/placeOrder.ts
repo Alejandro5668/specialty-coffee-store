@@ -4,12 +4,17 @@ import { normalizePhone } from '../features/checkout/lib/details';
 import { CheckoutState, isCardFresh } from './checkoutState';
 import { ThunkExtra } from './extra';
 import { messageOf } from './messages';
+import { isOptionsFresh, OptionsState, optionsUsed } from './optionsSlice';
 
 export const keyAssigned = createAction<string>('checkout/keyAssigned');
 
 const CHECK_DETAILS = 'Revisa tus datos e inténtalo de nuevo.';
 
-type Config = { state: { checkout: CheckoutState }; extra: ThunkExtra; rejectValue: string };
+type Config = {
+  state: { checkout: CheckoutState; options: OptionsState };
+  extra: ThunkExtra;
+  rejectValue: string;
+};
 
 /**
  * Places the order. It reads everything from the saved draft, so nothing sensitive travels as an
@@ -34,8 +39,12 @@ export const placeOrder = createAsyncThunk<TransactionView, void, Config>(
     if (!s.idempotencyKey) dispatch(keyAssigned(idempotencyKey));
 
     try {
-      // Acceptance tokens are single use, so they are fetched right before paying.
-      const options = await extra.api.getCheckoutOptions();
+      // Acceptance tokens are single use. The ones loaded while the shopper filled the form are
+      // used once, and forgotten even if the payment fails; otherwise new ones are fetched.
+      const loaded = getState().options;
+      const options = isOptionsFresh(loaded, extra.now()) ? loaded.data! : null;
+      if (options) dispatch(optionsUsed());
+      const tokens = options ?? (await extra.api.getCheckoutOptions());
       return await extra.api.createOrder({
         idempotencyKey,
         variantId: s.variantId,
@@ -48,8 +57,8 @@ export const placeOrder = createAsyncThunk<TransactionView, void, Config>(
           phone: normalizePhone(s.delivery.phone),
         },
         cardToken: s.card.token,
-        acceptanceToken: options.acceptance.token,
-        personalAuthToken: options.personalData.token,
+        acceptanceToken: tokens.acceptance.token,
+        personalAuthToken: tokens.personalData.token,
       });
     } catch (error) {
       return rejectWithValue(messageOf(error));

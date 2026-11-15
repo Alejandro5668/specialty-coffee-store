@@ -16,7 +16,7 @@ describe('createStore', () => {
   it('starts empty when nothing was saved', () => {
     expect(make(memoryStorage()).getState()).toEqual({
       catalog: { status: 'idle', products: [], error: null },
-      options: { status: 'idle', data: null, error: null },
+      options: { status: 'idle', data: null, error: null, loadedAt: null },
       order: { status: 'idle', forId: null, view: null, error: null, errorStatus: null },
       checkout: initialCheckout,
     });
