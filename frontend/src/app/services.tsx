@@ -11,10 +11,13 @@ export type Services = {
   poll?: PollSettings;
   /** How long the approved page stays before returning to the coffees. */
   autoReturnMs?: number;
+  /** The same for a declined or failed payment: the shopper has to read what to do next. */
+  failedReturnMs?: number;
 };
 
 export const DEFAULT_POLL: PollSettings = { intervalMs: 2_000, maxChecks: 30 };
 export const DEFAULT_AUTO_RETURN_MS = 8_000;
+export const DEFAULT_FAILED_RETURN_MS = 20_000;
 
 const ServicesContext = createContext<Services | null>(null);
 
