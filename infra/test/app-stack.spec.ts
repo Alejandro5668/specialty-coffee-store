@@ -131,6 +131,17 @@ describe('AppStack: finding the project in the console', () => {
     (type) => expect(tagged(type)).toBe(true),
   );
 
+  it('also tags the distribution with environment, purpose and how it is managed', () => {
+    const [dist] = Object.values(api.findResources('AWS::CloudFront::Distribution'));
+    expect(dist.Properties.Tags).toEqual(
+      expect.arrayContaining([
+        { Key: 'Environment', Value: 'prod' },
+        { Key: 'Purpose', Value: 'technical-test' },
+        { Key: 'ManagedBy', Value: 'cdk' },
+      ]),
+    );
+  });
+
   it('tags the CloudFront distribution too, which the console does not list by itself', () => {
     const [dist] = Object.values(api.findResources('AWS::CloudFront::Distribution'));
     expect(dist.Properties.Tags).toEqual(
