@@ -74,6 +74,22 @@ describe('JsonLogger', () => {
     expect((last().detail as string).length).toBeLessThanOrEqual(501);
   });
 
+  it('cuts a stack that is longer than its limit, and marks the cut', () => {
+    const { logger, last } = make();
+    logger.error('http.unhandled', { stack: 's'.repeat(9_000) });
+    expect((last().stack as string).length).toBe(4_001);
+    expect(last().stack).toMatch(/…$/);
+  });
+
+  it.each(['constructor', 'toString', 'valueOf', 'hasOwnProperty'])(
+    'cuts a long text under a field called %s, which an object would answer with an inherited function',
+    (key) => {
+      const { logger, last } = make();
+      logger.info('a.b', { [key]: 'x'.repeat(2_000) });
+      expect((last()[key] as string).length).toBe(501);
+    },
+  );
+
   it('never lets a field replace the level, the event, the time or the request id', () => {
     const { logger, last } = make();
     requestContext.run({ requestId: 'real' }, () =>

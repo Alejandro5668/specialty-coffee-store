@@ -8,7 +8,7 @@ const RESERVED = new Set(['level', 'event', 'time', 'requestId']);
 const KEY = /^[A-Za-z][A-Za-z0-9_]{0,40}$/;
 const MAX_TEXT = 500;
 /** A stack trace is how a failure is located, so it gets room for its frames. */
-const MAX_BY_FIELD: Record<string, number> = { stack: 4_000 };
+const MAX_BY_FIELD = new Map<string, number>([['stack', 4_000]]);
 
 type Level = 'info' | 'warn' | 'error';
 type Sink = (line: string) => void;
@@ -48,7 +48,7 @@ export class JsonLogger implements EventLogger {
       const requestId = requestContext.getStore()?.requestId;
       if (requestId) entry.requestId = requestId;
       for (const [key, raw] of Object.entries(fields)) {
-        const value = plain(raw, MAX_BY_FIELD[key] ?? MAX_TEXT);
+        const value = plain(raw, MAX_BY_FIELD.get(key) ?? MAX_TEXT);
         if (value !== undefined && KEY.test(key) && !RESERVED.has(key)) entry[key] = value;
       }
       this.write(JSON.stringify(entry));

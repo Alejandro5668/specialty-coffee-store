@@ -82,6 +82,28 @@ describe('HttpPaymentGateway logging', () => {
     });
   });
 
+  const throwingWarn = {
+    info: () => undefined,
+    warn: () => {
+      throw new Error('logger down');
+    },
+    error: () => undefined,
+  };
+
+  it('keeps a 5xx answer as it is even if the warning about it cannot be written', async () => {
+    const fetchFn = (async () => reply(503, {})) as unknown as typeof fetch;
+    const gateway = new HttpPaymentGateway(config, fetchFn, throwingWarn);
+    expect(await gateway.charge(charge)).toEqual({ ok: false, error: 'GATEWAY_UNAVAILABLE' });
+  });
+
+  it('still reports an unknown outcome, not an exception, when the call fails and the warning cannot be written', async () => {
+    const fetchFn = (async () => {
+      throw new Error('connection reset');
+    }) as unknown as typeof fetch;
+    const gateway = new HttpPaymentGateway(config, fetchFn, throwingWarn);
+    expect(await gateway.charge(charge)).toEqual({ ok: false, error: 'GATEWAY_UNAVAILABLE' });
+  });
+
   it('never writes a key, a token, the email or the signature', async () => {
     const { gateway, logger } = build(() =>
       reply(201, { data: { id: 'prov-1', status: 'APPROVED' } }),

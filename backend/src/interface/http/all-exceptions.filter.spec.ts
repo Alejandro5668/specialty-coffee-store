@@ -118,9 +118,17 @@ describe('AllExceptionsFilter', () => {
       expect.objectContaining({
         errorType: 'TypeError',
         detail: 'boom',
-        stack: expect.stringContaining('TypeError: boom'),
+        stack: expect.stringMatching(/^\s+at /),
       }),
     ]);
+  });
+
+  it('writes the message once, in `detail` with its limit, and keeps only the frames in `stack`', () => {
+    const error = new Error('provider said: ana@example.com');
+    error.stack = `Error: provider said: ana@example.com\n    at first (a.ts:1:1)\n    at second (b.ts:2:2)`;
+    run(error);
+    expect(logger.lines[0].detail).toBe('provider said: ana@example.com');
+    expect(logger.lines[0].stack).toBe('    at first (a.ts:1:1)\n    at second (b.ts:2:2)');
   });
 
   it('does not write the body of the request, only what failed', () => {

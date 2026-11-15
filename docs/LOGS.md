@@ -15,26 +15,26 @@ El mismo `requestId` aparece en todas las líneas de una petición, de modo que 
 
 ## Eventos
 
-| Evento                       | Nivel                            | Campos propios                                                     | Cuándo                                                      |
-| ---------------------------- | -------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------- |
-| `http.request`               | info, warn (4xx), error (5xx)    | `method`, `route`, `status`, `durationMs`                          | Termina una petición (no se registra `/health`)             |
-| `checkout.reserved`          | info                             | `orderId`, `variantId`, `quantity`, `totalCents`                   | Se crea el pedido y se reserva el stock                     |
-| `checkout.replayed`          | info                             | `orderId`, `status`                                                | Un reenvío con la misma clave recibe el primer pedido       |
-| `checkout.rejected`          | warn                             | `reason` (y `variantId`, `quantity` si falta stock)                | Se rechaza un pedido                                        |
-| `payment.charged`            | info, warn                       | `orderId`, `outcome`, `providerRef`                                | El proveedor responde al cobro                              |
-| `order.settled`              | info                             | `orderId`, `status`, `source`, `stockReleased`, `deliveryAssigned` | El pedido pasa a su estado final                            |
-| `order.settle_skipped`       | info                             | `orderId`, `wanted`, `current`, `source`                           | Otra vía ya lo había cerrado: no se repite nada             |
-| `order.provider_unreachable` | warn                             | `orderId`                                                          | No se pudo preguntar al proveedor por un pedido pendiente   |
-| `webhook.accepted`           | info                             | `orderId`, `status`                                                | Se acepta un evento firmado                                 |
-| `webhook.rejected`           | warn                             | `reason`                                                           | Se rechaza un evento (firma, pedido o importe)              |
-| `provider.call`              | info, warn (5xx o sin respuesta) | `operation`, `status` o `outcome`, `durationMs`                    | Una llamada al proveedor de pagos                           |
-| `http.unhandled`             | error                            | `errorType`, `detail`, `stack`                                     | Falla algo inesperado (el cliente recibe un error genérico) |
+| Evento                       | Nivel                            | Campos propios                                                                       | Cuándo                                                      |
+| ---------------------------- | -------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| `http.request`               | info, warn (4xx), error (5xx)    | `method`, `route`, `status`, `durationMs`                                            | Termina una petición (no se registra `/health`)             |
+| `checkout.reserved`          | info                             | `orderId`, `variantId`, `quantity`, `totalCents`                                     | Se crea el pedido y se reserva el stock                     |
+| `checkout.replayed`          | info                             | `orderId`, `status`                                                                  | Un reenvío con la misma clave recibe el primer pedido       |
+| `checkout.rejected`          | warn                             | `reason` (y `variantId`, `quantity` si falta stock)                                  | Se rechaza un pedido                                        |
+| `payment.charged`            | info, warn                       | `orderId`, `outcome`, `providerRef`                                                  | El proveedor responde al cobro                              |
+| `order.settled`              | info                             | `orderId`, `status`, `source`, `stockReleased`, `deliveryAssigned`                   | El pedido pasa a su estado final                            |
+| `order.settle_skipped`       | info                             | `orderId`, `wanted`, `current`, `source`                                             | Otra vía ya lo había cerrado: no se repite nada             |
+| `order.provider_unreachable` | warn                             | `orderId`                                                                            | No se pudo preguntar al proveedor por un pedido pendiente   |
+| `webhook.accepted`           | info                             | `orderId`, `status`                                                                  | Se acepta un evento firmado                                 |
+| `webhook.rejected`           | warn                             | `reason`                                                                             | Se rechaza un evento (firma, pedido o importe)              |
+| `provider.call`              | info, warn (5xx o sin respuesta) | `operation`, `status` o `outcome`, `durationMs`                                      | Una llamada al proveedor de pagos                           |
+| `http.unhandled`             | error                            | `errorType`, `detail` (hasta 500 caracteres), `stack` (solo los marcos, hasta 4.000) | Falla algo inesperado (el cliente recibe un error genérico) |
 
 `outcome` de `payment.charged` es `APPROVED`, `DECLINED`, `ERROR`, `PENDING`, `REJECTED` (el proveedor lo refusó) o `UNAVAILABLE` (resultado desconocido). `source` de `order.settled` es `charge`, `webhook`, `polling` o `expired`.
 
 ## Qué no se escribe
 
-Nombre, correo, dirección, teléfono, token o número de tarjeta, claves, cuerpos de peticiones ni lo que el usuario haya escrito en una dirección. El adaptador solo admite textos, números y booleanos, y corta los textos a 500 caracteres. Un test de extremo a extremo recorre una compra completa y comprueba que ninguna línea contiene esos datos.
+Nombre, correo, dirección, teléfono, token o número de tarjeta, claves, cuerpos de peticiones ni lo que el usuario haya escrito en una dirección. El adaptador solo admite textos, números y booleanos, y corta los textos a 500 caracteres (4.000 en `stack`, que solo lleva los marcos de la traza y no repite el mensaje). Un test de extremo a extremo recorre una compra completa y comprueba que ninguna línea contiene esos datos.
 
 ## Consultas (CloudWatch Logs Insights)
 
