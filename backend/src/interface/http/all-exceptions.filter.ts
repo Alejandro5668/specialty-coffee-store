@@ -1,5 +1,8 @@
 import { inspect } from 'node:util';
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Inject } from '@nestjs/common';
+
+import { EventLogger, silentLogger } from '../../application/ports/event-logger';
+import { TOKENS } from '../../composition/tokens';
 
 type Reply = { headersSent?: boolean; status(code: number): { json(body: unknown): void } };
 
@@ -19,6 +22,16 @@ const INTERNAL = {
  * the parser's http-errors (`expose: true`). A fault from an adapter that happens to carry a 4xx
  * `status` (an upstream 403, say) is a server fault and is answered and logged as one.
  */
+/**
+ * The frames of a stack, without its first line, which repeats the message: the message is
+ * logged once, in `detail`, with the shorter limit, so a long one cannot reach the log twice.
+ */
+const frames = (stack: string | undefined): string | undefined =>
+  stack
+    ?.split('\n')
+    .filter((line) => /^\s+at /.test(line))
+    .join('\n');
+
 const statusOf = (error: unknown): number => {
   if (error instanceof HttpException) return error.getStatus();
   const { status, statusCode, expose } = (error ?? {}) as Record<string, unknown>;
@@ -33,7 +46,7 @@ const statusOf = (error: unknown): number => {
  */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger('Exceptions');
+  constructor(@Inject(TOKENS.logger) private readonly logger: EventLogger = silentLogger) {}
 
   catch(error: unknown, host: ArgumentsHost): void {
     const reply = host.switchToHttp().getResponse<Reply>();
@@ -47,7 +60,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
     const status = statusOf(error);
     if (status >= 500) {
-      this.logger.error(error instanceof Error ? error.stack : inspect(error, { depth: 3 }));
+      // What went wrong, for whoever is paged: the type, the message and the top of the stack.
+      this.logger.error('http.unhandled', {
+        errorType: error instanceof Error ? error.name : typeof error,
+        detail: error instanceof Error ? error.message : inspect(error, { depth: 2 }),
+        stack: error instanceof Error ? frames(error.stack) : undefined,
+      });
       reply.status(500).json({ statusCode: 500, ...INTERNAL });
       return;
     }

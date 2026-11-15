@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CatalogRepository } from './application/ports/catalog.repository';
 import { CustomerRepository } from './application/ports/customer.repository';
+import { EventLogger } from './application/ports/event-logger';
 import { EventVerifier } from './application/ports/event.verifier';
 import { OrderStore } from './application/ports/order.store';
 import { PaymentGateway } from './application/ports/payment.gateway';
@@ -24,6 +25,7 @@ import { DynamoShipmentRepository } from './infrastructure/dynamodb/shipment.rep
 import { DynamoTransactionRepository } from './infrastructure/dynamodb/transaction.repository';
 import { ChecksumEventVerifier } from './infrastructure/payments/checksum-event.verifier';
 import { HttpPaymentGateway } from './infrastructure/payments/http-payment.gateway';
+import { JsonLogger } from './infrastructure/logging/json-logger';
 import { SystemClock, UuidIdGenerator } from './infrastructure/system/system';
 import { AllExceptionsFilter } from './interface/http/all-exceptions.filter';
 import { CheckoutController } from './interface/http/checkout.controller';
@@ -57,13 +59,18 @@ const adapters: Provider[] = [
     provide: TOKENS.customers,
     useFactory: () => new DynamoCustomerRepository(runtime().client, runtime().dynamo),
   },
-  { provide: TOKENS.gateway, useFactory: () => new HttpPaymentGateway(runtime().payments) },
+  {
+    provide: TOKENS.gateway,
+    inject: [TOKENS.logger],
+    useFactory: (logger: EventLogger) => new HttpPaymentGateway(runtime().payments, fetch, logger),
+  },
   {
     provide: TOKENS.verifier,
     useFactory: () => new ChecksumEventVerifier(runtime().payments.eventsSecret),
   },
   { provide: TOKENS.ids, useFactory: () => new UuidIdGenerator() },
   { provide: TOKENS.clock, useFactory: () => new SystemClock() },
+  { provide: TOKENS.logger, useFactory: () => new JsonLogger() },
 ];
 
 const useCases: Provider[] = [
@@ -82,6 +89,7 @@ const useCases: Provider[] = [
       TOKENS.gateway,
       TOKENS.ids,
       TOKENS.clock,
+      TOKENS.logger,
     ],
     useFactory: (
       catalog: CatalogRepository,
@@ -91,7 +99,8 @@ const useCases: Provider[] = [
       gateway: PaymentGateway,
       ids: IdGenerator,
       clock: Clock,
-    ) => new Checkout(catalog, transactions, orders, customers, gateway, ids, clock),
+      logger: EventLogger,
+    ) => new Checkout(catalog, transactions, orders, customers, gateway, ids, clock, logger),
   },
   {
     provide: GetCheckoutOptions,
@@ -100,13 +109,14 @@ const useCases: Provider[] = [
   },
   {
     provide: GetTransaction,
-    inject: [TOKENS.transactions, TOKENS.gateway, TOKENS.orders, TOKENS.clock],
+    inject: [TOKENS.transactions, TOKENS.gateway, TOKENS.orders, TOKENS.clock, TOKENS.logger],
     useFactory: (
       transactions: TransactionRepository,
       gateway: PaymentGateway,
       orders: OrderStore,
       clock: Clock,
-    ) => new GetTransaction(transactions, gateway, orders, clock),
+      logger: EventLogger,
+    ) => new GetTransaction(transactions, gateway, orders, clock, logger),
   },
   {
     provide: GetShipment,
@@ -115,12 +125,13 @@ const useCases: Provider[] = [
   },
   {
     provide: ProcessPaymentEvent,
-    inject: [TOKENS.verifier, TOKENS.transactions, TOKENS.orders],
+    inject: [TOKENS.verifier, TOKENS.transactions, TOKENS.orders, TOKENS.logger],
     useFactory: (
       verifier: EventVerifier,
       transactions: TransactionRepository,
       orders: OrderStore,
-    ) => new ProcessPaymentEvent(verifier, transactions, orders),
+      logger: EventLogger,
+    ) => new ProcessPaymentEvent(verifier, transactions, orders, logger),
   },
 ];
 

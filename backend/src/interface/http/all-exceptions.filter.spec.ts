@@ -1,5 +1,8 @@
-import { ArgumentsHost, ForbiddenException, HttpException, Logger } from '@nestjs/common';
+import { ArgumentsHost, ForbiddenException, HttpException } from '@nestjs/common';
+import { RecordingLogger } from '../../../test/fakes/recording-logger';
 import { AllExceptionsFilter } from './all-exceptions.filter';
+
+let logger: RecordingLogger;
 
 const run = (error: unknown) => {
   const sent: Array<{ status: number; body: unknown }> = [];
@@ -7,12 +10,13 @@ const run = (error: unknown) => {
     status: (status: number) => ({ json: (body: unknown) => sent.push({ status, body }) }),
   };
   const host = { switchToHttp: () => ({ getResponse: () => reply }) } as unknown as ArgumentsHost;
-  new AllExceptionsFilter().catch(error, host);
+  new AllExceptionsFilter(logger).catch(error, host);
   return sent[0];
 };
 
-beforeEach(() => jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined));
-afterEach(() => jest.restoreAllMocks());
+beforeEach(() => {
+  logger = new RecordingLogger();
+});
 
 describe('AllExceptionsFilter', () => {
   it('passes the errors of the API through unchanged', () => {
@@ -64,32 +68,11 @@ describe('AllExceptionsFilter', () => {
     expect(sent.body).toMatchObject({ code: 'INTERNAL_ERROR' });
   });
 
-  it('does not take a server-side fault for a client error, even if it carries a 4xx status', () => {
-    const log = jest.spyOn(Logger.prototype, 'error');
-    const upstream = Object.assign(new Error('upstream answered 403'), { status: 403 });
-    expect(run(upstream)).toEqual({
-      status: 500,
-      body: {
-        statusCode: 500,
-        code: 'INTERNAL_ERROR',
-        message: 'Algo salió mal de nuestro lado. Inténtalo de nuevo en un minuto.',
-      },
-    });
-    expect(log).toHaveBeenCalledTimes(1);
-  });
-
   it('answers 500, not the status it carries, to a 5xx Nest exception without a code', () => {
     expect(run(new HttpException('Bad gateway', 503))).toMatchObject({
       status: 500,
       body: { code: 'INTERNAL_ERROR' },
     });
-  });
-
-  it('logs what the cause was, even when it is not an Error', () => {
-    const log = jest.spyOn(Logger.prototype, 'error');
-    run({ reason: 'dynamo timeout', requestId: 'abc-123' });
-    expect(String(log.mock.calls[0][0])).toContain('dynamo timeout');
-    expect(String(log.mock.calls[0][0])).toContain('abc-123');
   });
 
   it('does nothing when the response was already sent', () => {
@@ -100,11 +83,62 @@ describe('AllExceptionsFilter', () => {
     expect(json).not.toHaveBeenCalled();
   });
 
-  it('logs the stack of a server error, and nothing for a client error', () => {
-    const log = jest.spyOn(Logger.prototype, 'error');
+  it('does not take a server-side fault for a client error, even if it carries a 4xx status', () => {
+    const upstream = Object.assign(new Error('upstream answered 403'), { status: 403 });
+    expect(run(upstream)).toEqual({
+      status: 500,
+      body: {
+        statusCode: 500,
+        code: 'INTERNAL_ERROR',
+        message: 'Algo salió mal de nuestro lado. Inténtalo de nuevo en un minuto.',
+      },
+    });
+    expect(logger.lines).toEqual([
+      expect.objectContaining({
+        level: 'error',
+        event: 'http.unhandled',
+        errorType: 'Error',
+        detail: 'upstream answered 403',
+      }),
+    ]);
+  });
+
+  it('logs what the cause was, even when it is not an Error', () => {
+    run({ reason: 'dynamo timeout', requestId: 'abc-123' });
+    expect(logger.lines).toHaveLength(1);
+    expect(String(logger.lines[0].detail)).toContain('dynamo timeout');
+    expect(logger.lines[0].errorType).toBe('object');
+  });
+
+  it('logs the type, the message and the top of the stack of a server error, and nothing for a client error', () => {
     run(Object.assign(new Error('x'), { status: 404, expose: true }));
-    expect(log).not.toHaveBeenCalled();
-    run(new Error('boom'));
-    expect(log).toHaveBeenCalledTimes(1);
+    expect(logger.lines).toHaveLength(0);
+    run(new TypeError('boom'));
+    expect(logger.lines).toEqual([
+      expect.objectContaining({
+        errorType: 'TypeError',
+        detail: 'boom',
+        stack: expect.stringMatching(/^\s+at /),
+      }),
+    ]);
+  });
+
+  it('writes the message once, in `detail` with its limit, and keeps only the frames in `stack`', () => {
+    const error = new Error('provider said: ana@example.com');
+    error.stack = `Error: provider said: ana@example.com\n    at first (a.ts:1:1)\n    at second (b.ts:2:2)`;
+    run(error);
+    expect(logger.lines[0].detail).toBe('provider said: ana@example.com');
+    expect(logger.lines[0].stack).toBe('    at first (a.ts:1:1)\n    at second (b.ts:2:2)');
+  });
+
+  it('does not write the body of the request, only what failed', () => {
+    run(new Error('failed for ana@example.com'));
+    expect(Object.keys(logger.lines[0]).sort()).toEqual([
+      'detail',
+      'errorType',
+      'event',
+      'level',
+      'stack',
+    ]);
   });
 });

@@ -1,6 +1,7 @@
 import { err, ok, Result } from '../../domain/shared/result';
 import { Transaction } from '../../domain/transaction/transaction';
 import { OrderStore } from '../ports/order.store';
+import { EventLogger, silentLogger } from '../ports/event-logger';
 import { EventError, EventVerifier } from '../ports/event.verifier';
 import { TransactionRepository } from '../ports/transaction.repository';
 import { SettleTransaction } from '../settle-transaction';
@@ -14,11 +15,26 @@ export class ProcessPaymentEvent {
     private readonly verifier: EventVerifier,
     private readonly transactions: TransactionRepository,
     orders: OrderStore,
+    private readonly logger: EventLogger = silentLogger,
   ) {
-    this.settler = new SettleTransaction(orders, transactions);
+    this.settler = new SettleTransaction(orders, transactions, logger);
   }
 
   async execute(payload: unknown): Promise<Result<Transaction, ProcessEventError>> {
+    const result = await this.process(payload);
+    // Only the reason and the order id: never the body, the signature or the provider's data.
+    if (result.ok) {
+      this.logger.info('webhook.accepted', {
+        orderId: result.value.id,
+        status: result.value.status,
+      });
+    } else {
+      this.logger.warn('webhook.rejected', { reason: result.error });
+    }
+    return result;
+  }
+
+  private async process(payload: unknown): Promise<Result<Transaction, ProcessEventError>> {
     const event = this.verifier.verify(payload);
     if (!event.ok) return event;
 
@@ -29,6 +45,13 @@ export class ProcessPaymentEvent {
     }
     if (event.value.status === 'PENDING') return ok(transaction);
 
-    return ok(await this.settler.execute(transaction, event.value.status, event.value.providerRef));
+    return ok(
+      await this.settler.execute(
+        transaction,
+        event.value.status,
+        event.value.providerRef,
+        'webhook',
+      ),
+    );
   }
 }

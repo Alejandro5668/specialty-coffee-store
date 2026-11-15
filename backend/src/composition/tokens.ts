@@ -9,4 +9,5 @@ export const TOKENS = {
   verifier: Symbol('EventVerifier'),
   ids: Symbol('IdGenerator'),
   clock: Symbol('Clock'),
+  logger: Symbol('EventLogger'),
 } as const;

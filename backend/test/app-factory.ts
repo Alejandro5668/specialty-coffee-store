@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { TOKENS } from '../src/composition/tokens';
 import { configureApp } from '../src/interface/http/configure-app';
+import { JsonLogger } from '../src/infrastructure/logging/json-logger';
 import { loadHttpConfig } from '../src/interface/http/http-config';
 import { setupSwagger } from '../src/interface/http/swagger';
 import { FakeGateway } from './fakes/fake-gateway';
@@ -21,6 +22,9 @@ export const buildTestApp = async (stock = 5, config: { trustProxyHops?: number 
   const orders = new InMemoryOrders(catalog, transactions, shipments);
   const customers = new InMemoryCustomers();
   const gateway = new FakeGateway();
+  // The real JSON logger, with its output kept as objects, so a test reads what CloudWatch would.
+  const logs: Array<Record<string, unknown>> = [];
+  const logger = new JsonLogger((line) => logs.push(JSON.parse(line)));
 
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(TOKENS.catalog)
@@ -41,6 +45,8 @@ export const buildTestApp = async (stock = 5, config: { trustProxyHops?: number 
     .useValue(sequentialIds())
     .overrideProvider(TOKENS.clock)
     .useValue(fixedClock)
+    .overrideProvider(TOKENS.logger)
+    .useValue(logger)
     .compile();
 
   const app = moduleRef.createNestApplication<NestExpressApplication>();
@@ -53,5 +59,5 @@ export const buildTestApp = async (stock = 5, config: { trustProxyHops?: number 
   );
   setupSwagger(app);
   await app.init();
-  return { app, catalog, transactions, orders, shipments, customers, gateway };
+  return { app, catalog, transactions, orders, shipments, customers, gateway, logs };
 };

@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import request from 'supertest';
 import { buildTestApp } from './app-factory';
 
@@ -53,7 +52,6 @@ describe('errors raised by the framework', () => {
 
   it('answers an unexpected failure with a plain message and nothing from the cause', async () => {
     jest.spyOn(built.catalog, 'listCatalog').mockRejectedValueOnce(new Error('password=hunter2'));
-    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     const res = await request(server()).get('/products');
     expect(res.status).toBe(500);
     expect(res.body).toEqual({

@@ -4,6 +4,7 @@ import { InMemoryOrders } from './fakes/in-memory-orders';
 import { InMemoryCustomers } from './fakes/in-memory-customers';
 import { InMemoryTransactions } from './fakes/in-memory-transactions';
 import { catalogWithStock, fixedClock, sequentialIds, VARIANT_ID } from './fakes/fixtures';
+import { EventLogger } from '../src/application/ports/event-logger';
 import { Checkout, CheckoutInput } from '../src/application/use-cases/checkout';
 
 export const input = (over: Partial<CheckoutInput> = {}): CheckoutInput => ({
@@ -23,7 +24,7 @@ export const input = (over: Partial<CheckoutInput> = {}): CheckoutInput => ({
   ...over,
 });
 
-export const setup = (stock = 5) => {
+export const setup = (stock = 5, logger?: EventLogger) => {
   const catalog: InMemoryCatalog = catalogWithStock(VARIANT_ID, stock);
   const transactions = new InMemoryTransactions();
   const customers = new InMemoryCustomers();
@@ -37,6 +38,7 @@ export const setup = (stock = 5) => {
     gateway,
     sequentialIds(),
     fixedClock,
+    logger,
   );
   return { catalog, transactions, orders, customers, gateway, checkout };
 };
