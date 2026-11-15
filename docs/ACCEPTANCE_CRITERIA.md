@@ -47,7 +47,7 @@ Agrupados por el criterio de evaluación de la prueba. Cada casilla debe poder v
 ## Bonificación
 
 - [x] **Seguridad (5)**: cabeceras de seguridad, CORS restringido, HTTPS y ningún secreto en el repositorio.
-- [ ] **Responsive (5)**: verificado en dos navegadores. _Pendiente: Solo verificado en Chrome._
+- [x] **Responsive (5)**: verificado en dos navegadores. Las pruebas de extremo a extremo corren en Chrome móvil y en Firefox a 375 × 667 px; Firefox usa el tamaño y la entrada táctil, no un dispositivo real.
 - [x] **CSS (10)**: maquetación con flexbox y grid.
 - [x] **Código limpio (10)**: reglas de lint y módulos pequeños.
 - [x] **Hexagonal (10)**: el dominio no importa nada del framework, la base de datos ni el proveedor.

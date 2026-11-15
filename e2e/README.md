@@ -1,18 +1,19 @@
 # Pruebas de extremo a extremo
 
-Playwright maneja un Chrome real con el tamaño de un iPhone SE (375 × 667 px) y recorre la compra completa. Ejecutan el frontend real; el backend y el servicio de pagos se simulan.
+Playwright maneja un Chrome móvil y un Firefox con el tamaño de un iPhone SE (375 × 667 px) y recorre la compra completa. Ejecutan el frontend real; el backend y el servicio de pagos se simulan.
 
 ## Comandos
 
-| Comando                                           | Acción                                                             |
-| ------------------------------------------------- | ------------------------------------------------------------------ |
-| `npm test -w e2e`                                 | Suite completa en móvil (46 casos). Levanta el frontend en `:5174` |
-| `npm run test:all -w e2e`                         | Móvil y escritorio (92 casos)                                      |
-| `npm run test:live -w e2e`                        | Comprobaciones de solo lectura sobre el sitio desplegado (5 casos) |
-| `E2E_BASE_URL=https://… npm run test:live -w e2e` | Lo mismo contra otro despliegue                                    |
-| `npm run report -w e2e`                           | Abre el informe HTML de la última ejecución                        |
+| Comando                                           | Acción                                                                 |
+| ------------------------------------------------- | ---------------------------------------------------------------------- |
+| `npm test -w e2e`                                 | Suite en Chrome móvil. Levanta el frontend en `:5174`                  |
+| `npm run test:browsers -w e2e`                    | Chrome móvil y Firefox: lo que ejecuta CI                              |
+| `npm run test:all -w e2e`                         | Además, Chrome de escritorio                                           |
+| `npm run test:live -w e2e`                        | Comprobaciones sobre el sitio desplegado, sin comprar ni guardar datos |
+| `E2E_BASE_URL=https://… npm run test:live -w e2e` | Lo mismo contra otro despliegue                                        |
+| `npm run report -w e2e`                           | Abre el informe HTML de la última ejecución                            |
 
-Requisitos: Chrome instalado (no se descarga ningún navegador) y `npm ci` en la raíz.
+Requisitos: Chrome instalado y `npm ci` en la raíz. CI instala Firefox del servidor oficial de Playwright, con la versión fijada en `package-lock.json`. Para Firefox, una sola vez: `npx playwright install firefox` (descarga unos 320 MB con FFmpeg en `~/.cache/ms-playwright`).
 
 ## Qué cubre
 
@@ -26,6 +27,7 @@ Requisitos: Chrome instalado (no se descarga ningún navegador) y `npm ci` en la
 | `adversarial-hostile-input.spec.ts` | XSS, cadenas de inyección y cantidad fuera de rango                                                                 |
 | `adversarial-card-data.spec.ts`     | El número y el código solo llegan al servicio de pagos: ni a nuestra API, ni a terceros, ni al almacenamiento       |
 | `adversarial-time.spec.ts`          | Regreso automático a los cafés, botón "Quedarme en esta página" y catálogo lento                                    |
+| `browser.spec.ts`                   | Confirma qué navegador y qué ancho de pantalla corrió cada proyecto                                                 |
 | `live.spec.ts`                      | Sitio desplegado: contrato de la API, errores en español, cabeceras de seguridad, formulario vacío en móvil         |
 
 ## Cómo funciona
@@ -37,4 +39,4 @@ Requisitos: Chrome instalado (no se descarga ningún navegador) y `npm ci` en la
 ## Límites
 
 - La compra real sobre la URL pública se hace a mano con una tarjeta de prueba: no se escriben datos de tarjeta en un sitio desplegado desde estas pruebas.
-- Solo Chrome (escritorio y móvil emulado). Firefox y Safari requieren descargar sus navegadores.
+- Chrome (móvil emulado y escritorio) y Firefox. Firefox no puede emular un teléfono: se prueba con el mismo tamaño de pantalla (375 × 667 px) y entrada táctil, no en un dispositivo real. Safari no está cubierto: Playwright usa WebKit, que habría que descargar aparte.

@@ -26,13 +26,24 @@ export default defineConfig({
   },
   projects: [
     {
-      // iPhone SE (2020): 750 x 1334 px at 2x, the smallest screen the test names.
+      // iPhone SE (2020): 750 x 1334 px at 2x, which is 375 x 667 css px, the screen the test names.
+      // Playwright's plain "iPhone SE" is the 2016 model (320 x 568), so the 3rd gen entry is used.
       name: 'mobile',
       use: {
-        ...devices['iPhone SE'],
+        ...devices['iPhone SE (3rd gen)'],
         browserName: 'chromium',
         channel: 'chrome',
         defaultBrowserType: 'chromium',
+      },
+    },
+    {
+      // Firefox cannot emulate a phone, so it gets the same screen size and touch input.
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport: { width: 375, height: 667 },
+        deviceScaleFactor: 2,
+        hasTouch: true,
       },
     },
     {
