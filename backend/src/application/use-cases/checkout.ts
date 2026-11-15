@@ -7,6 +7,7 @@ import { createTransaction, Transaction } from '../../domain/transaction/transac
 import { SettleTransaction } from '../settle-transaction';
 import { CatalogRepository } from '../ports/catalog.repository';
 import { CustomerRepository } from '../ports/customer.repository';
+import { EventLogger, silentLogger } from '../ports/event-logger';
 import { PaymentGateway } from '../ports/payment.gateway';
 import { OrderStore } from '../ports/order.store';
 import { Clock, IdGenerator } from '../ports/system.ports';
@@ -48,17 +49,32 @@ export class Checkout {
     private readonly gateway: PaymentGateway,
     private readonly ids: IdGenerator,
     private readonly clock: Clock,
+    private readonly logger: EventLogger = silentLogger,
   ) {
-    this.settler = new SettleTransaction(orders, transactions);
+    this.settler = new SettleTransaction(orders, transactions, logger);
   }
 
   async execute(input: CheckoutInput): Promise<Result<Transaction, CheckoutError>> {
+    const result = await this.run(input);
+    if (!result.ok) {
+      // The size is only named when it exists: what the shopper typed is never written.
+      const known = result.error === 'OUT_OF_STOCK';
+      this.logger.warn('checkout.rejected', {
+        reason: result.error,
+        variantId: known ? input.variantId : undefined,
+        quantity: known ? input.quantity : undefined,
+      });
+    }
+    return result;
+  }
+
+  private async run(input: CheckoutInput): Promise<Result<Transaction, CheckoutError>> {
     const parsed = this.parse(input);
     if (!parsed.ok) return parsed;
     const p = parsed.value;
 
     const existing = await this.transactions.findByIdempotencyKey(p.key);
-    if (existing) return ok(existing);
+    if (existing) return ok(this.replayed(existing));
 
     const variant = await this.catalog.findVariant(p.variantId);
     if (!variant) return err('VARIANT_NOT_FOUND');
@@ -66,7 +82,20 @@ export class Checkout {
     const placed = await this.place(p, variant);
     if (!placed.ok) return placed;
     const { transaction, created } = placed.value;
-    return created ? this.charge(transaction, p) : ok(transaction);
+    if (!created) return ok(this.replayed(transaction));
+    this.logger.info('checkout.reserved', {
+      orderId: transaction.id,
+      variantId: transaction.variantId,
+      quantity: transaction.quantity,
+      totalCents: transaction.amounts.total.amountInCents,
+    });
+    return this.charge(transaction, p);
+  }
+
+  /** A repeated submit gets the first order back: nothing is reserved or charged twice. */
+  private replayed(transaction: Transaction): Transaction {
+    this.logger.info('checkout.replayed', { orderId: transaction.id, status: transaction.status });
+    return transaction;
   }
 
   private parse(input: CheckoutInput): Result<Parsed, 'INVALID_INPUT'> {
@@ -126,11 +155,20 @@ export class Checkout {
       })
       // An exception is a transport failure: the outcome is unknown, same as UNAVAILABLE.
       .catch((): Result<never, 'GATEWAY_UNAVAILABLE'> => err('GATEWAY_UNAVAILABLE'));
+    this.logger[charged.ok ? 'info' : 'warn']('payment.charged', {
+      orderId: transaction.id,
+      outcome: charged.ok
+        ? charged.value.status
+        : charged.error === 'GATEWAY_REJECTED'
+          ? 'REJECTED'
+          : 'UNAVAILABLE',
+      providerRef: charged.ok ? charged.value.providerRef : undefined,
+    });
     if (!charged.ok) {
       // REJECTED: the provider refused it. UNAVAILABLE: unknown outcome, stay PENDING and reconcile later.
       return ok(
         charged.error === 'GATEWAY_REJECTED'
-          ? await this.settler.execute(transaction, 'ERROR', null)
+          ? await this.settler.execute(transaction, 'ERROR', null, 'charge')
           : transaction,
       );
     }
@@ -138,7 +176,7 @@ export class Checkout {
     return ok(
       status === 'PENDING'
         ? transaction
-        : await this.settler.execute(transaction, status, providerRef),
+        : await this.settler.execute(transaction, status, providerRef, 'charge'),
     );
   }
 

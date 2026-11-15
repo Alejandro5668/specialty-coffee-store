@@ -1,5 +1,6 @@
 import { err, ok, Result } from '../../domain/shared/result';
 import { Transaction } from '../../domain/transaction/transaction';
+import { EventLogger, silentLogger } from '../ports/event-logger';
 import { OrderStore } from '../ports/order.store';
 import { PaymentGateway } from '../ports/payment.gateway';
 import { Clock } from '../ports/system.ports';
@@ -19,8 +20,9 @@ export class GetTransaction {
     private readonly gateway: PaymentGateway,
     orders: OrderStore,
     private readonly clock: Clock,
+    private readonly logger: EventLogger = silentLogger,
   ) {
-    this.settler = new SettleTransaction(orders, transactions);
+    this.settler = new SettleTransaction(orders, transactions, logger);
   }
 
   async execute(id: string): Promise<Result<Transaction, GetTransactionError>> {
@@ -33,17 +35,20 @@ export class GetTransaction {
   /** Webhooks are the main path; this is the fallback when one is late or lost. */
   private async reconcile(transaction: Transaction): Promise<Transaction> {
     const found = await this.gateway.findByReference(transaction.id);
-    if (!found.ok) return transaction;
+    if (!found.ok) {
+      this.logger.warn('order.provider_unreachable', { orderId: transaction.id });
+      return transaction;
+    }
 
     if (found.value === null) {
       return this.isOlderThanGrace(transaction)
-        ? this.settler.execute(transaction, 'ERROR', null)
+        ? this.settler.execute(transaction, 'ERROR', null, 'expired')
         : transaction;
     }
     const { status, providerRef } = found.value;
     return status === 'PENDING'
       ? transaction
-      : this.settler.execute(transaction, status, providerRef);
+      : this.settler.execute(transaction, status, providerRef, 'polling');
   }
 
   private isOlderThanGrace(transaction: Transaction): boolean {
