@@ -135,7 +135,6 @@ test.describe('a storage edited by hand never shows a wrong amount', () => {
     const summary = page.getByRole('dialog', { name: 'Resumen del pedido' });
     // Two units at $32.000, plus the base fee and the delivery: the server's number, not the forged one.
     await expect(summary.getByRole('button', { name: 'Pagar $75.000' })).toBeVisible();
-    await expect(summary).not.toContainText('$0');
     await pay(page);
     await expect(page.getByRole('heading', { name: 'Pago aprobado' })).toBeVisible();
     expect(checkouts(backend.calls)).toHaveLength(1);

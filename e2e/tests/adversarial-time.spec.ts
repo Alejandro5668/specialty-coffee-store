@@ -46,9 +46,12 @@ test.describe('time', () => {
       },
     );
     await page.goto('/');
-    await expect(page.getByText('Cargando cafés')).toBeVisible();
-    await expect(page.locator('article')).toHaveCount(0);
-    release();
+    try {
+      await expect(page.getByText('Cargando cafés')).toBeVisible();
+      await expect(page.locator('article')).toHaveCount(0);
+    } finally {
+      release();
+    }
     await expect(page.locator('article')).toHaveCount(2);
   });
 });
